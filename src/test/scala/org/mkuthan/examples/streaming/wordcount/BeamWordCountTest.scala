@@ -1,29 +1,33 @@
-package org.mkuthan.examples.streaming.beam
+package org.mkuthan.examples.streaming.wordcount
 
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 import com.spotify.scio.testing.testStreamOf
 import org.joda.time.Duration
+import org.mkuthan.examples.streaming.beam.TimestampedMatchers
+import org.mkuthan.examples.streaming.beam._
 
-class WordCountTest extends PipelineSpec with TimestampedMatchers {
-
-  import TestImplicits._
+class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   "Words" should "be counted in fixed window" in runWithContext { sc =>
     val windowDuration = Duration.standardMinutes(10L)
     val allowedLateness = Duration.standardMinutes(1)
 
     val words = testStreamOf[String]
+      // on-time events
       .addElementsAt("12:00:00", "foo bar")
       .addElementsAt("12:05:00", "bar baz")
       .advanceWatermarkTo("12:10:00")
-      .addElementsAt("12:09:00", "foo") // late event in the 12:00-12:10 window
-      .addElementsAt("12:10:00", "foo bar") // non-late event in the 12:10-12:20 window
+      // late event (under allowed lateness)
+      .addElementsAt("12:09:00", "foo")
+      // on-time event
+      .addElementsAt("12:10:00", "foo bar")
       .advanceWatermarkTo("12:11:00")
-      .addElementsAt("12:09:00", "foo") // discarded late event
+      // late event (discarded)
+      .addElementsAt("12:09:00", "foo")
       .advanceWatermarkToInfinity()
 
-    val results = WordCount
+    val results = BeamWordCount
       .wordCountInFixedWindow(sc.testStream(words), windowDuration, allowedLateness)
       .withTimestamp
 

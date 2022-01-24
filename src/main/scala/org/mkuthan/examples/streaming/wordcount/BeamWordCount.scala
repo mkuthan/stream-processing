@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.beam
+package org.mkuthan.examples.streaming.wordcount
 
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions
@@ -10,7 +10,7 @@ import org.apache.beam.sdk.transforms.windowing.Window.OnTimeBehavior
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
-object WordCount {
+object BeamWordCount {
 
   def wordCountInFixedWindow(lines: SCollection[String], windowDuration: Duration, allowedLateness: Duration): SCollection[(String, Long)] = {
     val windowOptions = WindowOptions(

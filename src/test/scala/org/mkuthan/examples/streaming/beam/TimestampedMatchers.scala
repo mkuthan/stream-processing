@@ -1,7 +1,5 @@
 package org.mkuthan.examples.streaming.beam
 
-import scala.reflect.ClassTag
-
 import cats.kernel.Eq
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.testing.SCollectionMatchers
@@ -9,6 +7,8 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.transforms.windowing.IntervalWindow
 import org.joda.time.Instant
 import org.scalatest.matchers.Matcher
+
+import scala.reflect.ClassTag
 
 trait TimestampedMatchers {
   this: SCollectionMatchers =>

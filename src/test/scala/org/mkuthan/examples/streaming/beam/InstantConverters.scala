@@ -3,7 +3,8 @@ package org.mkuthan.examples.streaming.beam
 import org.joda.time.Instant
 import org.joda.time.LocalTime
 
-object InstantConverters {
+private[beam] object InstantConverters {
+
   private val BaseTime = new Instant(0)
 
   def stringToInstant(time: String): Instant =

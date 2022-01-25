@@ -1,5 +1,7 @@
 package org.mkuthan.examples.streaming.beam
 
+import scala.reflect.ClassTag
+
 import cats.kernel.Eq
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.testing.SCollectionMatchers
@@ -7,8 +9,6 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.transforms.windowing.IntervalWindow
 import org.joda.time.Instant
 import org.scalatest.matchers.Matcher
-
-import scala.reflect.ClassTag
 
 trait TimestampedMatchers {
   this: SCollectionMatchers =>
@@ -34,10 +34,9 @@ trait TimestampedMatchers {
     containSingleValue((value, stringToInstant(time)))
 
   def containInAnyOrderAtTime[T: Coder : Eq](
-      time: String,
-      value: Iterable[T]
+      value: Iterable[(String, T)]
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
-    containInAnyOrder(value.map(v => (v, stringToInstant(time))))
+    containInAnyOrder(value.map { case (time, v) => (v, stringToInstant(time)) })
 
   def containValueAtWindowTime[T: Coder : Eq](
       time: String,
@@ -52,9 +51,8 @@ trait TimestampedMatchers {
     containSingleValue((value, stringToInstant(time).minus(1)))
 
   def containInAnyOrderAtWindowTime[T: Coder : Eq](
-      time: String,
-      value: Iterable[T]
+      value: Iterable[(String, T)]
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
-    containInAnyOrder(value.map(v => (v, stringToInstant(time).minus(1))))
+    containInAnyOrder(value.map { case (time, v) => (v, stringToInstant(time).minus(1)) })
 
 }

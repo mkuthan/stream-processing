@@ -3,6 +3,7 @@ package org.mkuthan.examples.streaming.wordcount
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 import com.spotify.scio.testing.testStreamOf
+import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 import org.mkuthan.examples.streaming.beam.TimestampedMatchers
@@ -34,6 +35,22 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       ("00:01:00", ("foo", 1L)),
       ("00:01:00", ("bar", 1L)),
       ("00:01:00", ("baz", 2L)),
+    ))
+  }
+
+  "Words" should "be aggregated into single fixed window with latest timestamp" in runWithContext { sc =>
+    val words = testStreamOf[String]
+      .addElementsAt("00:00:00", "foo bar")
+      .addElementsAt("00:00:30", "baz baz")
+      .advanceWatermarkToInfinity()
+
+    val timestampCombiner = TimestampCombiner.LATEST
+    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration, timestampCombiner = timestampCombiner)
+
+    results.withTimestamp should containInAnyOrderAtTime(Seq(
+      ("00:00:00", ("foo", 1L)),
+      ("00:00:00", ("bar", 1L)),
+      ("00:00:30", ("baz", 2L)),
     ))
   }
 

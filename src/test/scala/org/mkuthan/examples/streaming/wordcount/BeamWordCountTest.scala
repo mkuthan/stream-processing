@@ -73,6 +73,10 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       ("00:03:00", ("foo", 2L)),
       ("00:03:00", ("bar", 2L)),
     ))
+
+    results.withTimestamp should inOnTimePane("00:01:00", "00:02:00") {
+      beEmpty
+    }
   }
 
   "Late words" should "be silently dropped" in runWithContext { sc =>

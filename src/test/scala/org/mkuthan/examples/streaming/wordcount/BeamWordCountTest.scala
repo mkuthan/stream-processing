@@ -44,8 +44,10 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAt("00:00:30", "baz baz")
       .advanceWatermarkToInfinity()
 
-    val timestampCombiner = TimestampCombiner.LATEST
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration, timestampCombiner = timestampCombiner)
+    val results = wordCountInFixedWindow(
+      sc.testStream(words),
+      DefaultWindowDuration,
+      timestampCombiner = TimestampCombiner.LATEST)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:00", ("foo", 1L)),
@@ -121,8 +123,10 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAt("00:00:40", "foo foo") // late event under allowed lateness
       .advanceWatermarkToInfinity()
 
-    val allowedLateness = Duration.standardSeconds(30)
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration, allowedLateness)
+    val results = wordCountInFixedWindow(
+      sc.testStream(words),
+      DefaultWindowDuration,
+      allowedLateness = Duration.standardSeconds(30))
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
       containInAnyOrderAtWindowTime(Seq(
@@ -147,9 +151,11 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAt("00:00:40", "foo foo") // late event under allowed lateness
       .advanceWatermarkToInfinity()
 
-    val allowedLateness = Duration.standardSeconds(30)
-    val accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration, allowedLateness, accumulationMode)
+    val results = wordCountInFixedWindow(
+      sc.testStream(words),
+      DefaultWindowDuration,
+      allowedLateness = Duration.standardSeconds(30),
+      accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
       containInAnyOrderAtWindowTime(Seq(

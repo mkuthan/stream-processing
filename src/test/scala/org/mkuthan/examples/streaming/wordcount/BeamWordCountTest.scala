@@ -25,23 +25,23 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   "Words" should "be aggregated into single fixed window" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
 
-    results.withTimestamp should containInAnyOrderAtWindowTime(Seq(
-      ("00:01:00", ("foo", 1L)),
-      ("00:01:00", ("bar", 1L)),
-      ("00:01:00", ("baz", 2L)),
+    results.withTimestamp should containInAnyOrderAtTime(Seq(
+      ("00:00:59.999", ("foo", 1L)),
+      ("00:00:59.999", ("bar", 1L)),
+      ("00:00:59.999", ("baz", 2L)),
     ))
   }
 
   "Words" should "be aggregated into single fixed window with latest timestamp" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
@@ -58,39 +58,39 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   it should "be aggregated into consecutive fixed windows" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
-      .addElementsAt("00:01:00", "foo bar")
-      .addElementsAt("00:01:30", "bar foo")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
+      .addElementsAtTime("00:01:00", "foo bar")
+      .addElementsAtTime("00:01:30", "bar foo")
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
 
-    results.withTimestamp should containInAnyOrderAtWindowTime(Seq(
-      ("00:01:00", ("foo", 1L)),
-      ("00:01:00", ("bar", 1L)),
-      ("00:01:00", ("baz", 2L)),
-      ("00:02:00", ("foo", 2L)),
-      ("00:02:00", ("bar", 2L)),
+    results.withTimestamp should containInAnyOrderAtTime(Seq(
+      ("00:00:59.999", ("foo", 1L)),
+      ("00:00:59.999", ("bar", 1L)),
+      ("00:00:59.999", ("baz", 2L)),
+      ("00:01:59.999", ("foo", 2L)),
+      ("00:01:59.999", ("bar", 2L)),
     ))
   }
 
   it should "be aggregated into non-consecutive fixed windows" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
-      .addElementsAt("00:02:00", "foo bar")
-      .addElementsAt("00:02:30", "bar foo")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
+      .addElementsAtTime("00:02:00", "foo bar")
+      .addElementsAtTime("00:02:30", "bar foo")
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
 
-    results.withTimestamp should containInAnyOrderAtWindowTime(Seq(
-      ("00:01:00", ("foo", 1L)),
-      ("00:01:00", ("bar", 1L)),
-      ("00:01:00", ("baz", 2L)),
-      ("00:03:00", ("foo", 2L)),
-      ("00:03:00", ("bar", 2L)),
+    results.withTimestamp should containInAnyOrderAtTime(Seq(
+      ("00:00:59.999", ("foo", 1L)),
+      ("00:00:59.999", ("bar", 1L)),
+      ("00:00:59.999", ("baz", 2L)),
+      ("00:02:59.999", ("foo", 2L)),
+      ("00:02:59.999", ("bar", 2L)),
     ))
 
     results.withTimestamp should inOnTimePane("00:01:00", "00:02:00") {
@@ -100,27 +100,27 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   "Late words" should "be silently dropped" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkTo("00:01:00")
-      .addElementsAt("00:00:40", "foo") // late event
+      .addElementsAtTime("00:00:40", "foo") // late event
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
 
-    results.withTimestamp should containInAnyOrderAtWindowTime(Seq(
-      ("00:01:00", ("foo", 1L)),
-      ("00:01:00", ("bar", 1L)),
-      ("00:01:00", ("baz", 2L)),
+    results.withTimestamp should containInAnyOrderAtTime(Seq(
+      ("00:00:59.999", ("foo", 1L)),
+      ("00:00:59.999", ("bar", 1L)),
+      ("00:00:59.999", ("baz", 2L)),
     ))
   }
 
   "Late words under allowed lateness" should "be aggregated in late pane" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkTo("00:01:00")
-      .addElementsAt("00:00:40", "foo foo") // late event under allowed lateness
+      .addElementsAtTime("00:00:40", "foo foo") // late event under allowed lateness
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
@@ -129,26 +129,26 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       allowedLateness = Duration.standardSeconds(30))
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
-      containInAnyOrderAtWindowTime(Seq(
-        ("00:01:00", ("foo", 1L)),
-        ("00:01:00", ("bar", 1L)),
-        ("00:01:00", ("baz", 2L)),
+      containInAnyOrderAtTime(Seq(
+        ("00:00:59.999", ("foo", 1L)),
+        ("00:00:59.999", ("bar", 1L)),
+        ("00:00:59.999", ("baz", 2L)),
       ))
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
-      containSingleValueAtWindowTime(
-        "00:01:00", ("foo", 2L)
+      containSingleValueAtTime(
+        "00:00:59.999", ("foo", 2L)
       )
     }
   }
 
   "Late words under allowed lateness" should "be aggregated and accumulated in late pane" in runWithContext { sc =>
     val words = testStreamOf[String]
-      .addElementsAt("00:00:00", "foo bar")
-      .addElementsAt("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkTo("00:01:00")
-      .addElementsAt("00:00:40", "foo foo") // late event under allowed lateness
+      .addElementsAtTime("00:00:40", "foo foo") // late event under allowed lateness
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
@@ -158,16 +158,16 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
-      containInAnyOrderAtWindowTime(Seq(
-        ("00:01:00", ("foo", 1L)),
-        ("00:01:00", ("bar", 1L)),
-        ("00:01:00", ("baz", 2L))
+      containInAnyOrderAtTime(Seq(
+        ("00:00:59.999", ("foo", 1L)),
+        ("00:00:59.999", ("bar", 1L)),
+        ("00:00:59.999", ("baz", 2L))
       ))
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
-      containSingleValueAtWindowTime(
-        "00:01:00", ("foo", 3L)
+      containSingleValueAtTime(
+        "00:00:59.999", ("foo", 3L)
       )
     }
   }

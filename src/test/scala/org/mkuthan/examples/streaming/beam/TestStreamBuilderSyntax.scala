@@ -9,7 +9,7 @@ private[beam] trait TestStreamBuilderSyntax {
 
   implicit class TestStreamBuilderOps[T](builder: TestStream.Builder[T]) {
 
-    def addElementsAt(time: String, element: T, elements: T*): TestStream.Builder[T] = {
+    def addElementsAtTime(time: String, element: T, elements: T*): TestStream.Builder[T] = {
       val allElements = Seq(element) ++ elements
       val timestampedElements = allElements.map(TimestampedValue.of(_, stringToInstant(time)))
       builder.addElements(timestampedElements.head, timestampedElements.tail: _*)

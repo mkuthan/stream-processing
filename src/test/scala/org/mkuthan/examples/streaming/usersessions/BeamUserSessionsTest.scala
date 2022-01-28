@@ -100,19 +100,18 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAt("00:00:00", ("jack", "open app"))
       .addElementsAt("00:01:00", ("jack", "search product"))
       .addElementsAt("00:01:30", ("jack", "open product"))
-      .addElementsAt("00:03:00", ("jack", "add to cart"))
       .advanceWatermarkTo("00:13:00")
+      .addElementsAt("00:03:00", ("jack", "add to cart")) // dropped due to lateness
       .addElementsAt("00:09:30", ("jack", "checkout"))
       .addElementsAt("00:13:10", ("jack", "close app"))
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
 
-    results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
-      containSingleValueAtWindowTime("00:13:00", ("jack", Iterable("open app", "search product", "open product", "add to cart")))
+    results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
+      containSingleValueAtWindowTime("00:11:30", ("jack", Iterable("open app", "search product", "open product")))
     }
 
-    // Why session window starts at 00:09:30 if watermark has been advanced to 00:13:00? I would expect dropped "checkout" due to lateness.
     results.withTimestamp should inOnTimePane("00:09:30", "00:23:10") {
       containSingleValueAtWindowTime("00:23:10", ("jack", Iterable("checkout", "close app")))
     }

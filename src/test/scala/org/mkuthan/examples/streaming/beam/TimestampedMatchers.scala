@@ -21,6 +21,18 @@ trait TimestampedMatchers {
   def inLatePane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
     inLatePane(new IntervalWindow(stringToInstant(begin), stringToInstant(end)))(matcher)
 
+  // TODO: simplify by delegation
+  // https://github.com/spotify/scio/pull/4229
+  def inEarlyPane[T: ClassTag, B: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] = {
+    val window = new IntervalWindow(stringToInstant(begin), stringToInstant(end))
+    matcher match {
+      case value: SingleMatcher[T, _] =>
+        value.matcher(_.inEarlyPane(window))
+      case value: IterableMatcher[T, _] =>
+        value.matcher(_.inEarlyPane(window))
+    }
+  }
+
   def inWindow[T: ClassTag, B: ClassTag](begin: String, end: String)(matcher: IterableMatcher[T, B]): Matcher[T] =
     inWindow(new IntervalWindow(stringToInstant(begin), stringToInstant(end)))(matcher)
 
@@ -40,5 +52,5 @@ trait TimestampedMatchers {
       value: Iterable[(String, T)]
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
     containInAnyOrder(value.map { case (time, v) => (v, stringToInstant(time)) })
-  
+
 }

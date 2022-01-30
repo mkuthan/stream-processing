@@ -93,7 +93,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       ("00:02:59.999", ("bar", 2L)),
     ))
 
-    results.withTimestamp should inOnTimePane("00:01:00", "00:02:00") {
+    results.withTimestamp should inWindow("00:01:00", "00:02:00") {
       beEmpty
     }
   }
@@ -115,12 +115,12 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     ))
   }
 
-  "Late words under allowed lateness" should "be aggregated in late pane" in runWithContext { sc =>
+  "Late words within allowed lateness" should "be aggregated in late pane" in runWithContext { sc =>
     val words = testStreamOf[String]
       .addElementsAtTime("00:00:00", "foo bar")
       .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkTo("00:01:00")
-      .addElementsAtTime("00:00:40", "foo foo") // late event under allowed lateness
+      .addElementsAtTime("00:00:40", "foo foo") // late event within allowed lateness
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
@@ -143,12 +143,12 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Late words under allowed lateness" should "be aggregated and accumulated in late pane" in runWithContext { sc =>
+  "Late words within allowed lateness" should "be aggregated and accumulated in late pane" in runWithContext { sc =>
     val words = testStreamOf[String]
       .addElementsAtTime("00:00:00", "foo bar")
       .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkTo("00:01:00")
-      .addElementsAtTime("00:00:40", "foo foo") // late event under allowed lateness
+      .addElementsAtTime("00:00:40", "foo foo") // late event within allowed lateness
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(

@@ -33,6 +33,10 @@ trait TimestampedMatchers {
     }
   }
 
+  def inFinalPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
+    inFinalPane(new IntervalWindow(stringToInstant(begin), stringToInstant(end)))(matcher)
+
+
   def inWindow[T: ClassTag, B: ClassTag](begin: String, end: String)(matcher: IterableMatcher[T, B]): Matcher[T] =
     inWindow(new IntervalWindow(stringToInstant(begin), stringToInstant(end)))(matcher)
 

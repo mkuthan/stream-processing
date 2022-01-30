@@ -56,7 +56,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     ))
   }
 
-  it should "be aggregated into consecutive fixed windows" in runWithContext { sc =>
+  "Words" should "be aggregated into consecutive fixed windows" in runWithContext { sc =>
     val words = testStreamOf[String]
       .addElementsAtTime("00:00:00", "foo bar")
       .addElementsAtTime("00:00:30", "baz baz")
@@ -75,7 +75,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     ))
   }
 
-  it should "be aggregated into non-consecutive fixed windows" in runWithContext { sc =>
+  "Words" should "be aggregated into non-consecutive fixed windows" in runWithContext { sc =>
     val words = testStreamOf[String]
       .addElementsAtTime("00:00:00", "foo bar")
       .addElementsAtTime("00:00:30", "baz baz")

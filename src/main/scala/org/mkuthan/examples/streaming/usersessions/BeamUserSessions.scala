@@ -19,13 +19,11 @@ object BeamUserSessions {
       gapDuration: Duration,
       allowedLateness: Duration = Duration.ZERO,
       accumulationMode: AccumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-      timestampCombiner: TimestampCombiner = TimestampCombiner.END_OF_WINDOW,
       trigger: Trigger = DefaultTrigger.of()
   ): SCollection[(User, Iterable[Action])] = {
     val windowOptions = WindowOptions(
       allowedLateness = allowedLateness,
       accumulationMode = accumulationMode,
-      timestampCombiner = timestampCombiner,
       trigger = trigger,
     )
 
@@ -34,11 +32,11 @@ object BeamUserSessions {
       .map { case ((user, action), timestamp) => (user, (action, timestamp)) }
       .withSessionWindows(gapDuration, windowOptions)
       .groupByKey
-      .mapValues(sort)
+      .mapValues(sortByTimestamp)
       .mapValues(withoutTimestamp)
   }
 
-  private def sort(actions: Iterable[(Action, Instant)]): Iterable[(Action, Instant)] = {
+  private def sortByTimestamp(actions: Iterable[(Action, Instant)]): Iterable[(Action, Instant)] = {
     val ordering: Ordering[(Action, Instant)] = Ordering.by { case (_, instant) => instant.getMillis }
     actions.toSeq.sorted(ordering)
   }

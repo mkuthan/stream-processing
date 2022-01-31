@@ -15,39 +15,51 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
 
   import BeamUserSessions._
 
-  private val OneMinute = Duration.standardMinutes(1L)
   private val DefaultGapDuration = Duration.standardMinutes(10L)
 
-  "Visit without actions" should "create empty session" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)].advanceWatermarkToInfinity()
+  "No activities" should "create empty session" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)].advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results should beEmpty
   }
 
-  "Single visit" should "be aggregated into single session" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Activities" should "be aggregated into single session" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:00", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
     }
   }
 
-  "Two visits" should "be aggregated into two simultaneous sessions" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Out-of-order activities" should "be aggregated into single session" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
+      .addElementsAtTime("00:01:00", ("joe", "close app"))
+      .addElementsAtTime("00:00:00", ("joe", "open app"))
+      .advanceWatermarkToInfinity()
+
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+
+    results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
+      containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
+    }
+  }
+
+  "Activities from two clients" should "be aggregated into two simultaneous sessions" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:00:00", ("ben", "open app"))
       .addElementsAtTime("00:01:00", ("joe", "close app"))
       .addElementsAtTime("00:01:30", ("ben", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -58,21 +70,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Unordered visit" should "be aggregated into single session" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
-      .addElementsAtTime("00:01:00", ("joe", "close app"))
-      .addElementsAtTime("00:00:00", ("joe", "open app"))
-      .advanceWatermarkToInfinity()
-
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
-
-    results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
-      containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
-    }
-  }
-
-  "Continuous visit" should "be aggregated into single session" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Continuous activities" should "be aggregated into single session" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .addElementsAtTime("00:03:00", ("joe", "add to cart"))
@@ -80,7 +79,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
       containSingleValueAtTime(
@@ -89,8 +88,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Interrupted visit" should "be aggregated into two sessions" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Interrupted activities" should "be aggregated into two sessions" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .addElementsAtTime("00:03:00", ("joe", "add to cart"))
@@ -98,7 +97,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
       containSingleValueAtTime(
@@ -111,8 +110,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Visit with late event" should "be aggregated but late event should be silently dropped" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Late activity" should "be silently discarded" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
@@ -121,7 +120,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(userActions), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
       containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
@@ -136,8 +135,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Visit with late event within allowed lateness" should "be aggregated also into session in late pane" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Late activity within allowed lateness" should "be aggregated into late pane" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
@@ -147,7 +146,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
-      sc.testStream(userActions),
+      sc.testStream(activities),
       DefaultGapDuration,
       allowedLateness = Duration.standardMinutes(5))
 
@@ -164,8 +163,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Visit with late event within allowed lateness" should "be aggregated and accumulated also into session in late pane" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Late activity within allowed lateness" should "be aggregated and accumulated into late pane" in runWithContext { sc =>
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
@@ -175,7 +174,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
-      sc.testStream(userActions),
+      sc.testStream(activities),
       DefaultGapDuration,
       allowedLateness = Duration.standardMinutes(5),
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
@@ -193,8 +192,10 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     }
   }
 
-  "Visit" should "be aggregated speculatively on every minute, on-time, and lately on every element" in runWithContext { sc =>
-    val userActions = testStreamOf[(User, Action)]
+  "Activities" should "be aggregated speculatively on every minute, on-time, and finally on every late activity" in runWithContext { sc =>
+    val OneMinute = Duration.standardMinutes(1L)
+
+    val activities = testStreamOf[(User, Activity)]
       .addElementsAtTime("00:00:00", ("joe", "0")).advanceProcessingTime(OneMinute)
       .addElementsAtTime("00:01:00", ("joe", "1")).advanceProcessingTime(OneMinute)
       .addElementsAtTime("00:02:00", ("joe", "2")).advanceProcessingTime(OneMinute)
@@ -207,7 +208,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
-      sc.testStream(userActions),
+      sc.testStream(activities),
       DefaultGapDuration,
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES,
       allowedLateness = Duration.standardMinutes(10),

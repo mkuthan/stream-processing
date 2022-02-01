@@ -220,8 +220,6 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
           AfterPane.elementCountAtLeast(1))
     )
 
-    results.withPaneInfo.withWindow.debug()
-
     results.withTimestamp should inEarlyPane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("0", "1")))
     }

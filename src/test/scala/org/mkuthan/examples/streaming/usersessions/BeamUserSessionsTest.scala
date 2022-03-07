@@ -15,12 +15,12 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
 
   import BeamUserSessions._
 
-  private val DefaultGapDuration = Duration.standardMinutes(10L)
+  private val TenMinutesGap = Duration.standardMinutes(10L)
 
   "No activities" should "create empty session" in runWithContext { sc =>
     val activities = testStreamOf[(User, Activity)].advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results should beEmpty
   }
@@ -31,7 +31,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:01:00", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -44,7 +44,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -59,7 +59,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:01:30", ("ben", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -79,7 +79,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
       containSingleValueAtTime(
@@ -97,7 +97,7 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
       containSingleValueAtTime(
@@ -115,12 +115,12 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
-      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late event
+      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late activity
       .addElementsAtTime("00:09:30", ("joe", "checkout"))
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.testStream(activities), DefaultGapDuration)
+    val results = activitiesInSessionWindow(sc.testStream(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
       containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
@@ -140,14 +140,14 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
-      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late event within allowed lateness
+      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late activity within allowed lateness
       .addElementsAtTime("00:09:30", ("joe", "checkout"))
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
       sc.testStream(activities),
-      DefaultGapDuration,
+      TenMinutesGap,
       allowedLateness = Duration.standardMinutes(5))
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
@@ -168,14 +168,14 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .addElementsAtTime("00:01:30", ("joe", "show product"))
       .advanceWatermarkTo("00:13:00")
-      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late event within allowed lateness
+      .addElementsAtTime("00:03:00", ("joe", "add to cart")) // late activity within allowed lateness
       .addElementsAtTime("00:09:30", ("joe", "checkout"))
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
       sc.testStream(activities),
-      DefaultGapDuration,
+      TenMinutesGap,
       allowedLateness = Duration.standardMinutes(5),
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
 
@@ -203,13 +203,13 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:04:00", ("joe", "4")).advanceProcessingTime(OneMinute)
       .addElementsAtTime("00:05:00", ("joe", "5")).advanceProcessingTime(OneMinute)
       .advanceWatermarkTo("00:20:00") // more than 00:05:00 + 10 minutes of gap
-      .addElementsAtTime("00:06:00", ("joe", "6")) // late event within allowed lateness
-      .addElementsAtTime("00:07:00", ("joe", "7")) // late event within allowed lateness
+      .addElementsAtTime("00:06:00", ("joe", "6")) // late activity within allowed lateness
+      .addElementsAtTime("00:07:00", ("joe", "7")) // late activity within allowed lateness
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
       sc.testStream(activities),
-      DefaultGapDuration,
+      TenMinutesGap,
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES,
       allowedLateness = Duration.standardMinutes(10),
       trigger = AfterWatermark

@@ -1,9 +1,9 @@
 name := "example-streaming"
 version := "1.0"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.8"
 
-val scioVersion = "0.11.4"
+val scioVersion = "0.11.5"
 
 libraryDependencies ++= Seq(
   "com.spotify" %% "scio-core" % scioVersion,

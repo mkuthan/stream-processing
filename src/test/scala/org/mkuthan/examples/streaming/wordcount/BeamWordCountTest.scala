@@ -13,12 +13,12 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   import BeamWordCount._
 
-  private val DefaultWindowDuration = Duration.standardMinutes(1L)
+  private val OneMinute = Duration.standardMinutes(1L)
 
   "Words aggregate" should "be empty for empty stream" in runWithContext { sc =>
     val words = testStreamOf[String].advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
+    val results = wordCountInFixedWindow(sc.testStream(words), OneMinute)
 
     results should beEmpty
   }
@@ -29,7 +29,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
+    val results = wordCountInFixedWindow(sc.testStream(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -46,7 +46,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
     val results = wordCountInFixedWindow(
       sc.testStream(words),
-      DefaultWindowDuration,
+      OneMinute,
       timestampCombiner = TimestampCombiner.LATEST)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
@@ -64,7 +64,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:01:30", "bar foo")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
+    val results = wordCountInFixedWindow(sc.testStream(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -83,7 +83,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:02:30", "bar foo")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
+    val results = wordCountInFixedWindow(sc.testStream(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -106,7 +106,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       .addElementsAtTime("00:00:40", "foo") // late event
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.testStream(words), DefaultWindowDuration)
+    val results = wordCountInFixedWindow(sc.testStream(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -125,7 +125,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
     val results = wordCountInFixedWindow(
       sc.testStream(words),
-      DefaultWindowDuration,
+      OneMinute,
       allowedLateness = Duration.standardSeconds(30))
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
@@ -153,7 +153,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
     val results = wordCountInFixedWindow(
       sc.testStream(words),
-      DefaultWindowDuration,
+      OneMinute,
       allowedLateness = Duration.standardSeconds(30),
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
 

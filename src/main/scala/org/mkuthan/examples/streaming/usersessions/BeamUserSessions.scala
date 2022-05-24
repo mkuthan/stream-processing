@@ -23,7 +23,7 @@ object BeamUserSessions {
     val windowOptions = WindowOptions(
       allowedLateness = allowedLateness,
       accumulationMode = accumulationMode,
-      trigger = trigger,
+      trigger = trigger
     )
 
     activities

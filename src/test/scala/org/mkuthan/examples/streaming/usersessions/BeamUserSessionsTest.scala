@@ -84,7 +84,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
       containSingleValueAtTime(
         "00:23:09.999",
-        ("joe", Iterable("open app", "show product", "add to cart", "checkout", "close app")))
+        ("joe", Iterable("open app", "show product", "add to cart", "checkout", "close app"))
+      )
     }
   }
 
@@ -102,7 +103,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
       containSingleValueAtTime(
         "00:12:59.999",
-        ("joe", Iterable("open app", "show product", "add to cart")))
+        ("joe", Iterable("open app", "show product", "add to cart"))
+      )
     }
 
     results.withTimestamp should inOnTimePane("00:13:00", "00:23:10") {
@@ -148,7 +150,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
     val results = activitiesInSessionWindow(
       sc.testStream(activities),
       TenMinutesGap,
-      allowedLateness = Duration.standardMinutes(5))
+      allowedLateness = Duration.standardMinutes(5)
+    )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
       containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
@@ -177,7 +180,8 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       sc.testStream(activities),
       TenMinutesGap,
       allowedLateness = Duration.standardMinutes(5),
-      accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
+      accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES
+    )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
       containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
@@ -215,9 +219,11 @@ class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
       trigger = AfterWatermark
         .pastEndOfWindow()
         .withEarlyFirings(
-          AfterProcessingTime.pastFirstElementInPane().plusDelayOf(OneMinute))
+          AfterProcessingTime.pastFirstElementInPane().plusDelayOf(OneMinute)
+        )
         .withLateFirings(
-          AfterPane.elementCountAtLeast(1))
+          AfterPane.elementCountAtLeast(1)
+        )
     )
 
     results.withTimestamp should inEarlyPane("00:00:00", "00:11:00") {

@@ -34,7 +34,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
       ("00:00:59.999", ("bar", 1L)),
-      ("00:00:59.999", ("baz", 2L)),
+      ("00:00:59.999", ("baz", 2L))
     ))
   }
 
@@ -47,12 +47,13 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     val results = wordCountInFixedWindow(
       sc.testStream(words),
       OneMinute,
-      timestampCombiner = TimestampCombiner.LATEST)
+      timestampCombiner = TimestampCombiner.LATEST
+    )
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:00", ("foo", 1L)),
       ("00:00:00", ("bar", 1L)),
-      ("00:00:30", ("baz", 2L)),
+      ("00:00:30", ("baz", 2L))
     ))
   }
 
@@ -71,7 +72,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       ("00:00:59.999", ("bar", 1L)),
       ("00:00:59.999", ("baz", 2L)),
       ("00:01:59.999", ("foo", 2L)),
-      ("00:01:59.999", ("bar", 2L)),
+      ("00:01:59.999", ("bar", 2L))
     ))
   }
 
@@ -90,7 +91,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       ("00:00:59.999", ("bar", 1L)),
       ("00:00:59.999", ("baz", 2L)),
       ("00:02:59.999", ("foo", 2L)),
-      ("00:02:59.999", ("bar", 2L)),
+      ("00:02:59.999", ("bar", 2L))
     ))
 
     results.withTimestamp should inWindow("00:01:00", "00:02:00") {
@@ -111,7 +112,7 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
       ("00:00:59.999", ("bar", 1L)),
-      ("00:00:59.999", ("baz", 2L)),
+      ("00:00:59.999", ("baz", 2L))
     ))
   }
 
@@ -126,19 +127,21 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
     val results = wordCountInFixedWindow(
       sc.testStream(words),
       OneMinute,
-      allowedLateness = Duration.standardSeconds(30))
+      allowedLateness = Duration.standardSeconds(30)
+    )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
       containInAnyOrderAtTime(Seq(
         ("00:00:59.999", ("foo", 1L)),
         ("00:00:59.999", ("bar", 1L)),
-        ("00:00:59.999", ("baz", 2L)),
+        ("00:00:59.999", ("baz", 2L))
       ))
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
       containSingleValueAtTime(
-        "00:00:59.999", ("foo", 2L)
+        "00:00:59.999",
+        ("foo", 2L)
       )
     }
   }
@@ -155,7 +158,8 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
       sc.testStream(words),
       OneMinute,
       allowedLateness = Duration.standardSeconds(30),
-      accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES)
+      accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES
+    )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
       containInAnyOrderAtTime(Seq(
@@ -167,7 +171,8 @@ class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
       containSingleValueAtTime(
-        "00:00:59.999", ("foo", 3L)
+        "00:00:59.999",
+        ("foo", 3L)
       )
     }
   }

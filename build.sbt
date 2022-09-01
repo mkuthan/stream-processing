@@ -3,7 +3,7 @@ version := "1.0"
 
 scalaVersion := "2.13.8"
 
-val scioVersion = "0.11.9"
+val scioVersion = "0.11.10"
 
 libraryDependencies ++= Seq(
   // scio

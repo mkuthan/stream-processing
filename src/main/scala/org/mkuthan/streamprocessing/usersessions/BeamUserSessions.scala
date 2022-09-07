@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.usersessions
+package org.mkuthan.streamprocessing.usersessions
 
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions

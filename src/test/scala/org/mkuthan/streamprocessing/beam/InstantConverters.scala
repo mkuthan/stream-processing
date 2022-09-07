@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.beam
+package org.mkuthan.streamprocessing.beam
 
 import org.joda.time.Instant
 import org.joda.time.LocalTime

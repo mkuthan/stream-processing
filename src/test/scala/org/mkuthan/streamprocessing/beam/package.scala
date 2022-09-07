@@ -1,3 +1,3 @@
-package org.mkuthan.examples.streaming
+package org.mkuthan.streamprocessing
 
 package object beam extends TestStreamBuilderSyntax

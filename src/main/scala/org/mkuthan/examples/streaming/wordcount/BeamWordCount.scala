@@ -20,11 +20,14 @@ object BeamWordCount {
       accumulationMode = accumulationMode,
       timestampCombiner = timestampCombiner
     )
-
     lines
       .flatMap(line => line.split("\\s+"))
       .withFixedWindows(duration = windowDuration, options = windowOptions)
       .countByValue
+  }
+
+  def unusedMethod(): Unit = {
+    println("foo")
   }
 
 }

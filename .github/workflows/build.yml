@@ -1,8 +1,6 @@
 name: Build
 
-on:
-  pull_request:
-  push:
+on: [ push, pull_request ]
 
 jobs:
   build:
@@ -22,5 +20,8 @@ jobs:
       - name: Check formatting
         run: sbt scalafmtCheckAll
 
-      - name: Build and Test
-        run: sbt test
+      - name: Build and test
+        run: sbt jacoco
+
+      - name: Upload test coverage results
+        uses: codecov/codecov-action@v3

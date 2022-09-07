@@ -14,3 +14,12 @@ libraryDependencies ++= Seq(
   // tests
   "org.scalatest" %% "scalatest" % "3.2.12" % "test"
 )
+
+// Jacoco coverage setting
+jacocoReportSettings := JacocoReportSettings(
+  "Jacoco Coverage Report",
+  None,
+  JacocoThresholds(),
+  Seq(JacocoReportFormats.XML, JacocoReportFormats.HTML),
+  "utf-8"
+)

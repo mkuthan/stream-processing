@@ -10,7 +10,7 @@ libraryDependencies ++= Seq(
   "com.spotify" %% "scio-core" % scioVersion,
   "com.spotify" %% "scio-test" % scioVersion % "test",
   // other
-  "ch.qos.logback" % "logback-classic" % "1.2.11",
+  "ch.qos.logback" % "logback-classic" % "1.4.0",
   // tests
   "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )

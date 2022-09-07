@@ -24,5 +24,5 @@ jacocoReportSettings := JacocoReportSettings(
   "utf-8"
 )
 
-// specify scapegoat version explicitly (sbt plugins assumes 1.0.0)
-ThisBuild / scapegoatVersion := "1.4.15"
+// turn on all checks that are currently considered stable
+wartremoverErrors ++= Warts.unsafe

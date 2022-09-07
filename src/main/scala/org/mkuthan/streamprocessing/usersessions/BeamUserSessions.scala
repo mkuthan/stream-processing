@@ -13,6 +13,7 @@ object BeamUserSessions {
   type User = String
   type Activity = String
 
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def activitiesInSessionWindow(
       activities: SCollection[(User, Activity)],
       gapDuration: Duration,

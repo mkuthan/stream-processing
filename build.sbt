@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )
 
-// enable XML report
+// enable XML report for Jacoco, needed by codecov.io
 jacocoReportSettings := JacocoReportSettings(
   "Jacoco Coverage Report",
   None,
@@ -23,3 +23,6 @@ jacocoReportSettings := JacocoReportSettings(
   Seq(JacocoReportFormats.XML, JacocoReportFormats.HTML),
   "utf-8"
 )
+
+// specify scapegoat version explicitly (sbt plugins assumes 1.0.0)
+ThisBuild / scapegoatVersion := "1.4.15"

@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.usersessions
+package org.mkuthan.streamprocessing.usersessions
 
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
@@ -8,8 +8,8 @@ import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
 import org.apache.beam.sdk.transforms.windowing.AfterWatermark
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
-import org.mkuthan.examples.streaming.beam.TimestampedMatchers
-import org.mkuthan.examples.streaming.beam._
+import org.mkuthan.streamprocessing.beam._
+import org.mkuthan.streamprocessing.beam.TimestampedMatchers
 
 class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
 

@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.wordcount
+package org.mkuthan.streamprocessing.wordcount
 
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions

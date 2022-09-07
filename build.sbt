@@ -1,4 +1,4 @@
-name := "example-streaming"
+name := "stream-processing"
 version := "1.0"
 
 scalaVersion := "2.13.8"
@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )
 
-// Jacoco coverage setting
+// enable XML report
 jacocoReportSettings := JacocoReportSettings(
   "Jacoco Coverage Report",
   None,

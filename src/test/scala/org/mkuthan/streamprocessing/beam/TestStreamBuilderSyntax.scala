@@ -1,4 +1,4 @@
-package org.mkuthan.examples.streaming.beam
+package org.mkuthan.streamprocessing.beam
 
 import org.apache.beam.sdk.testing.TestStream
 import org.apache.beam.sdk.values.TimestampedValue

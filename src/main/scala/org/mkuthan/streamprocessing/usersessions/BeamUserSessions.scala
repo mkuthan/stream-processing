@@ -43,4 +43,8 @@ object BeamUserSessions {
 
   private def withoutTimestamp(activities: Iterable[(Activity, Instant)]): Iterable[Activity] =
     activities.map(_._1)
+
+  def unusedFunction(): Unit = {
+    println("foo")
+  }
 }

@@ -11,7 +11,7 @@ import org.joda.time.Duration
 import org.mkuthan.streamprocessing.beam._
 import org.mkuthan.streamprocessing.beam.TimestampedMatchers
 
-class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
+final class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
 
   import BeamUserSessions._
 

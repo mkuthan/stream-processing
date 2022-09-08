@@ -28,4 +28,7 @@ object BeamWordCount {
       .countByValue
   }
 
+  def unusedFunction(): Unit = {
+    println("foo")
+  }
 }

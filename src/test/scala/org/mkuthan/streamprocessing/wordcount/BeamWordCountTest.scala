@@ -9,7 +9,7 @@ import org.joda.time.Duration
 import org.mkuthan.streamprocessing.beam.TimestampedMatchers
 import org.mkuthan.streamprocessing.beam._
 
-class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
+final class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 
   import BeamWordCount._
 

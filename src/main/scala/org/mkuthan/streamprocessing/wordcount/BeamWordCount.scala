@@ -8,6 +8,7 @@ import org.joda.time.Duration
 
 object BeamWordCount {
 
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def wordCountInFixedWindow(
       lines: SCollection[String],
       windowDuration: Duration,

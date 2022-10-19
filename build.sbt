@@ -7,9 +7,12 @@ val scioVersion = "0.11.10"
 libraryDependencies ++= Seq(
   // scio
   "com.spotify" %% "scio-core" % scioVersion,
+  "com.spotify" %% "scio-google-cloud-platform" % scioVersion,
   "com.spotify" %% "scio-test" % scioVersion % "test",
   // other
   "ch.qos.logback" % "logback-classic" % "1.4.0",
+  "org.json4s" %% "json4s-jackson" % "4.0.6",
+  "org.json4s" %% "json4s-ext" % "4.0.6",
   // tests
   "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )

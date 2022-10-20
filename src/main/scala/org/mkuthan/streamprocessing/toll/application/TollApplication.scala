@@ -1,14 +1,21 @@
 package org.mkuthan.streamprocessing.toll.application
 
-import com.spotify.scio.{Args, ContextAndArgs, ScioContext}
+import com.spotify.scio.Args
+import com.spotify.scio.ContextAndArgs
+import com.spotify.scio.ScioContext
 import org.joda.time.Duration
 import org.mkuthan.streamprocessing.toll.configuration.TollApplicationConfiguration
-import org.mkuthan.streamprocessing.toll.domain.booth.{TollBoothEntry, TollBoothEntryStats, TollBoothExit}
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.toll.{TotalCarTime, VehiclesWithExpiredRegistration}
-import org.mkuthan.streamprocessing.toll.infrastructure.{BigQueryRepository, PubSubRepository, StorageRepository}
+import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
+import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.infrastructure.BigQueryRepository
+import org.mkuthan.streamprocessing.toll.infrastructure.PubSubRepository
+import org.mkuthan.streamprocessing.toll.infrastructure.StorageRepository
 
 /** A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world. Each toll station has
   * multiple toll booths. At manual booths, you stop to pay the toll to an attendant. At automated booths, a sensor on top of each booth scans an RFID

@@ -4,7 +4,8 @@ import com.spotify.scio.ScioContext
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.pubsub.PubsubIO
 import com.spotify.scio.values.SCollection
-import org.mkuthan.streamprocessing.toll.configuration.{PubSubSubscription, PubSubTopic}
+import org.mkuthan.streamprocessing.toll.configuration.PubSubSubscription
+import org.mkuthan.streamprocessing.toll.configuration.PubSubTopic
 
 object PubSubRepository {
   def subscribe[T <: AnyRef: Coder: Manifest](

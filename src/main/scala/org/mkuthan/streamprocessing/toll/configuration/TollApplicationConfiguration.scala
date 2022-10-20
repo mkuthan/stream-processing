@@ -1,11 +1,14 @@
 package org.mkuthan.streamprocessing.toll.configuration
 
 import com.spotify.scio.Args
-import org.mkuthan.streamprocessing.toll.domain.booth.{TollBoothEntry, TollBoothEntryStats, TollBoothExit}
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.toll.{TotalCarTime, VehiclesWithExpiredRegistration}
+import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
+import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
 
 final case class TollApplicationConfiguration(
     entrySubscription: PubSubSubscription[TollBoothEntry.Raw],

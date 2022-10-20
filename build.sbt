@@ -1,9 +1,9 @@
 name := "stream-processing"
 version := "1.0"
 
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.10"
 
-val scioVersion = "0.11.10"
+val scioVersion = "0.11.11"
 libraryDependencies ++= Seq(
   // scio
   "com.spotify" %% "scio-core" % scioVersion,

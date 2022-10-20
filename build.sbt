@@ -1,9 +1,10 @@
 name := "stream-processing"
 version := "1.0"
 
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.10"
 
-val scioVersion = "0.11.10"
+val scioVersion = "0.11.11"
+
 libraryDependencies ++= Seq(
   // scio
   "com.spotify" %% "scio-core" % scioVersion,
@@ -17,6 +18,15 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.13" % "test"
 )
 
+// recommended options for scalac
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-Ymacro-annotations", // required by Scio macros
+  "-Xmacro-settings:show-coder-fallback=true" // warn about fallback to Kryo coder
+)
+
 // automatically reload the build when source changes are detected
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -24,13 +34,17 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 jacocoReportSettings := JacocoReportSettings()
   .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
 
-// configure static code analysis
-val disabledCompileWarts = Seq()
-val disabledTestWarts = Seq(
+// configure static code analysis, Scio macros require relaxed rules
+val disabledWarts = Seq(
   Wart.Any,
+  Wart.DefaultArguments,
+  Wart.FinalCaseClass,
+  Wart.ImplicitParameter,
   Wart.NonUnitStatements,
-  Wart.Nothing
+  Wart.Nothing,
+  Wart.Throw,
+  Wart.ToString
 )
 
-Compile / compile / wartremoverErrors := Warts.allBut(disabledCompileWarts: _*)
-Test / compile / wartremoverErrors := Warts.allBut(disabledTestWarts: _*)
+Compile / compile / wartremoverErrors := Warts.allBut(disabledWarts: _*)
+Test / compile / wartremoverErrors := Warts.allBut(disabledWarts: _*)

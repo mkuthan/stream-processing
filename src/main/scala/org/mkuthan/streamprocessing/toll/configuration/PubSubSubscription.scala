@@ -1,3 +1,3 @@
 package org.mkuthan.streamprocessing.toll.configuration
 
-case class PubSubSubscription[T](id: String) extends AnyVal
+final case class PubSubSubscription[T](id: String) extends AnyVal

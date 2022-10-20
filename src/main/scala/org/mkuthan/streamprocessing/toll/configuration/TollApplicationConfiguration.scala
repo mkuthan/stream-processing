@@ -1,28 +1,25 @@
 package org.mkuthan.streamprocessing.toll.configuration
 
 import com.spotify.scio.Args
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryRaw
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsRaw
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitRaw
+import org.mkuthan.streamprocessing.toll.domain.booth.{TollBoothEntry, TollBoothEntryStats, TollBoothExit}
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
-import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationRaw
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
-import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
+import org.mkuthan.streamprocessing.toll.domain.toll.{TotalCarTime, VehiclesWithExpiredRegistration}
 
-case class TollApplicationConfiguration(
-    entrySubscription: PubSubSubscription[TollBoothEntryRaw],
-    exitSubscription: PubSubSubscription[TollBoothExitRaw],
-    vehicleRegistrationTable: BigQueryTable[VehicleRegistrationRaw],
-    entryStatsTable: BigQueryTable[TollBoothEntryStatsRaw],
-    carTotalTimeTable: BigQueryTable[TotalCarTime],
-    diagnosticTable: BigQueryTable[Diagnostic],
-    vehiclesWithExpiredRegistrationTopic: PubSubTopic[VehiclesWithExpiredRegistration],
-    dlqBucket: StorageBucket[DeadLetterQueue]
+final case class TollApplicationConfiguration(
+    entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
+    exitSubscription: PubSubSubscription[TollBoothExit.Raw],
+    vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
+    entryStatsTable: BigQueryTable[TollBoothEntryStats.Raw],
+    carTotalTimeTable: BigQueryTable[TotalCarTime.Raw],
+    diagnosticTable: BigQueryTable[Diagnostic.Raw],
+    vehiclesWithExpiredRegistrationTopic: PubSubTopic[VehiclesWithExpiredRegistration.Raw],
+    dlqBucket: StorageBucket[DeadLetterQueue.Raw]
 )
 
 object TollApplicationConfiguration {
-  def apply(args: Args): TollApplicationConfiguration = TollApplicationConfiguration(
+  def parse(args: Args): TollApplicationConfiguration = TollApplicationConfiguration(
     entrySubscription = PubSubSubscription(args.required("entrySubscription")),
     exitSubscription = PubSubSubscription(args.required("exitSubscription")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),

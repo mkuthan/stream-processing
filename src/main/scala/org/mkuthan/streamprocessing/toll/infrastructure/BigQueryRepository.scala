@@ -1,15 +1,24 @@
 package org.mkuthan.streamprocessing.toll.infrastructure
 
 import com.spotify.scio.ScioContext
-import com.spotify.scio.bigquery.Table
+import com.spotify.scio.bigquery._
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import org.mkuthan.streamprocessing.toll.configuration.BigQueryTable
 
-object BigQueryRepository {
-  def load[T <: HasAnnotation](table: BigQueryTable[T])(implicit sc: ScioContext): SCollection[T] =
-    sc.typedBigQueryStorage(Table.Spec(table.id))
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 
-  def save[T <: HasAnnotation](table: BigQueryTable[T], data: SCollection[T]): Unit =
-    data.saveAsTypedBigQueryTable(Table.Spec(table.id))
+object BigQueryRepository {
+  def load[T <: HasAnnotation: ClassTag: TypeTag: Coder](
+      table: BigQueryTable[T]
+  )(implicit sc: ScioContext): SCollection[T] =
+    sc.typedBigQueryStorage(table.spec)
+
+  def save[T <: HasAnnotation: ClassTag: TypeTag: Coder](
+      table: BigQueryTable[T],
+      data: SCollection[T]
+  ): Unit =
+    data.saveAsTypedBigQueryTable(table.spec)
 }

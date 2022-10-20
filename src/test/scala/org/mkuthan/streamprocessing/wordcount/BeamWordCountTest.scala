@@ -1,13 +1,15 @@
 package org.mkuthan.streamprocessing.wordcount
 
+import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
-import com.spotify.scio.testing.testStreamOf
+
 import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
-import org.mkuthan.streamprocessing.beam.TimestampedMatchers
+
 import org.mkuthan.streamprocessing.beam._
+import org.mkuthan.streamprocessing.beam.TimestampedMatchers
 
 final class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 

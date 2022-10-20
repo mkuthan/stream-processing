@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "com.spotify" %% "scio-google-cloud-platform" % scioVersion,
   "com.spotify" %% "scio-test" % scioVersion % "test",
   // other
-  "ch.qos.logback" % "logback-classic" % "1.4.0",
+  "ch.qos.logback" % "logback-classic" % "1.4.1",
   "org.json4s" %% "json4s-jackson" % "4.0.6",
   "org.json4s" %% "json4s-ext" % "4.0.6",
   // tests

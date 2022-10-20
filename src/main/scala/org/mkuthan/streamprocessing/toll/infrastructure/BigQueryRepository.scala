@@ -1,14 +1,15 @@
 package org.mkuthan.streamprocessing.toll.infrastructure
 
-import com.spotify.scio.ScioContext
+import scala.reflect.runtime.universe._
+import scala.reflect.ClassTag
+
 import com.spotify.scio.bigquery._
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-import org.mkuthan.streamprocessing.toll.configuration.BigQueryTable
+import com.spotify.scio.ScioContext
 
-import scala.reflect.ClassTag
-import scala.reflect.runtime.universe._
+import org.mkuthan.streamprocessing.toll.configuration.BigQueryTable
 
 object BigQueryRepository {
   def load[T <: HasAnnotation: ClassTag: TypeTag: Coder](

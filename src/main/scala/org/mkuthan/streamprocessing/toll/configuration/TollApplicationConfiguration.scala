@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.toll.configuration
 
 import com.spotify.scio.Args
+
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit

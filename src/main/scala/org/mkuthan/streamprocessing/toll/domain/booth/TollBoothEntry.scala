@@ -1,7 +1,9 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.values.SCollection
+
 import org.joda.time.Instant
+
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 final case class TollBoothEntry(

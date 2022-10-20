@@ -2,7 +2,9 @@ package org.mkuthan.streamprocessing.toll.domain.toll
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
+
 import org.joda.time.Instant
+
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate

@@ -3,7 +3,9 @@ package org.mkuthan.streamprocessing.toll.application
 import com.spotify.scio.Args
 import com.spotify.scio.ContextAndArgs
 import com.spotify.scio.ScioContext
+
 import org.joda.time.Duration
+
 import org.mkuthan.streamprocessing.toll.configuration.TollApplicationConfiguration
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
@@ -17,12 +19,14 @@ import org.mkuthan.streamprocessing.toll.infrastructure.BigQueryRepository
 import org.mkuthan.streamprocessing.toll.infrastructure.PubSubRepository
 import org.mkuthan.streamprocessing.toll.infrastructure.StorageRepository
 
-/** A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world. Each toll station has
-  * multiple toll booths. At manual booths, you stop to pay the toll to an attendant. At automated booths, a sensor on top of each booth scans an RFID
-  * card that's affixed to the windshield of your vehicle as you pass the toll booth. It is easy to visualize the passage of vehicles through these
-  * toll stations as an event stream over which interesting operations can be performed.
+/** A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the
+  * world. Each toll station has multiple toll booths. At manual booths, you stop to pay the toll to an attendant. At
+  * automated booths, a sensor on top of each booth scans an RFID card that's affixed to the windshield of your vehicle
+  * as you pass the toll booth. It is easy to visualize the passage of vehicles through these toll stations as an event
+  * stream over which interesting operations can be performed.
   *
-  * See: https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
+  * See:
+  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
   */
 object TollApplication {
 
@@ -61,7 +65,10 @@ object TollApplication {
     ))
     StorageRepository.save(configuration.dlqBucket, DeadLetterQueue.encode(dlqs))
 
-    val diagnostics = Diagnostic.aggregateInFixedWindow(Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic), TenMinutes)
+    val diagnostics = Diagnostic.aggregateInFixedWindow(
+      Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic),
+      TenMinutes
+    )
     BigQueryRepository.save(configuration.diagnosticTable, Diagnostic.encode(diagnostics))
   }
 }

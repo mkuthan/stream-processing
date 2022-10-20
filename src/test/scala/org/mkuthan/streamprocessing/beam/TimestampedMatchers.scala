@@ -2,10 +2,11 @@ package org.mkuthan.streamprocessing.beam
 
 import scala.reflect.ClassTag
 
-import cats.kernel.Eq
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.testing.SCollectionMatchers
 import com.spotify.scio.values.SCollection
+
+import cats.kernel.Eq
 import org.apache.beam.sdk.transforms.windowing.IntervalWindow
 import org.joda.time.Instant
 import org.scalatest.matchers.Matcher

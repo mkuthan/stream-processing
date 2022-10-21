@@ -12,6 +12,9 @@ final case class VehicleRegistration(
 )
 
 object VehicleRegistration {
+
+  // implicit val CoderCache: Coder[VehicleRegistration] = Coder.gen
+
   @BigQueryType.toTable
   final case class Raw(
       id: String,

@@ -13,6 +13,9 @@ final case class TollBoothExit(
 )
 
 object TollBoothExit {
+
+  // implicit val CoderCache: Coder[TollBoothExit] = Coder.gen
+
   final case class Raw(
       id: String,
       exitTime: String,

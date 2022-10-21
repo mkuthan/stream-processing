@@ -1,12 +1,9 @@
 package org.mkuthan.streamprocessing.toll.application
 
-import com.spotify.scio.Args
 import com.spotify.scio.ContextAndArgs
-import com.spotify.scio.ScioContext
 
 import org.joda.time.Duration
 
-import org.mkuthan.streamprocessing.toll.configuration.TollApplicationConfiguration
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
@@ -15,9 +12,7 @@ import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.infrastructure.BigQueryRepository
-import org.mkuthan.streamprocessing.toll.infrastructure.PubSubRepository
-import org.mkuthan.streamprocessing.toll.infrastructure.StorageRepository
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.AllSyntax
 
 /** A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the
   * world. Each toll station has multiple toll booths. At manual booths, you stop to pay the toll to an attendant. At
@@ -28,47 +23,52 @@ import org.mkuthan.streamprocessing.toll.infrastructure.StorageRepository
   * See:
   * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
   */
-object TollApplication {
+object TollApplication extends AllSyntax {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
   def main(mainArgs: Array[String]): Unit = {
-    implicit val (sc: ScioContext, args: Args) = ContextAndArgs(mainArgs)
+    val (sc, args) = ContextAndArgs(mainArgs)
 
-    val configuration = TollApplicationConfiguration.parse(args)
+    val configuration = TollApplicationConfig.parse(args)
 
-    val boothEntriesRaw = PubSubRepository.subscribe(configuration.entrySubscription)
-    val boothExitsRaw = PubSubRepository.subscribe(configuration.exitSubscription)
-    val vehicleRegistrationsRaw = BigQueryRepository.load(configuration.vehicleRegistrationTable)
-
-    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
-    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
-    val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration.decode(vehicleRegistrationsRaw)
+    val (boothEntries, boothEntriesDlq) = TollBoothEntry
+      .decode(sc.subscribeToPubSub(configuration.entrySubscription))
+    val (boothExits, boothExistsDlq) = TollBoothExit
+      .decode(sc.subscribeToPubSub(configuration.exitSubscription))
+    val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
+      .decode(sc.loadFromBigQuery(configuration.vehicleRegistrationTable))
 
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
-    BigQueryRepository.save(configuration.entryStatsTable, TollBoothEntryStats.encode(boothEntryStats))
+
+    TollBoothEntryStats
+      .encode(boothEntryStats)
+      .saveToBigQuery(configuration.entryStatsTable)
 
     val (tollTotalCarTimes, totalCarTimesDiagnostic) = TotalCarTime.calculate(boothEntries, boothExits)
-    BigQueryRepository.save(configuration.carTotalTimeTable, TotalCarTime.encode(tollTotalCarTimes))
+
+    TotalCarTime
+      .encode(tollTotalCarTimes)
+      .saveToBigQuery(configuration.carTotalTimeTable)
 
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
-    PubSubRepository.publish(
-      configuration.vehiclesWithExpiredRegistrationTopic,
-      VehiclesWithExpiredRegistration.encode(vehiclesWithExpiredRegistration)
-    )
 
-    val dlqs = sc.unionAll(Seq(
-      DeadLetterQueue.encode(boothEntriesDlq),
-      DeadLetterQueue.encode(boothExistsDlq),
-      DeadLetterQueue.encode(vehicleRegistrationsDlq)
-    ))
-    StorageRepository.save(configuration.dlqBucket, DeadLetterQueue.encode(dlqs))
+    VehiclesWithExpiredRegistration
+      .encode(vehiclesWithExpiredRegistration)
+      .publishToPubSub(configuration.vehiclesWithExpiredRegistrationTopic)
+
+//    DeadLetterQueue
+//      .encode(Seq(boothEntriesDlq, boothExistsDlq, vehicleRegistrationsDlq))
+//      .saveToStorage(configuration.dlqBucket)
 
     val diagnostics = Diagnostic.aggregateInFixedWindow(
       Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic),
       TenMinutes
     )
-    BigQueryRepository.save(configuration.diagnosticTable, Diagnostic.encode(diagnostics))
+
+    Diagnostic
+      .encode(diagnostics)
+      .saveToBigQuery(configuration.diagnosticTable)
   }
 }

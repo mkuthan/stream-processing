@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure
+package org.mkuthan.streamprocessing.toll.infrastructure.json
 
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.jackson.Serialization

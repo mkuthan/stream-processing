@@ -1,13 +1,14 @@
 package org.mkuthan.streamprocessing.toll.domain.dlq
 
-import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 
-final case class DeadLetterQueue()
+final case class DeadLetterQueue[T](
+    payload: T
+)
 
 object DeadLetterQueue {
-  @BigQueryType.toTable
-  final case class Raw()
 
-  def encode[T](input: SCollection[T]): SCollection[Raw] = ???
+  // implicit val CoderCache: Coder[DeadLetterQueue] = Coder.gen
+
+  final case class Raw()
 }

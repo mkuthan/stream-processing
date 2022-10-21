@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.configuration
+package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.Args
 
@@ -10,8 +10,12 @@ import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.BigQueryTable
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubSubscription
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubTopic
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.StorageBucket
 
-final case class TollApplicationConfiguration(
+final case class TollApplicationConfig(
     entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
     exitSubscription: PubSubSubscription[TollBoothExit.Raw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
@@ -22,8 +26,8 @@ final case class TollApplicationConfiguration(
     dlqBucket: StorageBucket[DeadLetterQueue.Raw]
 )
 
-object TollApplicationConfiguration {
-  def parse(args: Args): TollApplicationConfiguration = TollApplicationConfiguration(
+object TollApplicationConfig {
+  def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
     entrySubscription = PubSubSubscription(args.required("entrySubscription")),
     exitSubscription = PubSubSubscription(args.required("exitSubscription")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),

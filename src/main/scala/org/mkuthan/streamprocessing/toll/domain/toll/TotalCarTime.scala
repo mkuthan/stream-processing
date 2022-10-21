@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.toll.domain.toll
 
 import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
 import org.joda.time.Duration
@@ -21,6 +22,9 @@ final case class TotalCarTime(
 )
 
 object TotalCarTime {
+
+  // implicit val CoderCache: Coder[TotalCarTime] = Coder.gen
+
   @BigQueryType.toTable
   final case class Raw(
       licence_plate: String,

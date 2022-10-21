@@ -14,6 +14,9 @@ final case class TollBoothEntry(
 )
 
 object TollBoothEntry {
+
+  // implicit val CoderCache: Coder[TollBoothEntry] = Coder.gen
+
   final case class Raw(
       id: String,
       entry_time: String,

@@ -29,7 +29,7 @@ object VehiclesWithExpiredRegistration {
       license_plate: String,
       toll_both_id: String,
       vehicle_registration_id: String,
-      entryTime: Instant
+      entry_time: Instant
   )
 
   def calculate(

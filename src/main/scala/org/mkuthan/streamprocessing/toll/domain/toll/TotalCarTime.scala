@@ -29,8 +29,8 @@ object TotalCarTime {
   final case class Raw(
       licence_plate: String,
       toll_booth_id: String,
-      entryTime: Instant,
-      exitTime: Instant,
+      entry_time: Instant,
+      exit_time: Instant,
       duration_seconds: Int
   )
 

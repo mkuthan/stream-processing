@@ -18,8 +18,8 @@ object TollBoothExit {
 
   final case class Raw(
       id: String,
-      exitTime: String,
-      licensePlate: String
+      exit_time: String,
+      license_plate: String
   )
 
   def decode(raw: SCollection[Raw]): (SCollection[TollBoothExit], SCollection[Raw]) = ???

@@ -8,7 +8,6 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
-import org.mkuthan.streamprocessing.toll.domain.dlq.DeadLetterQueue
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
@@ -30,45 +29,42 @@ object TollApplication extends AllSyntax {
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
 
-    val configuration = TollApplicationConfig.parse(args)
+    val config = TollApplicationConfig.parse(args)
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry
-      .decode(sc.subscribeToPubSub(configuration.entrySubscription))
+      .decode(sc.subscribeToPubSub(config.entrySubscription))
+    boothEntriesDlq.saveToStorage(config.entryDlq)
+
     val (boothExits, boothExistsDlq) = TollBoothExit
-      .decode(sc.subscribeToPubSub(configuration.exitSubscription))
+      .decode(sc.subscribeToPubSub(config.exitSubscription))
+    boothExistsDlq.saveToStorage(config.exitDlq)
+
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
-      .decode(sc.loadFromBigQuery(configuration.vehicleRegistrationTable))
+      .decode(sc.loadFromBigQuery(config.vehicleRegistrationTable))
+    vehicleRegistrationsDlq.saveToStorage(config.vehicleRegistrationDlq)
 
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
-
     TollBoothEntryStats
       .encode(boothEntryStats)
-      .saveToBigQuery(configuration.entryStatsTable)
+      .saveToBigQuery(config.entryStatsTable)
 
     val (tollTotalCarTimes, totalCarTimesDiagnostic) = TotalCarTime.calculate(boothEntries, boothExits)
-
     TotalCarTime
       .encode(tollTotalCarTimes)
-      .saveToBigQuery(configuration.carTotalTimeTable)
+      .saveToBigQuery(config.carTotalTimeTable)
 
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
-
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
-      .publishToPubSub(configuration.vehiclesWithExpiredRegistrationTopic)
-
-//    DeadLetterQueue
-//      .encode(Seq(boothEntriesDlq, boothExistsDlq, vehicleRegistrationsDlq))
-//      .saveToStorage(configuration.dlqBucket)
+      .publishToPubSub(config.vehiclesWithExpiredRegistrationTopic)
 
     val diagnostics = Diagnostic.aggregateInFixedWindow(
       Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic),
       TenMinutes
     )
-
     Diagnostic
       .encode(diagnostics)
-      .saveToBigQuery(configuration.diagnosticTable)
+      .saveToBigQuery(config.diagnosticTable)
   }
 }

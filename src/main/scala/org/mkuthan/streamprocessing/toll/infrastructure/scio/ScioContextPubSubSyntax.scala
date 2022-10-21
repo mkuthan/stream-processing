@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import scala.language.implicitConversions
+import scala.util.Try
 
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.pubsub.PubsubIO

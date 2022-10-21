@@ -25,7 +25,7 @@ object TollBoothEntryStats {
       begin_time: Instant,
       end_time: Instant,
       count: Int,
-      totalToll: String
+      total_toll: String
   )
 
   def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothEntryStats] =

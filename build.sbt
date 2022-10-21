@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   // other
   "ch.qos.logback" % "logback-classic" % "1.4.1",
   // tests
-  "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test"
 )
 
 // automatically reload the build when source changes are detected

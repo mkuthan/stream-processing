@@ -1,7 +1,12 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
-import com.spotify.scio.values.SCollection
+import scala.util.control.NonFatal
 
+import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.SideOutput
+import com.spotify.scio.ScioMetrics
+
+import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -15,7 +20,7 @@ final case class TollBoothEntry(
 
 object TollBoothEntry {
 
-  // implicit val CoderCache: Coder[TollBoothEntry] = Coder.gen
+  val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
 
   final case class Raw(
       id: String,
@@ -30,5 +35,29 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(raw: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[Raw]) = ???
+  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[Raw]) = {
+    val dlq = SideOutput[Raw]()
+    val (results, sideOutputs) = inputs
+      .withSideOutputs(dlq)
+      .flatMap { case (input, ctx) =>
+        try {
+          Some(fromRaw(input))
+        } catch {
+          case NonFatal(_) =>
+            ctx.output(dlq, input)
+            DlqCounter.inc()
+            None
+        }
+      }
+
+    (results, sideOutputs(dlq))
+  }
+
+  private def fromRaw(raw: Raw): TollBoothEntry =
+    TollBoothEntry(
+      id = TollBoothId(raw.id),
+      entryTime = Instant.parse(raw.entry_time),
+      licencePlate = LicensePlate(raw.license_plate),
+      toll = BigDecimal(raw.toll)
+    )
 }

@@ -11,11 +11,11 @@ libraryDependencies ++= Seq(
   "com.spotify" %% "scio-google-cloud-platform" % scioVersion,
   "com.spotify" %% "scio-test" % scioVersion % "test",
   // other
-  "ch.qos.logback" % "logback-classic" % "1.4.1",
+  "ch.qos.logback" % "logback-classic" % "1.4.4",
   "org.json4s" %% "json4s-jackson" % "4.0.6",
   "org.json4s" %% "json4s-ext" % "4.0.6",
   // tests
-  "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.14" % "test"
 )
 
 // recommended options for scalac

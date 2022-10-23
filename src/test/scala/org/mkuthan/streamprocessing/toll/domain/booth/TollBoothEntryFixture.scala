@@ -22,6 +22,6 @@ trait TollBoothEntryFixture {
     id = TollBoothId("1"),
     entryTime = Instant.parse("2014-09-10T12:01:00.000Z"),
     toll = BigDecimal(7),
-    licencePlate = LicensePlate("JNB 7001")
+    licensePlate = LicensePlate("JNB 7001")
   )
 }

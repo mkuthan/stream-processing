@@ -6,7 +6,11 @@ import com.spotify.scio.values.SCollection
 
 import org.joda.time.Duration
 
-final case class Diagnostic()
+final case class Diagnostic(
+    reason: String,
+    labels: Map[String, String],
+    counter: Int = 1
+)
 
 object Diagnostic {
 

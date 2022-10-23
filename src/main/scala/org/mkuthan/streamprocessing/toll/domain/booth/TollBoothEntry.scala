@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 final case class TollBoothEntry(
     id: TollBoothId,
     entryTime: Instant,
-    licencePlate: LicensePlate,
+    licensePlate: LicensePlate,
     toll: BigDecimal
 )
 
@@ -57,7 +57,7 @@ object TollBoothEntry {
     TollBoothEntry(
       id = TollBoothId(raw.id),
       entryTime = Instant.parse(raw.entry_time),
-      licencePlate = LicensePlate(raw.license_plate),
+      licensePlate = LicensePlate(raw.license_plate),
       toll = BigDecimal(raw.toll)
     )
 }

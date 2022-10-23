@@ -39,6 +39,7 @@ val disabledWarts = Seq(
   Wart.Any,
   Wart.DefaultArguments,
   Wart.FinalCaseClass,
+  Wart.LeakingSealed,
   Wart.NonUnitStatements,
   Wart.Nothing,
   Wart.Throw,

@@ -1,7 +1,7 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import scala.language.implicitConversions
-import scala.reflect.runtime.universe._
+import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
 import com.spotify.scio.bigquery._

@@ -22,5 +22,6 @@ object VehicleRegistration {
       expired: Int
   )
 
-  def decode(raw: SCollection[Raw]): (SCollection[VehicleRegistration], SCollection[Raw]) = ???
+  def decode(raw: SCollection[Raw]): (SCollection[VehicleRegistration], SCollection[Raw]) =
+    (raw.context.empty[VehicleRegistration](), raw.context.empty[Raw]())
 }

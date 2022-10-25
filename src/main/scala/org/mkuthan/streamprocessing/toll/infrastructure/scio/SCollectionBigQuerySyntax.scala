@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import scala.language.implicitConversions
-import scala.reflect.runtime.universe._
+import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
@@ -20,6 +19,8 @@ final class BigQuerySCollectionOps[T <: HasAnnotation](private val self: SCollec
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
 trait SCollectionBigQuerySyntax {
+  import scala.language.implicitConversions
+
   implicit def bigQuerySCollectionOps[T <: HasAnnotation](sc: SCollection[T]): BigQuerySCollectionOps[T] =
     new BigQuerySCollectionOps(sc)
 }

@@ -3,18 +3,21 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 import scala.language.implicitConversions
 
 import com.spotify.scio.coders.Coder
-import com.spotify.scio.pubsub.PubsubIO
 import com.spotify.scio.values.SCollection
+
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
   def publishToPubSub(
       topic: PubSubTopic[T]
-  )(implicit c: Coder[T]): Unit =
+  )(implicit c: Coder[T]): Unit = {
+    val io = PubsubIO.writeStrings().to(topic.id)
     self
       .map(JsonSerde.write[T])
-      .write(PubsubIO.string(topic.id))(PubsubIO.WriteParam())
+      .saveAsCustomOutput("PublishToPubsub", io)
+  }
 
 }
 

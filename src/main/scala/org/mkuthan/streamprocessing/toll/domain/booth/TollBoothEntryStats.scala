@@ -29,7 +29,8 @@ object TollBoothEntryStats {
   )
 
   def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothEntryStats] =
-    ???
+    input.context.empty[TollBoothEntryStats]()
 
-  def encode(input: SCollection[TollBoothEntryStats]): SCollection[Raw] = ???
+  def encode(input: SCollection[TollBoothEntryStats]): SCollection[Raw] =
+    input.context.empty[Raw]()
 }

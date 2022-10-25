@@ -35,7 +35,9 @@ object VehiclesWithExpiredRegistration {
   def calculate(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistration: SCollection[VehicleRegistration]
-  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[Diagnostic]) = ???
+  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[Diagnostic]) =
+    (boothEntries.context.empty[VehiclesWithExpiredRegistration](), boothEntries.context.empty[Diagnostic]())
 
-  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Raw] = ???
+  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Raw] =
+    input.context.empty[Raw]()
 }

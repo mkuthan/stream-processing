@@ -19,8 +19,10 @@ object Diagnostic {
   @BigQueryType.toTable
   final case class Raw()
 
-  def aggregateInFixedWindow(input: Iterable[SCollection[Diagnostic]], duration: Duration): SCollection[Diagnostic] =
-    ???
+  def aggregateInFixedWindow(input: SCollection[Diagnostic], duration: Duration): SCollection[Diagnostic] = {
+    input.context.empty[Diagnostic]()
+  }
 
-  def encode(input: SCollection[Diagnostic]): SCollection[Raw] = ???
+  def encode(input: SCollection[Diagnostic]): SCollection[Raw] =
+    input.context.empty[Raw]()
 }

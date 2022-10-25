@@ -22,5 +22,6 @@ object TollBoothExit {
       license_plate: String
   )
 
-  def decode(raw: SCollection[Raw]): (SCollection[TollBoothExit], SCollection[Raw]) = ???
+  def decode(raw: SCollection[Raw]): (SCollection[TollBoothExit], SCollection[Raw]) =
+    (raw.context.empty[TollBoothExit](), raw.context.empty[Raw]())
 }

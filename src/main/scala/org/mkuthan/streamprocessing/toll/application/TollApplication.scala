@@ -59,12 +59,15 @@ object TollApplication extends AllSyntax {
       .encode(vehiclesWithExpiredRegistration)
       .publishToPubSub(config.vehiclesWithExpiredRegistrationTopic)
 
+    // TODO: encapsulate unionAll
     val diagnostics = Diagnostic.aggregateInFixedWindow(
-      Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic),
+      sc.unionAll(Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)),
       TenMinutes
     )
     Diagnostic
       .encode(diagnostics)
       .saveToBigQuery(config.diagnosticTable)
+
+    // sc.run()
   }
 }

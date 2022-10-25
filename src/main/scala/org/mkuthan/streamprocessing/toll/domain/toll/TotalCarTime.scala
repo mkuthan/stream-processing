@@ -59,10 +59,11 @@ object TotalCarTime {
           ctx.output(diagnostic, toDiagnostic(boothEntry))
           None
       }
-    (results, sideOutputs(diagnostic))
+    (results, sideOutputs(diagnostic).withGlobalWindow())
   }
 
-  def encode(input: SCollection[TotalCarTime]): SCollection[Raw] = ???
+  def encode(input: SCollection[TotalCarTime]): SCollection[Raw] =
+    input.context.empty[Raw]()
 
   private def totalCarTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalCarTime = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis

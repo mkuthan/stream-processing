@@ -20,7 +20,7 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
 
     self
       .map(JsonSerde.write)
-      .saveAsCustomOutput("SaveToStorage", io)
+      .saveAsCustomOutput(location.path, io)
   }
 }
 

@@ -68,6 +68,6 @@ object TollApplication extends AllSyntax {
       .encode(diagnostics)
       .saveToBigQuery(config.diagnosticTable)
 
-    // sc.run()
+    sc.run()
   }
 }

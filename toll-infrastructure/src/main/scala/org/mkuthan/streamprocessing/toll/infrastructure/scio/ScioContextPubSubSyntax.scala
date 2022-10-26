@@ -18,7 +18,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
       .readStrings()
       .fromSubscription(subscription.id)
     self
-      .customInput(s"SubscribeToPubSub", io)
+      .customInput(subscription.id, io)
       .map(JsonSerde.read[T])
   }
 }

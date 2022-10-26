@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.toll.domain.diagnostic
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
 import org.joda.time.Duration
@@ -17,7 +16,9 @@ object Diagnostic {
   // implicit val CoderCache: Coder[Diagnostic] = Coder.gen
 
   @BigQueryType.toTable
-  final case class Raw()
+  final case class Raw(
+      reason: String
+  )
 
   def aggregateInFixedWindow(input: SCollection[Diagnostic], duration: Duration): SCollection[Diagnostic] =
     input.context.empty[Diagnostic]()

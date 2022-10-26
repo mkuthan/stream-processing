@@ -1,53 +1,38 @@
-name := "stream-processing"
-version := "1.0"
+import sbt._
 
-scalaVersion := "2.13.10"
+import Dependencies._
+import Settings._
 
-val scioVersion = "0.11.11"
-val json4sVersion = "4.0.6"
-val scalaTestVersion = "3.2.14"
-val logbackVersion = "1.4.4"
+lazy val root = (project in file("."))
+  .settings(name := "stream-processing")
+  .settings(commonSettings)
+  .aggregate(shared, wordCount, userSessions, tollApplication, tollDomain, tollInfrastructure)
 
-libraryDependencies ++= Seq(
-  // scio
-  "com.spotify" %% "scio-core" % scioVersion,
-  "com.spotify" %% "scio-google-cloud-platform" % scioVersion,
-  "com.spotify" %% "scio-test" % scioVersion % "test",
-  // other
-  "ch.qos.logback" % "logback-classic" % logbackVersion,
-  "org.json4s" %% "json4s-jackson" % json4sVersion,
-  "org.json4s" %% "json4s-ext" % json4sVersion,
-  // tests
-  "org.scalatest" %% "scalatest" % scalaTestVersion % "it, test"
-)
+lazy val shared = (project in file("shared"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scalaTest))
 
-// recommended options for scalac
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-feature",
-  "-unchecked",
-  "-Ymacro-annotations", // required by Scio macros
-  "-Xmacro-settings:show-coder-fallback=true" // warn about fallback to Kryo coder
-)
+lazy val wordCount = (project in file("word-count"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scalaTest))
+  .dependsOn(shared % "compile->compile;test->test")
 
-// automatically reload the build when source changes are detected
-Global / onChangedBuildSource := ReloadOnSourceChanges
+lazy val userSessions = (project in file("user-sessions"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scalaTest))
+  .dependsOn(shared % "compile->compile;test->test")
 
-// enable XML report, needed by codecov.io
-jacocoReportSettings := JacocoReportSettings()
-  .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
+lazy val tollApplication = (project in file("toll-application"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scioGcp, scalaTest))
+  .dependsOn(shared % "compile->compile;test->test", tollDomain, tollInfrastructure)
 
-// configure static code analysis, Scio macros require relaxed rules
-val disabledWarts = Seq(
-  Wart.Any,
-  Wart.DefaultArguments,
-  Wart.FinalCaseClass,
-  Wart.LeakingSealed,
-  Wart.NonUnitStatements,
-  Wart.Nothing,
-  Wart.Throw,
-  Wart.ToString
-)
+lazy val tollDomain = (project in file("toll-domain"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scioGcp, scalaTest))
+  .dependsOn(shared % "compile->compile;test->test")
 
-Compile / compile / wartremoverErrors := Warts.allBut(disabledWarts: _*)
-Test / compile / wartremoverErrors := Warts.allBut(disabledWarts: _*)
+lazy val tollInfrastructure = (project in file("toll-infrastructure"))
+  .settings(commonSettings)
+  .settings(libraryDependencies ++= Seq(scio, scioTest, scioGcp, json4s, json4sExt, scalaTest))
+  .dependsOn(shared % "compile->compile;test->test")

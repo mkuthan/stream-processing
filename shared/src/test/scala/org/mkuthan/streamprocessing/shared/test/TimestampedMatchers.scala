@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.beam
+package org.mkuthan.streamprocessing.shared.test
 
 import scala.reflect.ClassTag
 

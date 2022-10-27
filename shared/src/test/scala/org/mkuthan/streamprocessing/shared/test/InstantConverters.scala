@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.beam
+package org.mkuthan.streamprocessing.shared.test
 
 import scala.util.Try
 
@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.joda.time.LocalTime
 
-private[beam] object InstantConverters {
+private[test] object InstantConverters {
 
   private val BaseTime = new Instant(0)
 

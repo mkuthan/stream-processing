@@ -8,8 +8,7 @@ import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
-import org.mkuthan.streamprocessing.beam._
-import org.mkuthan.streamprocessing.beam.TimestampedMatchers
+import org.mkuthan.streamprocessing.shared.test._
 
 final class BeamWordCountTest extends PipelineSpec with TimestampedMatchers {
 

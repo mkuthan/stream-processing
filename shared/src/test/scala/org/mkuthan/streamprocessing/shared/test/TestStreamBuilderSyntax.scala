@@ -1,9 +1,9 @@
-package org.mkuthan.streamprocessing.beam
+package org.mkuthan.streamprocessing.shared.test
 
 import org.apache.beam.sdk.testing.TestStream
 import org.apache.beam.sdk.values.TimestampedValue
 
-private[beam] trait TestStreamBuilderSyntax {
+private[test] trait TestStreamBuilderSyntax {
 
   import InstantConverters._
 
@@ -18,5 +18,4 @@ private[beam] trait TestStreamBuilderSyntax {
     def advanceWatermarkTo(time: String): TestStream.Builder[T] =
       builder.advanceWatermarkTo(stringToInstant(time))
   }
-
 }

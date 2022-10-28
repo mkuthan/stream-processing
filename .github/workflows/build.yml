@@ -10,6 +10,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
@@ -20,8 +25,14 @@ jobs:
       - name: Check formatting
         run: sbt scalafmtCheckAll
 
-      - name: Build and test
+      - name: Compile
+        run: sbt compile
+
+      - name: Unit test
         run: sbt jacoco
+
+      - name: Integration test
+        run: sbt it:jacoco
 
       - name: Upload test coverage results
         uses: codecov/codecov-action@v3

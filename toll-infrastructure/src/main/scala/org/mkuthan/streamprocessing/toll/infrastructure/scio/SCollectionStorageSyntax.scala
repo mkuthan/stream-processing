@@ -13,10 +13,11 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
   def saveToStorage(
       location: StorageLocation[T]
   )(implicit c: Coder[T]): Unit = {
-    val io = TextIO
-      .write()
-      .withWindowedWrites()
+    val io = TextIO.write()
       .to(location.path)
+      .withNumShards(1)
+      .withSuffix(".json")
+      .withWindowedWrites()
 
     self
       .map(JsonSerde.write)

@@ -31,7 +31,7 @@ lazy val tollDomain = (project in file("toll-domain"))
 
 lazy val tollInfrastructure = (project in file("toll-infrastructure"))
   .configs(IntegrationTest)
-  .settings(Defaults.itSettings)
+  .enablePlugins(JacocoItPlugin)
   .settings(commonSettings)
   .settings(libraryDependencies ++= Seq(
     scioGcp,

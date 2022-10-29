@@ -25,14 +25,11 @@ jobs:
       - name: Check formatting
         run: sbt scalafmtCheckAll
 
-      - name: Compile
-        run: sbt compile
-
       - name: Unit test
         run: sbt jacoco
 
       - name: Integration test
-        run: sbt it:jacoco
+        run: sbt IntegrationTest/jacoco
 
       - name: Upload test coverage results
         uses: codecov/codecov-action@v3

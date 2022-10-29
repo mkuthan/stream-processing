@@ -5,7 +5,8 @@ object Dependencies {
   private val logbackVersion = "1.4.4"
   private val scalaTestVersion = "3.2.14"
   private val json4sVersion = "4.0.6"
-  private val googleCloudStorageVersion = "2.13.1"
+  // https://github.com/apache/beam/issues/22843
+  private val googleCloudStorageVersion = "2.10.0" // scala-steward:off
 
   val scio = "com.spotify" %% "scio-core" % scioVersion
   val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % scioVersion

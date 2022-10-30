@@ -12,9 +12,9 @@ import org.scalatest.BeforeAndAfterAll
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 class SCollectionPubSubSyntaxTest extends PipelineSpec
-  with BeforeAndAfterAll
-  with PubSubClient
-  with SCollectionPubSubSyntax {
+    with BeforeAndAfterAll
+    with PubSubClient
+    with SCollectionPubSubSyntax {
 
   private val options = PipelineOptionsFactory.create()
 
@@ -52,6 +52,6 @@ class SCollectionPubSubSyntaxTest extends PipelineSpec
     val results = pullMessages(subscriptionName)
       .map(JsonSerde.read[AnyCaseClass])
 
-    results should contain allOf(record1, record2)
+    results should contain allOf (record1, record2)
   }
 }

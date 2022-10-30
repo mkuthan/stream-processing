@@ -7,6 +7,7 @@ object Dependencies {
   private val json4sVersion = "4.0.6"
   // https://github.com/apache/beam/issues/22843
   private val googleCloudStorageVersion = "2.10.0" // scala-steward:off
+  private val googleCloudPubSubVersion = "1.120.22"
 
   val scio = "com.spotify" %% "scio-core" % scioVersion
   val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % scioVersion
@@ -20,4 +21,5 @@ object Dependencies {
   val json4sExt = "org.json4s" %% "json4s-ext" % json4sVersion
 
   val googleCloudStorage = "com.google.cloud" % "google-cloud-storage" % googleCloudStorageVersion
+  val googleCloudPubSub = "com.google.cloud" % "google-cloud-pubsub" % googleCloudPubSubVersion
 }

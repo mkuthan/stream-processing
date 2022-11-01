@@ -3,7 +3,6 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.ScioContext
 
-import com.google.cloud.storage.testing.RemoteStorageHelper
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.joda.time.Duration
 import org.joda.time.Instant
@@ -17,7 +16,7 @@ final class SCollectionStorageSyntaxTest extends PipelineSpec
     with SCollectionStorageSyntax {
 
   private val options = PipelineOptionsFactory.create()
-  private val bucketName = RemoteStorageHelper.generateBucketName
+  private val bucketName = generateBucketName()
 
   val location = StorageLocation[AnyCaseClass](s"gs://$bucketName")
 

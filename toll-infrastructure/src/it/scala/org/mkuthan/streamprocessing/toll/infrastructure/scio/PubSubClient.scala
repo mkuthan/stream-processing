@@ -6,10 +6,13 @@ import scala.util.Using
 
 import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub
 import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings
+import com.google.cloud.pubsub.v1.Publisher
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient
 import com.google.cloud.pubsub.v1.TopicAdminClient
 import com.google.cloud.ServiceOptions
+import com.google.protobuf.ByteString
 import com.google.pubsub.v1.AcknowledgeRequest
+import com.google.pubsub.v1.PubsubMessage
 import com.google.pubsub.v1.PullRequest
 import com.google.pubsub.v1.PushConfig
 
@@ -44,6 +47,21 @@ trait PubSubClient {
     Using(SubscriptionAdminClient.create()) { subscriptionAdminClient =>
       subscriptionAdminClient.deleteSubscription(subscriptionName)
     }.toOption // ignore exception
+
+  def publishMessage(topicName: String, messages: String*) = {
+    val publisher = Publisher.newBuilder(topicName).build
+
+    messages.foreach { message =>
+      publisher.publish(
+        PubsubMessage
+          .newBuilder()
+          .setData(ByteString.copyFromUtf8(message))
+          .build()
+      )
+    }
+
+    publisher.shutdown()
+  }
 
   def pullMessages(subscriptionName: String): Seq[String] = {
     import scala.jdk.CollectionConverters._

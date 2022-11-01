@@ -5,7 +5,6 @@ import scala.util.Using
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.ScioContext
 
-import com.google.cloud.ServiceOptions
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.scalatest.BeforeAndAfterAll
 
@@ -17,8 +16,6 @@ class SCollectionPubSubSyntaxTest extends PipelineSpec
     with SCollectionPubSubSyntax {
 
   private val options = PipelineOptionsFactory.create()
-
-  val projectId = ServiceOptions.getDefaultProjectId
 
   val topicName = generateTopicName()
   val subscriptionName = generateSubscriptionName()
@@ -33,7 +30,7 @@ class SCollectionPubSubSyntaxTest extends PipelineSpec
     createSubscription(topicName, subscriptionName)
   }
 
-  override def afterAll(): Unit = Using.Manager { use =>
+  override def afterAll(): Unit = {
     deleteSubscription(subscriptionName)
     deleteTopic(topicName)
   }

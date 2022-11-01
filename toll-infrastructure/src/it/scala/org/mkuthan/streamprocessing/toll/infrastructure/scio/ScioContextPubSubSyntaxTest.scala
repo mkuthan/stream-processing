@@ -42,7 +42,7 @@ class ScioContextPubSubSyntaxTest extends PipelineSpec
 
   behavior of "ScioContextPubSubSyntaxTest"
 
-  it should "subscribe to topic" in {
+  ignore should "subscribe to topic" in {
     val sc = ScioContext(options)
     publishMessage(topicName, JsonSerde.write(record1), JsonSerde.write(record2))
 

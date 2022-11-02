@@ -2,42 +2,104 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import java.util.UUID
 
+import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 
-import com.google.cloud.bigquery._
-import com.google.cloud.bigquery.testing.RemoteBigQueryHelper
-import com.google.cloud.bigquery.QueryJobConfiguration
+import com.google.api.services.bigquery.model.Table
+import com.google.api.services.bigquery.model.TableReference
+import com.google.api.services.bigquery.model.TableSchema
+import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
+import com.google.cloud.bigquery.storage.v1.DataFormat
+import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
+import com.google.cloud.bigquery.storage.v1.ReadSession
+import com.google.cloud.ServiceOptions
+import org.apache.avro.generic.GenericDatumReader
+import org.apache.avro.generic.GenericRecord
+import org.apache.avro.io.BinaryDecoder
+import org.apache.avro.io.DecoderFactory
+import org.apache.avro.Schema
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
+import org.apache.beam.sdk.options.PipelineOptionsFactory
 
 trait BigQueryClient {
 
-  private val bigQueryHelper = RemoteBigQueryHelper.create
-  private val bigQuery = bigQueryHelper.getOptions.getService
+  private val projectId = ServiceOptions.getDefaultProjectId
+
+  private val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
+  private val datasetService = BigQueryServicesFactory.getDatasetService(options)
+  private val storageClient = BigQueryServicesFactory.getStorageClient(options)
 
   def generateDatasetName(): String =
-    RemoteBigQueryHelper.generateDatasetName()
+    "test_dataset_temp_" + UUID.randomUUID.toString.replace('-', '_')
 
   def generateTableName(): String =
-    "table_" + UUID.randomUUID.toString.replace('-', '_')
+    "test_table_temp" + UUID.randomUUID.toString.replace('-', '_')
 
-  def createDataset(datasetName: String): Unit =
-    bigQuery.create(DatasetInfo.of(datasetName))
+  def createDataset(datasetName: String): Unit = {
+    val location = "eu"
+    val description = null
+    val defaultTableExpirationMs = 3600 * 1000
+    datasetService.createDataset(projectId, datasetName, location, description, defaultTableExpirationMs)
+  }
 
-  def createTable(datasetName: String, tableName: String, schema: Schema): Unit =
-    bigQuery.create(
-      TableInfo.of(
-        TableId.of(datasetName, tableName),
-        StandardTableDefinition.of(schema)
-      )
-    )
+  def createTable(datasetName: String, tableName: String, schema: TableSchema): Unit = {
+    val tableReference = new TableReference()
+      .setProjectId(projectId)
+      .setDatasetId(datasetName)
+      .setTableId(tableName)
+
+    val table = new Table()
+      .setTableReference(tableReference)
+      .setSchema(schema)
+
+    datasetService.createTable(table)
+  }
 
   def deleteDataset(datasetName: String): Unit =
-    RemoteBigQueryHelper.forceDelete(bigQuery, datasetName)
+    datasetService.deleteDataset(projectId, datasetName)
 
-  def query(query: String) =
-    bigQuery.query(
-      QueryJobConfiguration
-        .newBuilder(query)
-        .build
-    ).iterateAll().iterator().asScala.toSeq
+  def deleteTable(datasetName: String, tableName: String): Unit = {
+    val tableReference = new TableReference()
+      .setProjectId(projectId)
+      .setDatasetId(datasetName)
+      .setTableId(tableName)
+
+    datasetService.deleteTable(tableReference)
+  }
+
+  def read(datasetName: String, tableName: String): Iterable[GenericRecord] = {
+    val request = CreateReadSessionRequest
+      .newBuilder
+      .setParent(projectId)
+      .setReadSession(ReadSession.newBuilder
+        .setTable(tableName)
+        .setDataFormat(DataFormat.AVRO))
+      .build
+
+    val session = storageClient.createReadSession(request)
+
+    val readRowsRequest = ReadRowsRequest
+      .newBuilder()
+      .build()
+
+    val rows = storageClient.readRows(readRowsRequest).asScala
+
+    val schema = new Schema.Parser().parse(session.getAvroSchema.getSchema)
+    val reader = new GenericDatumReader[GenericRecord](schema)
+    var decoder: BinaryDecoder = null
+
+    rows.flatMap { row =>
+      decoder =
+        DecoderFactory.get()
+          .binaryDecoder(row.getAvroRows.toByteArray(), decoder);
+
+      val results = ArrayBuffer.empty[GenericRecord]
+      while (!decoder.isEnd)
+        results += reader.read(null, decoder)
+
+      results
+    }
+  }
 
 }

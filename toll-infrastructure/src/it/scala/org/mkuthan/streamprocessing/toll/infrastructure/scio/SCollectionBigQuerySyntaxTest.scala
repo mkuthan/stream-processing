@@ -4,9 +4,6 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.ScioContext
 
-import com.google.cloud.bigquery.Field
-import com.google.cloud.bigquery.Schema
-import com.google.cloud.bigquery.StandardSQLTypeName
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.scalatest.BeforeAndAfterAll
 
@@ -28,26 +25,26 @@ class SCollectionBigQuerySyntaxTest extends PipelineSpec
     .create()
 
   private val datasetName = generateDatasetName()
+  private val tableName = generateTableName()
 
   private val record1 = BigQueryCaseClass("foo", 1)
   private val record2 = BigQueryCaseClass("foo", 2)
 
-  override def beforeAll(): Unit =
-    createDataset(datasetName)
+  val schema = BigQueryType[BigQueryCaseClass].schema
 
-  override def afterAll(): Unit =
+  override def beforeAll(): Unit = {
+    createDataset(datasetName)
+    createTable(datasetName, tableName, schema)
+  }
+
+  override def afterAll(): Unit = {
+    deleteTable(datasetName, tableName)
     deleteDataset(datasetName)
+  }
 
   behavior of "SCollectionBigQuerySyntax"
 
   it should "save into table" in {
-    val tableName = generateTableName()
-    val schema = Schema.of(
-      Field.of("field1", StandardSQLTypeName.STRING),
-      Field.of("field2", StandardSQLTypeName.INT64)
-    )
-    createTable(datasetName, tableName, schema)
-
     val sc = ScioContext(options)
 
     val stream = sc.parallelize[BigQueryCaseClass](Seq(record1, record2))
@@ -57,10 +54,9 @@ class SCollectionBigQuerySyntaxTest extends PipelineSpec
 
     sc.run().waitUntilDone()
 
-    val results = query(s"select * from $datasetName.$tableName")
+    val results = read(datasetName, tableName)
     results.foreach { row =>
-      println(row.get("field1"))
-      println(row.get("field2"))
+      println(BigQueryType[BigQueryCaseClass].fromAvro(row))
     }
   }
 }

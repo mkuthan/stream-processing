@@ -51,7 +51,6 @@ lazy val tollInfrastructure = (project in file("toll-infrastructure"))
       scioTest % IntegrationTest,
       scalaTest % IntegrationTest,
       googleCloudBigQuery % IntegrationTest,
-      googleCloudPubSub % IntegrationTest,
       googleCloudStorage % IntegrationTest
     )
   ).dependsOn(shared % "compile->compile;test->test")

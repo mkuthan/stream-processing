@@ -2,23 +2,30 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import java.util.UUID
 
-import scala.util.Using
-
-import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub
-import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings
-import com.google.cloud.pubsub.v1.Publisher
-import com.google.cloud.pubsub.v1.SubscriptionAdminClient
-import com.google.cloud.pubsub.v1.TopicAdminClient
+import com.google.api.services.pubsub.model.PublishRequest
+import com.google.api.services.pubsub.model.PubsubMessage
+import com.google.api.services.pubsub.model.PullRequest
+import com.google.api.services.pubsub.model.Subscription
+import com.google.api.services.pubsub.model.Topic
+import com.google.api.services.pubsub.Pubsub
+import com.google.auth.http.HttpCredentialsAdapter
+import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.ServiceOptions
 import com.google.protobuf.ByteString
-import com.google.pubsub.v1.AcknowledgeRequest
-import com.google.pubsub.v1.PubsubMessage
-import com.google.pubsub.v1.PullRequest
-import com.google.pubsub.v1.PushConfig
+import org.apache.beam.sdk.extensions.gcp.util.Transport
 
 trait PubSubClient {
 
   private val projectId = ServiceOptions.getDefaultProjectId
+
+  val credentials = GoogleCredentials.getApplicationDefault
+  val requestInitializer = new HttpCredentialsAdapter(credentials)
+
+  val pubsub = new Pubsub.Builder(
+    Transport.getTransport,
+    Transport.getJsonFactory,
+    requestInitializer
+  ).setApplicationName(getClass.getSimpleName).build
 
   def generateTopicName(): String =
     s"projects/$projectId/topics/gcloud-test-pubsub-topic-temp-" + UUID.randomUUID().toString
@@ -26,74 +33,51 @@ trait PubSubClient {
   def generateSubscriptionName(): String =
     s"projects/$projectId/subscriptions/gcloud-test-pubsub-subscription-temp-" + UUID.randomUUID().toString
 
-  def createTopic(topicName: String): Unit =
-    Using(TopicAdminClient.create()) { topicAdminClient =>
-      topicAdminClient.createTopic(topicName)
-    }.get // fail fast
+  def createTopic(topicName: String): Unit = {
+    val request = new Topic
+    pubsub.projects.topics.create(topicName, request).execute
+  }
 
-  def createSubscription(topicName: String, subscriptionName: String): Unit =
-    Using(SubscriptionAdminClient.create()) { subscriptionAdminClient =>
-      val pushConfig = PushConfig.newBuilder.build
-      val ackDeadlineSeconds = 10
-      subscriptionAdminClient.createSubscription(subscriptionName, topicName, pushConfig, ackDeadlineSeconds)
-    }.get // fail fast
+  def createSubscription(topicName: String, subscriptionName: String): Unit = {
+    val ackDeadlineSeconds = 10
+    val request = new Subscription()
+      .setTopic(topicName)
+      .setAckDeadlineSeconds(ackDeadlineSeconds)
+
+    pubsub.projects.subscriptions.create(subscriptionName, request).execute
+  }
 
   def deleteTopic(topicName: String): Unit =
-    Using(TopicAdminClient.create()) { topicAdminClient =>
-      topicAdminClient.deleteTopic(topicName)
-    }.toOption // ignore exception
+    pubsub.projects.topics.delete(topicName).execute
 
   def deleteSubscription(subscriptionName: String): Unit =
-    Using(SubscriptionAdminClient.create()) { subscriptionAdminClient =>
-      subscriptionAdminClient.deleteSubscription(subscriptionName)
-    }.toOption // ignore exception
+    pubsub.projects.subscriptions.delete(subscriptionName).execute
 
-  def publishMessage(topicName: String, messages: String*) = {
-    val publisher = Publisher.newBuilder(topicName).build
+  def publishMessage(topicName: String, messages: String*): Unit = {
+    import scala.jdk.CollectionConverters._
 
-    messages.foreach { message =>
-      publisher.publish(
-        PubsubMessage
-          .newBuilder()
-          .setData(ByteString.copyFromUtf8(message))
-          .build()
-      )
-    }
+    val pubsubMessages = messages.map { message =>
+      new PubsubMessage()
+        .encodeData(ByteString.copyFromUtf8(message).toByteArray)
+    }.asJava
 
-    publisher.shutdown()
+    val request = new PublishRequest()
+      .setMessages(pubsubMessages)
+    pubsub.projects().topics().publish(topicName, request).execute()
   }
 
   def pullMessages(subscriptionName: String): Seq[String] = {
     import scala.jdk.CollectionConverters._
 
-    val subscriberStubSettings = SubscriberStubSettings.newBuilder().build()
-    Using(GrpcSubscriberStub.create(subscriberStubSettings)) { subscriberStub =>
-      val response =
-        subscriberStub
-          .pullCallable()
-          .call(
-            PullRequest.newBuilder()
-              // pull more than you send, just in case there are other issues.
-              .setMaxMessages(10)
-              .setSubscription(subscriptionName)
-              .build()
-          )
+    val request = new PullRequest()
+      .setReturnImmediately(true)
+      .setMaxMessages(1000)
 
-      val responses = response.getReceivedMessagesList.asScala.toSeq
+    val response = pubsub.projects.subscriptions.pull(subscriptionName, request).execute
+    val messages = response.getReceivedMessages.asScala.toSeq
 
-      val acks = responses.map(_.getAckId)
-
-      subscriberStub
-        .acknowledgeCallable()
-        .call(
-          AcknowledgeRequest.newBuilder()
-            .setSubscription(subscriptionName)
-            .addAllAckIds(acks.asJava)
-            .build()
-        )
-
-      responses.map(_.getMessage.getData.toStringUtf8)
-
+    messages.map { message =>
+      ByteString.copyFrom(message.getMessage.decodeData()).toStringUtf8
     }
-  }.get // fail fast
+  }
 }

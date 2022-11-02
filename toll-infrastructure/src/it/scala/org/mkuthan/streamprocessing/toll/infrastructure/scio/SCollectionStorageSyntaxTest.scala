@@ -41,7 +41,7 @@ final class SCollectionStorageSyntaxTest extends PipelineSpec
     sc.run().waitUntilDone()
 
     val results =
-      readBlobLines(bucketName, "GlobalWindow-pane-0-last-00000-of-00001.json")
+      readObjectLines(bucketName, "GlobalWindow-pane-0-last-00000-of-00001.json")
         .map(JsonSerde.read[AnyCaseClass])
 
     results should contain allOf (record1, record2)
@@ -67,7 +67,7 @@ final class SCollectionStorageSyntaxTest extends PipelineSpec
     val windowEnd = "2014-09-10T12:03:10.000Z"
 
     val results =
-      readBlobLines(bucketName, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
+      readObjectLines(bucketName, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
         .map(JsonSerde.read[AnyCaseClass])
 
     results should contain allOf (record1, record2)

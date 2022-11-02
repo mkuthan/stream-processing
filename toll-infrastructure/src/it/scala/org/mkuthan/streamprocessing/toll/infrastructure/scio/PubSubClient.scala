@@ -28,10 +28,10 @@ trait PubSubClient {
   ).setApplicationName(getClass.getSimpleName).build
 
   def generateTopicName(): String =
-    s"projects/$projectId/topics/gcloud-test-pubsub-topic-temp-" + UUID.randomUUID().toString
+    s"projects/$projectId/topics/test-pubsub-topic-temp-" + UUID.randomUUID().toString
 
   def generateSubscriptionName(): String =
-    s"projects/$projectId/subscriptions/gcloud-test-pubsub-subscription-temp-" + UUID.randomUUID().toString
+    s"projects/$projectId/subscriptions/test-pubsub-subscription-temp-" + UUID.randomUUID().toString
 
   def createTopic(topicName: String): Unit = {
     val request = new Topic

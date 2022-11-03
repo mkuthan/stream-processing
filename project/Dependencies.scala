@@ -2,6 +2,7 @@ import sbt._
 
 object Dependencies {
   private val scioVersion = "0.11.11"
+  private val slf4jVersion = "2.0.3"
   private val logbackVersion = "1.4.4"
   private val scalaTestVersion = "3.2.14"
   private val json4sVersion = "4.0.6"
@@ -9,6 +10,9 @@ object Dependencies {
   val scio = "com.spotify" %% "scio-core" % scioVersion
   val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % scioVersion
   val scioTest = "com.spotify" %% "scio-test" % scioVersion
+
+  val slf4j = "org.slf4j" % "slf4j-api" % slf4jVersion
+  val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % slf4jVersion
 
   val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
 

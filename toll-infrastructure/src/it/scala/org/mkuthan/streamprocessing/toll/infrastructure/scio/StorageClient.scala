@@ -38,6 +38,7 @@ trait StorageClient {
       .setLocation("eu")
     storage.buckets().insert(projectId, request).execute
   }
+
   def deleteBucket(bucketName: String): Unit = {
     val objects = storage.objects().list(bucketName).execute
     val items = objects.getItems.asScala

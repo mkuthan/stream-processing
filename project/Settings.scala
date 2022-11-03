@@ -36,6 +36,8 @@ object Settings {
     Global / onChangedBuildSource := ReloadOnSourceChanges,
     // experimental feature to speed up the build
     updateOptions := updateOptions.value.withCachedResolution(true),
+    // use jcl-over-slf4j bridge instead of common-logging
+    excludeDependencies += "commons-logging" % "commons-logging",
     // enable XML report for codecov
     jacocoReportSettings := jacocoDefaultReport
   )

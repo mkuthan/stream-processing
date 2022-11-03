@@ -26,7 +26,7 @@ class SCollectionBigQuerySyntaxTest extends PipelineSpec
   private val options = PipelineOptionsFactory
     .fromArgs(
       "--tempLocation=gs://stream-processing-tmp/",
-      s"--projectId=$projectId" // needed by CI
+      s"--project=$projectId" // needed by CI
     )
     .create()
 

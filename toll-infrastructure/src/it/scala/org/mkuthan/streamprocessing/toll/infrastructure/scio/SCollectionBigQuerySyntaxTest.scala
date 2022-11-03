@@ -4,6 +4,7 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.ScioContext
 
+import com.google.cloud.ServiceOptions
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.scalatest.BeforeAndAfterAll
 
@@ -19,9 +20,14 @@ class SCollectionBigQuerySyntaxTest extends PipelineSpec
 
   import SCollectionBigQuerySyntaxTest._
 
+  private val projectId = ServiceOptions.getDefaultProjectId
+
   // TODO
   private val options = PipelineOptionsFactory
-    .fromArgs("--tempLocation=gs://stream-processing-tmp/")
+    .fromArgs(
+      "--tempLocation=gs://stream-processing-tmp/",
+      s"--projectId=$projectId" // needed by CI
+    )
     .create()
 
   private val datasetName = generateDatasetName()

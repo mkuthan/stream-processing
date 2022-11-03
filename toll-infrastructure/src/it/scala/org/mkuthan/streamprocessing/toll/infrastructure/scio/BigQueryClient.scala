@@ -69,11 +69,15 @@ trait BigQueryClient {
   }
 
   def read(datasetName: String, tableName: String): Iterable[GenericRecord] = {
+    val parent = s"projects/$projectId"
+    val table = s"projects/$projectId/datasets/$datasetName/tables/$tableName"
+
     val request = CreateReadSessionRequest
       .newBuilder
-      .setParent(projectId)
+      .setParent(parent)
+      .setMaxStreamCount(1)
       .setReadSession(ReadSession.newBuilder
-        .setTable(tableName)
+        .setTable(table)
         .setDataFormat(DataFormat.AVRO))
       .build
 
@@ -81,6 +85,7 @@ trait BigQueryClient {
 
     val readRowsRequest = ReadRowsRequest
       .newBuilder()
+      .setReadStream(session.getStreams(0).getName) // TODO: check streams
       .build()
 
     val rows = storageClient.readRows(readRowsRequest).asScala

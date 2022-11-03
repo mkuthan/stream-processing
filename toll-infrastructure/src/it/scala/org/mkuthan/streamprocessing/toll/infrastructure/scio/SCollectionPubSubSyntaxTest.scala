@@ -6,12 +6,16 @@ import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.ScioContext
 
 import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.BeforeAndAfterAll
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 class SCollectionPubSubSyntaxTest extends PipelineSpec
     with BeforeAndAfterAll
+    with Eventually
+    with IntegrationPatience
     with PubSubClient
     with SCollectionPubSubSyntax {
 
@@ -46,9 +50,11 @@ class SCollectionPubSubSyntaxTest extends PipelineSpec
 
     sc.run().waitUntilDone()
 
-    val results = pullMessages(subscriptionName)
-      .map(JsonSerde.read[AnyCaseClass])
+    eventually {
+      val results = pullMessages(subscriptionName)
+        .map(JsonSerde.read[AnyCaseClass])
 
-    results should contain allOf (record1, record2)
+      results should contain allOf (record1, record2)
+    }
   }
 }

@@ -8,7 +8,7 @@
     <logger name="org.apache.beam" level="INFO"/>
     <logger name="com.spotify.scio" level="INFO"/>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

@@ -20,7 +20,9 @@ trait StorageClient {
 
   private val projectId = ServiceOptions.getDefaultProjectId
 
-  val credentials = GoogleCredentials.getApplicationDefault
+  val credentials = GoogleCredentials
+    .getApplicationDefault
+    .createScoped("https://www.googleapis.com/auth/cloud-platform")
   val requestInitializer = new HttpCredentialsAdapter(credentials)
 
   val storage = new Storage.Builder(

@@ -17,7 +17,11 @@ import com.google.api.services.storage.Storage
 import com.google.api.services.storage.StorageScopes
 import com.typesafe.scalalogging.LazyLogging
 
-trait StorageClient extends GcpClient with LazyLogging {
+import org.mkuthan.streamprocessing.shared.test.Random._
+
+trait StorageClient extends LazyLogging {
+
+  import GoogleJsonClientUtils._
 
   private[this] val storage = new Storage.Builder(
     httpTransport,

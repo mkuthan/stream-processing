@@ -1,5 +1,8 @@
 package org.apache.beam.sdk.io.gcp.bigquery
 
+/**
+ * Wrapper for BigQueryServicesImpl with relaxed access modifiers.
+ */
 object BigQueryServicesFactory extends BigQueryServices {
   override def getJobService(options: BigQueryOptions): BigQueryServices.JobService =
     new BigQueryServicesImpl().getJobService(options)

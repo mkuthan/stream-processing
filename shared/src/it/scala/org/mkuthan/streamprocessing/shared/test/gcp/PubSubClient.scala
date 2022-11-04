@@ -8,7 +8,11 @@ import com.google.api.services.pubsub.PubsubScopes
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.LazyLogging
 
-trait PubSubClient extends GcpClient with LazyLogging {
+import org.mkuthan.streamprocessing.shared.test.Random._
+
+trait PubSubClient extends LazyLogging {
+
+  import GoogleJsonClientUtils._
 
   private[this] val pubsub = new Pubsub.Builder(
     httpTransport,

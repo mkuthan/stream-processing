@@ -4,53 +4,37 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.BeforeAndAfterAll
 
-import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
-import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
+import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
-import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 class SCollectionPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
-    with BeforeAndAfterAll
     with Eventually
     with IntegrationPatience
-    with IntegrationTestScioContext
-    with PubSubClient
+    with PubSubScioContext
     with SCollectionPubSubSyntax {
 
   import IntegrationTestFixtures._
 
-  val topicName = generateTopicName()
-  val subscriptionName = generateSubscriptionName()
-
-  val pubSubTopic = PubSubTopic[ComplexClass](topicName)
-
-  override def beforeAll(): Unit = {
-    createTopic(topicName)
-    createSubscription(topicName, subscriptionName)
-  }
-
-  override def afterAll(): Unit = {
-    deleteSubscription(subscriptionName)
-    deleteTopic(topicName)
-  }
-
   behavior of "SCollectionPubSubSyntax"
 
   it should "publish messages" in withScioContext { sc =>
-    sc
-      .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
-      .publishToPubSub(pubSubTopic)
+    withTopic[ComplexClass] { topic =>
+      withSubscription[ComplexClass](topic.id) { subscription =>
+        sc
+          .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
+          .publishToPubSub(topic)
 
-    sc.run().waitUntilDone()
+        sc.run().waitUntilDone()
 
-    eventually {
-      val results = pullMessages(subscriptionName)
-        .map(JsonSerde.read[ComplexClass])
+        eventually {
+          val results = pullMessages(subscription.id)
+            .map(JsonSerde.read[ComplexClass])
 
-      results should contain.only(complexObject1, complexObject2)
+          results should contain.only(complexObject1, complexObject2)
+        }
+      }
     }
   }
 }

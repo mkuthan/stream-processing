@@ -20,7 +20,11 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
-trait BigQueryClient extends GcpClient with LazyLogging {
+import org.mkuthan.streamprocessing.shared.test.Random._
+
+trait BigQueryClient extends LazyLogging {
+
+  import GoogleJsonClientUtils._
 
   private[this] val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
   private[this] val datasetService = BigQueryServicesFactory.getDatasetService(options)
@@ -74,7 +78,7 @@ trait BigQueryClient extends GcpClient with LazyLogging {
     datasetService.deleteTable(tableReference)
   }
 
-  def read(datasetName: String, tableName: String): Iterable[GenericRecord] = {
+  def readTable(datasetName: String, tableName: String): Iterable[GenericRecord] = {
     logger.debug("Read from bigquery table {}.{}", datasetName, tableName)
 
     val parent = s"projects/$projectId"

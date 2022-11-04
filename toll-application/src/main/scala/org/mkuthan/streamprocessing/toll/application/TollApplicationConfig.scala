@@ -12,15 +12,15 @@ import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistra
 import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
-import org.mkuthan.streamprocessing.toll.shared.configuration.StorageLocation
+import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 final case class TollApplicationConfig(
     entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
-    entryDlq: StorageLocation[TollBoothEntry.Raw],
+    entryDlq: StorageBucket[TollBoothEntry.Raw],
     exitSubscription: PubSubSubscription[TollBoothExit.Raw],
-    exitDlq: StorageLocation[TollBoothExit.Raw],
+    exitDlq: StorageBucket[TollBoothExit.Raw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
-    vehicleRegistrationDlq: StorageLocation[VehicleRegistration.Raw],
+    vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
     entryStatsTable: BigQueryTable[TollBoothEntryStats.Raw],
     carTotalTimeTable: BigQueryTable[TotalCarTime.Raw],
     vehiclesWithExpiredRegistrationTopic: PubSubTopic[VehiclesWithExpiredRegistration.Raw],
@@ -30,14 +30,14 @@ final case class TollApplicationConfig(
 object TollApplicationConfig {
   def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
     entrySubscription = PubSubSubscription(args.required("entrySubscription")),
-    entryDlq = StorageLocation(args.required("entryDlq")),
+    entryDlq = StorageBucket(args.required("entryDlq")),
     exitSubscription = PubSubSubscription(args.required("exitSubscription")),
-    exitDlq = StorageLocation(args.required("exitDlq")),
-    vehicleRegistrationTable = BigQueryTable.fromString(args.required("vehicleRegistrationTable")),
-    vehicleRegistrationDlq = StorageLocation(args.required("vehicleRegistrationDlq")),
-    entryStatsTable = BigQueryTable.fromString(args.required("entryCountTable")),
-    carTotalTimeTable = BigQueryTable.fromString(args.required("carTotalTimeTable")),
+    exitDlq = StorageBucket(args.required("exitDlq")),
+    vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
+    vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
+    entryStatsTable = BigQueryTable(args.required("entryCountTable")),
+    carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
     vehiclesWithExpiredRegistrationTopic = PubSubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
-    diagnosticTable = BigQueryTable.fromString(args.required("diagnosticTable"))
+    diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
   )
 }

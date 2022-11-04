@@ -1,27 +1,26 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import com.spotify.scio.testing.PipelineSpec
-import com.spotify.scio.ScioContext
-
-import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.joda.time.Duration
-import org.joda.time.Instant
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterAll
 
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.StorageLocation
 
-final class SCollectionStorageSyntaxTest extends PipelineSpec
+final class SCollectionStorageSyntaxTest extends AnyFlatSpec
+    with Matchers
     with BeforeAndAfterAll
+    with IntegrationTestScioContext
     with StorageClient
     with SCollectionStorageSyntax {
 
-  private val options = PipelineOptionsFactory.create()
+  import IntegrationTestFixtures._
+
   private val bucketName = generateBucketName()
-
-  val location = StorageLocation[AnyCaseClass](s"gs://$bucketName")
-
-  private val record1 = AnyCaseClass("foo", 1)
-  private val record2 = AnyCaseClass("foo", 2)
+  private val location = StorageLocation[ComplexClass](s"gs://$bucketName")
 
   override def beforeAll(): Unit =
     createBucket(bucketName)
@@ -31,33 +30,28 @@ final class SCollectionStorageSyntaxTest extends PipelineSpec
 
   behavior of "SCollectionStorageSyntax"
 
-  it should "save file on GCS in global window" in {
-    val sc = ScioContext(options)
-
-    val stream = sc.parallelize[AnyCaseClass](Seq(record1, record2))
-
-    stream.saveToStorage(location)
+  it should "save file on GCS in global window" in withScioContext { sc =>
+    sc
+      .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
+      .saveToStorage(location)
 
     sc.run().waitUntilDone()
 
     val results =
       readObjectLines(bucketName, "GlobalWindow-pane-0-last-00000-of-00001.json")
-        .map(JsonSerde.read[AnyCaseClass])
+        .map(JsonSerde.read[ComplexClass])
 
-    results should contain allOf (record1, record2)
+    results should contain.only(complexObject1, complexObject2)
   }
 
-  it should "save file on GCS in fixed window" in {
-    val sc = ScioContext(options)
-
-    val stream = sc.parallelizeTimestamped[AnyCaseClass](
-      Seq(
-        (record1, Instant.parse("2014-09-10T12:03:01Z")),
-        (record2, Instant.parse("2014-09-10T12:03:02Z"))
+  it should "save file on GCS in fixed window" in withScioContext { sc =>
+    sc
+      .parallelizeTimestamped[ComplexClass](
+        Seq(
+          (complexObject1, complexObject1.instantField),
+          (complexObject2, complexObject2.instantField)
+        )
       )
-    )
-
-    stream
       .withFixedWindows(Duration.standardSeconds(10))
       .saveToStorage(location)
 
@@ -68,8 +62,8 @@ final class SCollectionStorageSyntaxTest extends PipelineSpec
 
     val results =
       readObjectLines(bucketName, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
-        .map(JsonSerde.read[AnyCaseClass])
+        .map(JsonSerde.read[ComplexClass])
 
-    results should contain allOf (record1, record2)
+    results should contain.only(complexObject1, complexObject2)
   }
 }

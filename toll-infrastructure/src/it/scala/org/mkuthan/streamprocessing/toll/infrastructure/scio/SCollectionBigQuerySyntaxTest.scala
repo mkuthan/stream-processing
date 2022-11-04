@@ -1,68 +1,73 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.testing.PipelineSpec
-import com.spotify.scio.ScioContext
+import scala.reflect.runtime.universe.TypeTag
 
-import com.google.cloud.ServiceOptions
+import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+
+import org.apache.beam.sdk.options.PipelineOptions
 import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterAll
 
-object SCollectionBigQuerySyntaxTest {
-  @BigQueryType.toTable
-  final case class BigQueryCaseClass(field1: String, field2: Int)
-}
+import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
+import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 
-class SCollectionBigQuerySyntaxTest extends PipelineSpec
+class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
+    with Matchers
     with BeforeAndAfterAll
+    with IntegrationTestScioContext
+    with StorageClient
     with BigQueryClient
     with SCollectionBigQuerySyntax {
 
-  import SCollectionBigQuerySyntaxTest._
+  import IntegrationTestFixtures._
 
-  private val projectId = ServiceOptions.getDefaultProjectId
-
-  // TODO
-  private val options = PipelineOptionsFactory
-    .fromArgs(
-      "--tempLocation=gs://stream-processing-tmp/",
-      s"--project=$projectId" // needed by CI
-    )
-    .create()
-
+  private val tmpBucketName = generateBucketName()
   private val datasetName = generateDatasetName()
-  private val tableName = generateTableName()
 
-  private val record1 = BigQueryCaseClass("foo", 1)
-  private val record2 = BigQueryCaseClass("foo", 2)
+  val options = PipelineOptionsFactory
+    .create()
+    .as(classOf[PipelineOptions])
+  options.setTempLocation(s"gs://$tmpBucketName/")
 
-  val schema = BigQueryType[BigQueryCaseClass].schema
+  def withTable[T <: HasAnnotation: TypeTag](fn: BigQueryTable[T] => Any) {
+    val tableName = generateTableName()
+    val bigQueryTable = BigQueryTable[T](datasetName, tableName)
+    createTable(datasetName, tableName, BigQueryType[T].schema)
+    try
+      fn(bigQueryTable)
+    finally
+      deleteTable(datasetName, tableName)
+  }
 
   override def beforeAll(): Unit = {
+    createBucket(tmpBucketName)
     createDataset(datasetName)
-    createTable(datasetName, tableName, schema)
   }
 
   override def afterAll(): Unit = {
-    deleteTable(datasetName, tableName)
     deleteDataset(datasetName)
+    deleteBucket(tmpBucketName)
   }
 
   behavior of "SCollectionBigQuerySyntax"
 
-  it should "save into table" in {
-    val sc = ScioContext(options)
+  ignore should "save into table" in withScioContext(options) { sc =>
+    withTable[SimpleClass] { bigQueryTable =>
+      sc
+        .parallelize[SimpleClass](Seq(simpleObject1, simpleObject2))
+        .saveToBigQuery(bigQueryTable)
 
-    val stream = sc.parallelize[BigQueryCaseClass](Seq(record1, record2))
+      sc.run().waitUntilDone()
 
-    val bigQueryTable = BigQueryTable[BigQueryCaseClass](s"$datasetName.$tableName")
-    stream.saveToBigQuery(bigQueryTable)
-
-    sc.run().waitUntilDone()
-
-    val results = read(datasetName, tableName)
-    results.foreach { row =>
-      println(BigQueryType[BigQueryCaseClass].fromAvro(row))
+      val results = read(datasetName, bigQueryTable.tableId)
+      results.foreach { row =>
+        println(BigQueryType[SimpleClass].fromAvro(row))
+      }
     }
   }
 }

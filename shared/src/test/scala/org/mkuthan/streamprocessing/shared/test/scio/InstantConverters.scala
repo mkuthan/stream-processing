@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test
+package org.mkuthan.streamprocessing.shared.test.scio
 
 import scala.util.Try
 

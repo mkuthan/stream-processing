@@ -8,6 +8,7 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
   def publishToPubSub(

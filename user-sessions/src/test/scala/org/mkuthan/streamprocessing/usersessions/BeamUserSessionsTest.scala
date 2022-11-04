@@ -10,7 +10,8 @@ import org.apache.beam.sdk.transforms.windowing.AfterWatermark
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
-import org.mkuthan.streamprocessing.shared.test._
+import org.mkuthan.streamprocessing.shared.test.scio._
+import org.mkuthan.streamprocessing.shared.test.scio.TimestampedMatchers
 
 final class BeamUserSessionsTest extends PipelineSpec with TimestampedMatchers {
 

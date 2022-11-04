@@ -1,6 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
-
-import java.util.UUID
+package org.mkuthan.streamprocessing.shared.test.gcp
 
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
@@ -12,7 +10,7 @@ import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
 import com.google.cloud.bigquery.storage.v1.DataFormat
 import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
 import com.google.cloud.bigquery.storage.v1.ReadSession
-import com.google.cloud.ServiceOptions
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.io.BinaryDecoder
@@ -22,28 +20,31 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
-trait BigQueryClient {
+trait BigQueryClient extends GcpClient with LazyLogging {
 
-  private val projectId = ServiceOptions.getDefaultProjectId
-
-  private val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
-  private val datasetService = BigQueryServicesFactory.getDatasetService(options)
-  private val storageClient = BigQueryServicesFactory.getStorageClient(options)
+  private[this] val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
+  private[this] val datasetService = BigQueryServicesFactory.getDatasetService(options)
+  private[this] val storageClient = BigQueryServicesFactory.getStorageClient(options)
 
   def generateDatasetName(): String =
-    "test_dataset_temp_" + UUID.randomUUID.toString.replace('-', '_')
+    s"test_dataset_temp_${randomStringUnderscored()}"
 
   def generateTableName(): String =
-    "test_table_temp" + UUID.randomUUID.toString.replace('-', '_')
+    s"test_table_temp_${randomStringUnderscored()}"
 
   def createDataset(datasetName: String): Unit = {
+    logger.debug("Create bigquery dataset: '{}'", datasetName)
+
     val location = "eu"
     val description = null
     val defaultTableExpirationMs = 3600 * 1000
+
     datasetService.createDataset(projectId, datasetName, location, description, defaultTableExpirationMs)
   }
 
   def createTable(datasetName: String, tableName: String, schema: TableSchema): Unit = {
+    logger.debug("Create bigquery table: '{}.{}'", datasetName, tableName)
+
     val tableReference = new TableReference()
       .setProjectId(projectId)
       .setDatasetId(datasetName)
@@ -56,10 +57,15 @@ trait BigQueryClient {
     datasetService.createTable(table)
   }
 
-  def deleteDataset(datasetName: String): Unit =
+  def deleteDataset(datasetName: String): Unit = {
+    logger.debug("Delete bigquery dataset: '{}'", datasetName)
+
     datasetService.deleteDataset(projectId, datasetName)
+  }
 
   def deleteTable(datasetName: String, tableName: String): Unit = {
+    logger.debug("Delete bigquery table: '{}.{}'", datasetName, tableName)
+
     val tableReference = new TableReference()
       .setProjectId(projectId)
       .setDatasetId(datasetName)
@@ -69,6 +75,8 @@ trait BigQueryClient {
   }
 
   def read(datasetName: String, tableName: String): Iterable[GenericRecord] = {
+    logger.debug("Read from bigquery table {}.{}", datasetName, tableName)
+
     val parent = s"projects/$projectId"
     val table = s"projects/$projectId/datasets/$datasetName/tables/$tableName"
 

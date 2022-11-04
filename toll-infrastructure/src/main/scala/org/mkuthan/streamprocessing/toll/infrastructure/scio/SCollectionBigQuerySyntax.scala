@@ -7,6 +7,8 @@ import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
+import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
+
 final class BigQuerySCollectionOps[T <: HasAnnotation](private val self: SCollection[T])
     extends AnyVal {
 

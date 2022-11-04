@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test
+package org.mkuthan.streamprocessing.shared.test.scio
 
 import org.apache.beam.sdk.testing.TestStream
 import org.apache.beam.sdk.values.TimestampedValue

@@ -1,14 +1,15 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.apache.beam" level="INFO"/>
-    <logger name="com.spotify.scio" level="INFO"/>
+    <logger name="org.mkuthan.streamprocessing" level="DEBUG"/>
+    <logger name="org.apache.beam" level="WARN"/>
+    <logger name="com.spotify.scio" level="WARN"/>
 
-    <root level="INFO">
+    <root level="ERROR">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

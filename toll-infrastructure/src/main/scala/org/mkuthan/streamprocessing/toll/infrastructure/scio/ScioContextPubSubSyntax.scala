@@ -9,6 +9,7 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
   def subscribeToPubSub[T <: AnyRef: Coder: Manifest](

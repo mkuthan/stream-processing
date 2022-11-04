@@ -7,7 +7,8 @@ import com.spotify.scio.testing.TestStreamScioContext
 import org.joda.time.Duration
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.shared.test._
+import org.mkuthan.streamprocessing.shared.test.scio._
+import org.mkuthan.streamprocessing.shared.test.scio.TimestampedMatchers
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit

@@ -1,34 +1,30 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import java.util.UUID
-
 import com.spotify.scio.testing.PipelineSpec
-import com.spotify.scio.util.ScioUtil
 import com.spotify.scio.ScioContext
 
 import org.apache.beam.runners.direct.DirectOptions
-import org.apache.beam.sdk.io.TextIO
-import org.apache.beam.sdk.options.PipelineOptions
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.scalatest.BeforeAndAfterAll
 
+import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 class ScioContextPubSubSyntaxTest extends PipelineSpec
     with BeforeAndAfterAll
     with PubSubClient
     with ScioContextPubSubSyntax {
 
-  private val options = PipelineOptionsFactory.create()
-  options.as(classOf[DirectOptions]).setBlockOnRun(false)
+  import IntegrationTestFixtures._
+
+  private val options = PipelineOptionsFactory.create().as(classOf[DirectOptions])
+  options.setBlockOnRun(false)
 
   val topicName = generateTopicName()
   val subscriptionName = generateSubscriptionName()
 
-  val pubSubSubscription = PubSubSubscription[AnyCaseClass](subscriptionName)
-
-  private val record1 = AnyCaseClass("foo", 1)
-  private val record2 = AnyCaseClass("foo", 2)
+  val pubSubSubscription = PubSubSubscription[ComplexClass](subscriptionName)
 
   override def beforeAll(): Unit = {
     createTopic(topicName)
@@ -42,16 +38,16 @@ class ScioContextPubSubSyntaxTest extends PipelineSpec
 
   behavior of "ScioContextPubSubSyntaxTest"
 
-  ignore should "subscribe to topic" in {
+  it should "subscribe to topic" in {
     val sc = ScioContext(options)
-    publishMessage(topicName, JsonSerde.write(record1), JsonSerde.write(record2))
+    publishMessage(topicName, JsonSerde.write(complexObject1), JsonSerde.write(complexObject2))
 
     val results = sc
       .subscribeToPubSub(pubSubSubscription)
 
     println("DUPA: " + results.debug())
 
-    results should containInAnyOrder(Seq(record1, record2))
+    results should containInAnyOrder(Seq(complexObject1, complexObject2))
     val result = sc.run()
 
     // https://github.com/apache/beam/blob/09bbb48187301f18bec6d9110741c69b955e2b5a/sdks/java/io/google-cloud-platform/src/test/java/org/apache/beam/sdk/io/gcp/pubsub/PubsubReadIT.java

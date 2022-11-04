@@ -8,6 +8,7 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.io.TextIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.StorageLocation
 
 final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
   def saveToStorage(

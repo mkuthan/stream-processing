@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   private val scioVersion = "0.11.11"
-  private val scalaLoggingVersion = "3.9.4"
+  private val scalaLoggingVersion = "3.9.5"
   private val slf4jVersion = "2.0.3"
   private val logbackVersion = "1.4.4"
   private val scalaTestVersion = "3.2.14"

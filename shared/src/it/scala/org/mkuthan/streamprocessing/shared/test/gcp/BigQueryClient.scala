@@ -10,7 +10,6 @@ import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
 import com.google.cloud.bigquery.storage.v1.DataFormat
 import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
 import com.google.cloud.bigquery.storage.v1.ReadSession
-import com.google.cloud.bigquery.storage.v1.WriteStream
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericRecord
@@ -23,9 +22,7 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory
 
 import org.mkuthan.streamprocessing.shared.test.Random._
 
-trait BigQueryClient extends LazyLogging {
-
-  import GoogleJsonClientUtils._
+trait BigQueryClient extends GcpProjectId with LazyLogging {
 
   private[this] val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
   private[this] val datasetService = BigQueryServicesFactory.getDatasetService(options)

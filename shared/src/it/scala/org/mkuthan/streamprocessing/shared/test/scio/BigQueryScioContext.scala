@@ -13,7 +13,7 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 trait BigQueryScioContext extends GcpScioContext with BigQueryClient {
   this: Suite =>
 
-  def withDataset(fn: String => Any) {
+  def withDataset(fn: String => Any): Any = {
     val datasetName = generateDatasetName()
     try {
       createDataset(datasetName)
@@ -22,7 +22,7 @@ trait BigQueryScioContext extends GcpScioContext with BigQueryClient {
       deleteDataset(datasetName)
   }
 
-  def withTable[T <: HasAnnotation: TypeTag](datasetName: String)(fn: BigQueryTable[T] => Any) {
+  def withTable[T <: HasAnnotation: TypeTag](datasetName: String)(fn: BigQueryTable[T] => Any): Any = {
     val tableName = generateTableName()
     createTable(datasetName, tableName, BigQueryType[T].schema)
     try

@@ -9,7 +9,7 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 trait PubSubScioContext extends GcpScioContext with PubSubClient {
   this: Suite =>
 
-  def withTopic[T](fn: PubSubTopic[T] => Any): Unit = {
+  def withTopic[T](fn: PubSubTopic[T] => Any): Any = {
     val topicName = generateTopicName()
     try {
       createTopic(topicName)
@@ -18,7 +18,7 @@ trait PubSubScioContext extends GcpScioContext with PubSubClient {
       deleteTopic(topicName)
   }
 
-  def withSubscription[T](topicName: String)(fn: PubSubSubscription[T] => Any): Unit = {
+  def withSubscription[T](topicName: String)(fn: PubSubSubscription[T] => Any): Any = {
     val subscriptionName = generateSubscriptionName()
     try {
       createSubscription(topicName, subscriptionName)

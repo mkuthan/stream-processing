@@ -8,7 +8,7 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 trait StorageScioContext extends GcpScioContext with StorageClient {
   this: Suite =>
 
-  def withBucket[T](fn: StorageBucket[T] => Any): Unit = {
+  def withBucket[T](fn: StorageBucket[T] => Any): Any = {
     val bucketName = generateBucketName()
     try {
       createBucket(bucketName)

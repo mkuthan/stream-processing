@@ -11,17 +11,15 @@ import scala.util.Using
 
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.client.googleapis.json.GoogleJsonError
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.HttpHeaders
 import com.google.api.services.storage.model.Bucket
 import com.google.api.services.storage.Storage
 import com.google.api.services.storage.StorageScopes
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.commons.io.filefilter.FalseFileFilter
 
 import org.mkuthan.streamprocessing.shared.test.Random._
 
-trait StorageClient extends LazyLogging {
+trait StorageClient extends GcpProjectId with LazyLogging {
 
   import GoogleJsonClientUtils._
 
@@ -31,7 +29,7 @@ trait StorageClient extends LazyLogging {
     requestInitializer(
       credentials(StorageScopes.CLOUD_PLATFORM)
     )
-  ).setApplicationName(appName).build
+  ).setApplicationName(getClass.getName).build
 
   def generateBucketName(): String =
     s"test-bucket-temp-${randomString()}"

@@ -36,7 +36,7 @@ object Settings {
     Global / onChangedBuildSource := ReloadOnSourceChanges,
     // experimental feature to speed up the build
     updateOptions := updateOptions.value.withCachedResolution(true),
-    // fork JVM to handle javaOptions
+    // fork JVM to allow javaOptions
     fork := true,
     // don't check scio for updates
     javaOptions += "-Dscio.ignoreVersionWarning=true",

@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import org.mkuthan.streamprocessing.shared.test.Random._
 
-trait PubSubClient extends LazyLogging {
+trait PubSubClient extends GcpProjectId with LazyLogging {
 
   import GoogleJsonClientUtils._
 
@@ -22,7 +22,7 @@ trait PubSubClient extends LazyLogging {
     requestInitializer(
       credentials(PubsubScopes.CLOUD_PLATFORM)
     )
-  ).setApplicationName(appName).build
+  ).setApplicationName(getClass.getName).build
 
   def generateTopicName(): String =
     s"projects/$projectId/topics/test-topic-temp-${randomString()}"

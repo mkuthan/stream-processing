@@ -35,6 +35,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
 
     val request = new Topic
     pubsub.projects.topics.create(topicName, request).execute
+    ()
   }
 
   def createSubscription(topicName: String, subscriptionName: String): Unit = {
@@ -46,6 +47,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
       .setRetainAckedMessages(true)
 
     pubsub.projects.subscriptions.create(subscriptionName, request).execute
+    ()
   }
 
   def deleteTopic(topicName: String): Unit = {
@@ -79,7 +81,8 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     val request = new PublishRequest()
       .setMessages(pubsubMessages.asJava)
 
-    pubsub.projects().topics().publish(topicName, request).execute()
+    pubsub.projects().topics().publish(topicName, request).execute
+    ()
   }
 
   def pullMessages(subscriptionName: String, maxMessages: Int = 1000): Seq[String] = {

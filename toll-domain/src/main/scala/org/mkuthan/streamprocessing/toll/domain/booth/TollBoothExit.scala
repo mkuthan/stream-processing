@@ -1,9 +1,8 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-
 import org.joda.time.Instant
-
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 final case class TollBoothExit(
@@ -14,7 +13,8 @@ final case class TollBoothExit(
 
 object TollBoothExit {
 
-  // implicit val CoderCache: Coder[TollBoothExit] = Coder.gen
+  implicit val CoderCache: Coder[TollBoothExit] = Coder.gen
+  implicit val CoderCacheRaw: Coder[TollBoothExit.Raw] = Coder.gen
 
   final case class Raw(
       id: String,

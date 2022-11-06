@@ -1,8 +1,8 @@
 package org.mkuthan.streamprocessing.toll.domain.registration
 
 import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 final case class VehicleRegistration(
@@ -13,7 +13,8 @@ final case class VehicleRegistration(
 
 object VehicleRegistration {
 
-  // implicit val CoderCache: Coder[VehicleRegistration] = Coder.gen
+  implicit val CoderCache: Coder[VehicleRegistration] = Coder.gen
+  implicit val CoderCacheRaw: Coder[VehicleRegistration.Raw] = Coder.gen
 
   @BigQueryType.toTable
   final case class Raw(

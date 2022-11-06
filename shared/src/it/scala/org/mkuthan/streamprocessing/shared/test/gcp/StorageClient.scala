@@ -42,6 +42,7 @@ trait StorageClient extends GcpProjectId with LazyLogging {
       .setLocation("eu")
 
     storage.buckets().insert(projectId, request).execute
+    ()
   }
 
   def deleteBucket(bucketName: String): Unit = {

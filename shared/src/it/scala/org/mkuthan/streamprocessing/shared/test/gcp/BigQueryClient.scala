@@ -10,6 +10,7 @@ import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
 import com.google.cloud.bigquery.storage.v1.DataFormat
 import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
 import com.google.cloud.bigquery.storage.v1.ReadSession
+import com.google.cloud.bigquery.storage.v1.WriteStream
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericRecord
@@ -109,7 +110,13 @@ trait BigQueryClient extends LazyLogging {
     rows.flatMap { row =>
       decoder =
         DecoderFactory.get()
-          .binaryDecoder(row.getAvroRows.toByteArray(), decoder);
+          .binaryDecoder(
+            row
+              .getAvroRows
+              .getSerializedBinaryRows
+              .toByteArray,
+            decoder
+          )
 
       val results = ArrayBuffer.empty[GenericRecord]
       while (!decoder.isEnd)
@@ -117,6 +124,10 @@ trait BigQueryClient extends LazyLogging {
 
       results
     }
+  }
+
+  def writeTable(datasetName: String, tableName: String, records: GenericRecord*): Unit = {
+    // TODO
   }
 
 }

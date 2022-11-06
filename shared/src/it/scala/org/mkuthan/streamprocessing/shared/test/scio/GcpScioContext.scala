@@ -28,4 +28,15 @@ trait GcpScioContext extends BeforeAndAfterAll with StorageClient { this: Suite 
     fn(sc)
   }
 
+  def withScioContextInBackground[T](fn: ScioContext => T): T = {
+    val sc = ScioContext(
+      PipelineOptionsFactory.fromArgs(
+        s"--appName=${getClass.getName}",
+        s"--tempLocation=gs://$tmpBucketName",
+        "--blockOnRun=false"
+      ).create()
+    )
+    fn(sc)
+  }
+
 }

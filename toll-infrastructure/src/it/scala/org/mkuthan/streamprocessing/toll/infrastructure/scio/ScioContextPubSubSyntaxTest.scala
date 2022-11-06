@@ -1,42 +1,74 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
+import com.spotify.scio.values.WindowOptions
+
+import org.apache.beam.sdk.transforms.windowing.AfterFirst
+import org.apache.beam.sdk.transforms.windowing.AfterPane
+import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
-import org.mkuthan.streamprocessing.shared.test.scio.GcpScioContext
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
+    with Eventually
+    with IntegrationPatience
     with PubSubScioContext
     with PubSubClient
-    with ScioContextPubSubSyntax {
+    with StorageClient
+    with ScioContextPubSubSyntax
+    with SCollectionStorageSyntax {
 
   import IntegrationTestFixtures._
 
   behavior of "ScioContextPubSubSyntaxTest"
 
-  it should "subscribe to topic" in withScioContext { sc =>
+  it should "subscribe to topic" in withScioContextInBackground { sc =>
     withTopic[ComplexClass] { topic =>
       withSubscription[ComplexClass](topic.id) { subscription =>
-        publishMessage(topic.id, JsonSerde.write(complexObject1), JsonSerde.write(complexObject2))
+        publishMessage(
+          topic.id,
+          JsonSerde.write(complexObject1),
+          JsonSerde.write(complexObject2)
+        )
 
-        val results = sc
+        val tmpBucket = new StorageBucket[ComplexClass](sc.options.getTempLocation)
+
+        sc
           .subscribeToPubSub(subscription)
-          .debug()
+          .withGlobalWindow(
+            WindowOptions(
+              trigger = Repeatedly.forever(AfterFirst.of(
+                AfterPane.elementCountAtLeast(2),
+                AfterProcessingTime
+                  .pastFirstElementInPane()
+                  .plusDelayOf(org.joda.time.Duration.standardMinutes(1))
+              )),
+              accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
+            )
+          )
+          .saveToStorage(tmpBucket)
 
-      // sc.run().waitUntilFinish()
+        val run = sc.run()
 
-      // results should containInAnyOrder(Seq(complexObject1, complexObject2))
+        eventually {
+          val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
+            .map(JsonSerde.read[ComplexClass])
+
+          results should contain.only(complexObject1, complexObject2)
+        }
+
+        run.pipelineResult.cancel()
       }
     }
-
-  // https://github.com/apache/beam/blob/09bbb48187301f18bec6d9110741c69b955e2b5a/sdks/java/io/google-cloud-platform/src/test/java/org/apache/beam/sdk/io/gcp/pubsub/PubsubReadIT.java
-  // https://github.com/mozilla/gcp-ingestion/blob/fa98ac0c8fa09b5671a961062e6cf0985ec48b0e/ingestion-beam/src/test/java/com/mozilla/telemetry/integration/PubsubIntegrationTest.java
-  // https://github.com/damccorm/beam-pr-bot-demo/blob/a3974531e41fa7a8303f2507625d61352ebd1b9d/examples/java/src/test/java/org/apache/beam/examples/complete/kafkatopubsub/KafkaToPubsubE2ETest.java
-  // https://www.mail-archive.com/search?l=user%40beam.apache.org&q=subject:%22Terminating+a+streaming+integration+test%22&o=newest&f=1
-  // https://github.com/apache/beam/blob/de1c14777d3c6a1231361db12f3a0b9fd3b84b3e/runners/google-cloud-dataflow-java/src/main/java/org/apache/beam/runners/dataflow/TestDataflowRunner.java#L145
   }
 }

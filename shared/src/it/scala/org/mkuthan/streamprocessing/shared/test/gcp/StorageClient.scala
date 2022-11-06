@@ -1,21 +1,23 @@
 package org.mkuthan.streamprocessing.shared.test.gcp
 
 import java.io.BufferedReader
-import java.io.ByteArrayOutputStream
-import java.io.StringReader
-import java.nio.charset.StandardCharsets
+import java.io.InputStreamReader
 
 import scala.collection.immutable.Iterable
 import scala.jdk.CollectionConverters._
+import scala.util.control.NonFatal
+import scala.util.Try
 import scala.util.Using
 
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.client.googleapis.json.GoogleJsonError
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.HttpHeaders
 import com.google.api.services.storage.model.Bucket
 import com.google.api.services.storage.Storage
 import com.google.api.services.storage.StorageScopes
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.commons.io.filefilter.FalseFileFilter
 
 import org.mkuthan.streamprocessing.shared.test.Random._
 
@@ -54,7 +56,7 @@ trait StorageClient extends LazyLogging {
       val batch = storage.batch()
       val callback = new JsonBatchCallback[Void]() {
         override def onFailure(e: GoogleJsonError, responseHeaders: HttpHeaders): Unit =
-          logger.error(e.getMessage)
+          logger.error("Couldn't delete object {}", e.getMessage)
 
         override def onSuccess(obj: Void, responseHeaders: HttpHeaders): Unit =
           ()
@@ -66,17 +68,19 @@ trait StorageClient extends LazyLogging {
       batch.execute()
     }
 
-    storage.buckets().delete(bucketName).execute()
+    Try(storage.buckets().delete(bucketName).execute()).recover {
+      case NonFatal(e) => logger.warn("Couldn't delete bucket", e)
+    }
   }
 
   def readObjectLines(bucketName: String, objectName: String): Iterable[String] = {
     logger.debug("Read lines from: 'gs://{}/{}'", bucketName, objectName)
 
-    val out = new ByteArrayOutputStream()
-    storage.objects().get(bucketName, objectName).executeMediaAndDownloadTo(out)
+    Using.Manager { use =>
+      val is = use(storage.objects().get(bucketName, objectName).executeMediaAsInputStream())
+      val reader = use(new BufferedReader(new BufferedReader(new InputStreamReader(is))))
 
-    Using(new BufferedReader(new StringReader(new String(out.toByteArray, StandardCharsets.UTF_8)))) { reader =>
       reader.lines().iterator().asScala.toSeq
-    }.get // fail-fast
+    }.get
   }
 }

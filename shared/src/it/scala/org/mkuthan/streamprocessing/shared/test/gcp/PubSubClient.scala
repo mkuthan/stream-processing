@@ -1,6 +1,8 @@
 package org.mkuthan.streamprocessing.shared.test.gcp
 
 import scala.jdk.CollectionConverters._
+import scala.util.control.NonFatal
+import scala.util.Try
 
 import com.google.api.services.pubsub.model._
 import com.google.api.services.pubsub.Pubsub
@@ -40,7 +42,8 @@ trait PubSubClient extends LazyLogging {
 
     val request = new Subscription()
       .setTopic(topicName)
-      .setAckDeadlineSeconds(10)
+      .setAckDeadlineSeconds(10) // 10 seconds is a minimum
+      .setRetainAckedMessages(true)
 
     pubsub.projects.subscriptions.create(subscriptionName, request).execute
   }
@@ -48,13 +51,17 @@ trait PubSubClient extends LazyLogging {
   def deleteTopic(topicName: String): Unit = {
     logger.debug("Delete pubsub topic: '{}'", topicName)
 
-    pubsub.projects.topics.delete(topicName).execute
+    Try(pubsub.projects.topics.delete(topicName).execute).recover {
+      case NonFatal(e) => logger.warn("Couldn't delete topic", e)
+    }
   }
 
   def deleteSubscription(subscriptionName: String): Unit = {
     logger.debug("Delete subscription: '{}'", subscriptionName)
 
-    pubsub.projects.subscriptions.delete(subscriptionName).execute
+    Try(pubsub.projects.subscriptions.delete(subscriptionName).execute).recover {
+      case NonFatal(e) => logger.warn("Couldn't delete subscription", e)
+    }
   }
 
   def publishMessage(topicName: String, messages: String*): Unit = {
@@ -62,26 +69,42 @@ trait PubSubClient extends LazyLogging {
 
     val pubsubMessages = messages.map { message =>
       new PubsubMessage()
-        .encodeData(ByteString.copyFromUtf8(message).toByteArray)
-    }.asJava
+        .encodeData(
+          ByteString
+            .copyFromUtf8(message)
+            .toByteArray
+        )
+    }
 
     val request = new PublishRequest()
-      .setMessages(pubsubMessages)
+      .setMessages(pubsubMessages.asJava)
+
     pubsub.projects().topics().publish(topicName, request).execute()
   }
 
-  def pullMessages(subscriptionName: String): Seq[String] = {
+  def pullMessages(subscriptionName: String, maxMessages: Int = 1000): Seq[String] = {
     logger.debug("Pull messages from: '{}'", subscriptionName)
 
     val request = new PullRequest()
       .setReturnImmediately(true)
-      .setMaxMessages(1000)
+      .setMaxMessages(maxMessages)
 
-    val response = pubsub.projects.subscriptions.pull(subscriptionName, request).execute
-    val messages = response.getReceivedMessages.asScala.toSeq
+    val response = pubsub.projects.subscriptions.pull(subscriptionName, request).execute()
 
-    messages.map { message =>
-      ByteString.copyFrom(message.getMessage.decodeData()).toStringUtf8
+    val receivedMessages = if (response.getReceivedMessages == null)
+      Seq.empty[ReceivedMessage]
+    else
+      response.getReceivedMessages.asScala.toSeq
+
+    receivedMessages.map { receivedMessage =>
+      val decodedData = if (receivedMessage.getMessage == null || receivedMessage.getMessage.getData == null)
+        Array.empty[Byte]
+      else
+        receivedMessage.getMessage.decodeData()
+
+      ByteString.copyFrom(decodedData).toStringUtf8
     }
+
+    // TODO: ack or not to ack :)
   }
 }

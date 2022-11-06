@@ -6,8 +6,8 @@
     </appender>
 
     <logger name="org.mkuthan.streamprocessing" level="DEBUG"/>
-    <logger name="org.apache.beam" level="WARN"/>
-    <logger name="com.spotify.scio" level="WARN"/>
+    <logger name="org.apache.beam" level="INFO"/>
+    <logger name="com.spotify.scio" level="INFO"/>
 
     <root level="ERROR">
         <appender-ref ref="STDOUT"/>

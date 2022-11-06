@@ -18,6 +18,7 @@ final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) 
     self
       .map(JsonSerde.write[T])
       .saveAsCustomOutput(topic.id, io)
+    ()
   }
 }
 

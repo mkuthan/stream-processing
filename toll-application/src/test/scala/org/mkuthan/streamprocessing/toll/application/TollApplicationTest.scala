@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 class TollApplicationTest extends PipelineSpec {
-  val tollBoothEntry = TollBoothEntry.Raw(
+  private val tollBoothEntry = TollBoothEntry.Raw(
     id = "1",
     entry_time = "2014-09-10T12:01:00.000Z",
     license_plate = "JNB 7001",
@@ -27,12 +27,12 @@ class TollApplicationTest extends PipelineSpec {
     toll = "7",
     tag = "String"
   )
-  val tollBoothExit = TollBoothExit.Raw(
+  private val tollBoothExit = TollBoothExit.Raw(
     id = "1",
     exit_time = "2014-09-10T12:03:00.0000000Z",
     license_plate = "JNB 7001"
   )
-  val vehicleRegistration = VehicleRegistration.Raw(
+  private val vehicleRegistration = VehicleRegistration.Raw(
     id = "1",
     licence_plate = "JNB 7001",
     expired = 0

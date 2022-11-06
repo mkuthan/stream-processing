@@ -5,6 +5,7 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothEntryFixture {
+
   val anyTollBoothEntryRaw = TollBoothEntry.Raw(
     id = "1",
     entry_time = "2014-09-10T12:01:00.000Z",

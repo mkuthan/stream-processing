@@ -1,12 +1,15 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
 import scala.util.control.NonFatal
+
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.ScioMetrics
-import com.spotify.scio.coders.Coder
+
 import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
+
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 final case class TollBoothEntry(

@@ -4,8 +4,10 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
+
 import org.joda.time.Duration
 import org.joda.time.Instant
+
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId

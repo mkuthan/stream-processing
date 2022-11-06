@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
+
 import org.joda.time.Duration
 import org.joda.time.Instant
 

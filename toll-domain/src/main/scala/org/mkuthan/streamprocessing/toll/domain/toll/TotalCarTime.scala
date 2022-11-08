@@ -13,6 +13,7 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
+import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
 final case class TotalCarTime(
     licencePlate: LicensePlate,
@@ -36,17 +37,17 @@ object TotalCarTime {
       duration_seconds: Int
   )
 
-  def calculate(
+  def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
-      windowDuration: Duration
+      gapDuration: Duration
   ): (SCollection[TotalCarTime], SCollection[Diagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
-      .withFixedWindows(windowDuration)
+      .withSessionWindows(gapDuration)
     val boothExistsById = boothExits
       .keyBy(exit => (exit.id, exit.licensePlate))
-      .withFixedWindows(windowDuration)
+      .withSessionWindows(gapDuration)
 
     val diagnostic = SideOutput[Diagnostic]()
     val (results, sideOutputs) = boothEntriesById
@@ -60,7 +61,7 @@ object TotalCarTime {
           ctx.output(diagnostic, toDiagnostic(boothEntry))
           None
       }
-    (results, sideOutputs(diagnostic).withGlobalWindow())
+    (results, sideOutputs(diagnostic))
   }
 
   def encode(input: SCollection[TotalCarTime]): SCollection[Raw] =
@@ -79,7 +80,7 @@ object TotalCarTime {
 
   private def toDiagnostic(boothEntry: TollBoothEntry): Diagnostic =
     Diagnostic(
-      reason = "Missing TollBoothExit to calculate TotalCarTime",
-      labels = Map("tollBoothId" -> boothEntry.id.toString)
+      boothId = boothEntry.id,
+      reason = MissingTollBoothExit
     )
 }

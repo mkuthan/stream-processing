@@ -6,9 +6,14 @@ import com.spotify.scio.values.SCollection
 
 import org.joda.time.Duration
 
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
+
+sealed trait Reason { def name: String }
+case object MissingTollBoothExit extends Reason { val name = "Missing TollBoothExit to calculate TotalCarTime" }
+
 final case class Diagnostic(
-    reason: String,
-    labels: Map[String, String],
+    boothId: TollBoothId,
+    reason: Reason,
     counter: Int = 1
 )
 

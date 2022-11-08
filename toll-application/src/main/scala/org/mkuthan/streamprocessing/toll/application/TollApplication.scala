@@ -49,7 +49,7 @@ object TollApplication extends AllSyntax {
       .encode(boothEntryStats)
       .saveToBigQuery(config.entryStatsTable)
 
-    val (tollTotalCarTimes, totalCarTimesDiagnostic) = TotalCarTime.calculate(boothEntries, boothExits, TenMinutes)
+    val (tollTotalCarTimes, totalCarTimesDiagnostic) = TotalCarTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
     TotalCarTime
       .encode(tollTotalCarTimes)
       .saveToBigQuery(config.carTotalTimeTable)

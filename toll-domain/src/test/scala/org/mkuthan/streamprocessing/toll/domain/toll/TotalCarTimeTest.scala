@@ -15,6 +15,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
+import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
+import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
 class TotalCarTimeTest extends PipelineSpec
     with TimestampedMatchers
@@ -25,7 +27,9 @@ class TotalCarTimeTest extends PipelineSpec
 
   private val FiveMinutes = Duration.standardMinutes(5)
 
-  "TotalCarTime" should "be calculated" in runWithContext { sc =>
+  behavior of "TotalCarTime"
+
+  it should "calculate TotalCarTime in session window" in runWithContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -42,11 +46,12 @@ class TotalCarTimeTest extends PipelineSpec
       .addElementsAtTime("2014-09-10T12:04:03Z", tollBoothExit)
       .advanceWatermarkToInfinity()
 
-    val (results, diagnostic) = calculate(sc.testStream(boothEntries), sc.testStream(boothExits), FiveMinutes)
+    val (results, diagnostic) =
+      calculateInSessionWindow(sc.testStream(boothEntries), sc.testStream(boothExits), FiveMinutes)
 
-    results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
-        "2014-09-10T12:04:59.999Z",
+        "2014-09-10T12:09:02.999Z",
         TotalCarTime(
           tollBoothId = tollBoothId,
           licencePlate = licensePlate,
@@ -58,5 +63,35 @@ class TotalCarTimeTest extends PipelineSpec
     }
 
     diagnostic should beEmpty
+  }
+
+  it should "emit diagnostic if TollBoothExit is after session window gap" in runWithContext { sc =>
+    val tollBoothId = TollBoothId("1")
+    val licensePlate = LicensePlate("AB 123")
+    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
+    val exitTime = Instant.parse("2014-09-10T12:08:03Z")
+
+    val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
+    val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
+
+    val boothEntries = testStreamOf[TollBoothEntry]
+      .addElementsAtTime("2014-09-10T12:03:01Z", tollBoothEntry)
+      .advanceWatermarkToInfinity()
+
+    val boothExits = testStreamOf[TollBoothExit]
+      .addElementsAtTime("2014-09-10T12:08:03Z", tollBoothExit)
+      .advanceWatermarkToInfinity()
+
+    val (results, diagnostic) =
+      calculateInSessionWindow(sc.testStream(boothEntries), sc.testStream(boothExits), FiveMinutes)
+
+    results should beEmpty
+
+    diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
+      containSingleValueAtTime(
+        "2014-09-10T12:08:00.999Z",
+        Diagnostic(tollBoothId, MissingTollBoothExit, 1)
+      )
+    }
   }
 }

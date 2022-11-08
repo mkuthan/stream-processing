@@ -39,11 +39,11 @@ class TotalCarTimeTest extends PipelineSpec
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
     val boothEntries = testStreamOf[TollBoothEntry]
-      .addElementsAtTime("2014-09-10T12:03:01Z", tollBoothEntry)
+      .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val boothExits = testStreamOf[TollBoothExit]
-      .addElementsAtTime("2014-09-10T12:04:03Z", tollBoothExit)
+      .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
@@ -75,11 +75,11 @@ class TotalCarTimeTest extends PipelineSpec
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
     val boothEntries = testStreamOf[TollBoothEntry]
-      .addElementsAtTime("2014-09-10T12:03:01Z", tollBoothEntry)
+      .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val boothExits = testStreamOf[TollBoothExit]
-      .addElementsAtTime("2014-09-10T12:08:03Z", tollBoothExit)
+      .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =

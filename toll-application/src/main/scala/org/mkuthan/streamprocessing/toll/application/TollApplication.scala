@@ -49,7 +49,8 @@ object TollApplication extends AllSyntax {
       .encode(boothEntryStats)
       .saveToBigQuery(config.entryStatsTable)
 
-    val (tollTotalCarTimes, totalCarTimesDiagnostic) = TotalCarTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
+    val (tollTotalCarTimes, totalCarTimesDiagnostic) =
+      TotalCarTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
     TotalCarTime
       .encode(tollTotalCarTimes)
       .saveToBigQuery(config.carTotalTimeTable)
@@ -60,13 +61,10 @@ object TollApplication extends AllSyntax {
       .encode(vehiclesWithExpiredRegistration)
       .publishToPubSub(config.vehiclesWithExpiredRegistrationTopic)
 
-    // TODO: encapsulate unionAll
-    val diagnostics = Diagnostic.aggregateInFixedWindow(
-      sc.unionAll(Seq(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)),
-      TenMinutes
-    )
+    val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
+    val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)
     Diagnostic
-      .encode(diagnostics)
+      .encode(diagnosticsAggregated)
       .saveToBigQuery(config.diagnosticTable)
 
     sc.run()

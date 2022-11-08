@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.joda.time.LocalTime
 
-private[test] object InstantConverters {
+private[scio] object InstantConverters {
 
   private val BaseTime = new Instant(0)
 

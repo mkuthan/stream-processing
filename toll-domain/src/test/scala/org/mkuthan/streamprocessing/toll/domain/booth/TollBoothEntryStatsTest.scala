@@ -4,10 +4,10 @@ import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 
-import org.apache.beam.sdk.values.TimestampedValue
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.test.scio._
 import org.mkuthan.streamprocessing.shared.test.scio.TimestampedMatchers
 
 class TollBoothEntryStatsTest extends PipelineSpec
@@ -38,9 +38,9 @@ class TollBoothEntryStatsTest extends PipelineSpec
     )
 
     val inputs = testStreamOf[TollBoothEntry]
-      .addElements(TimestampedValue.of(tollBoothEntry1, tollBoothEntry1.entryTime))
-      .addElements(TimestampedValue.of(tollBoothEntry2, tollBoothEntry2.entryTime))
-      .addElements(TimestampedValue.of(tollBoothEntry3, tollBoothEntry3.entryTime))
+      .addElementsAtTime(tollBoothEntry1.entryTime, tollBoothEntry1)
+      .addElementsAtTime(tollBoothEntry2.entryTime, tollBoothEntry2)
+      .addElementsAtTime(tollBoothEntry3.entryTime, tollBoothEntry3)
       .advanceWatermarkToInfinity()
 
     val results = calculateInFixedWindow(sc.testStream(inputs), FiveMinutes)

@@ -3,7 +3,11 @@ package org.mkuthan.streamprocessing.toll.domain.diagnostic
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
 
+import org.apache.beam.sdk.transforms.windowing.AfterPane
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -26,6 +30,17 @@ object Diagnostic {
   final case class Raw(
       reason: String
   )
+
+  def unionInGlobalWindow(diagnostics: SCollection[Diagnostic]*): SCollection[Diagnostic] = {
+    val options = WindowOptions(
+      trigger = Repeatedly.forever(AfterPane.elementCountAtLeast(1)),
+      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
+    )
+
+    val diagnosticsInGlobalWindow = diagnostics.map(_.withGlobalWindow(options))
+
+    SCollection.unionAll(diagnosticsInGlobalWindow)
+  }
 
   def aggregateInFixedWindow(input: SCollection[Diagnostic], duration: Duration): SCollection[Diagnostic] =
     input.context.empty[Diagnostic]()

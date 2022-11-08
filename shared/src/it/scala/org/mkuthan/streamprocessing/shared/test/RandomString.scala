@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.shared.test
 
 import java.util.UUID
 
-object Random {
+object RandomString {
   def randomString(): String =
     UUID.randomUUID.toString
 

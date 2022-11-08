@@ -10,8 +10,6 @@ import org.joda.time.Instant
 
 final case class TollBoothEntryStats(
     id: TollBoothId,
-    beginTime: Instant,
-    endTime: Instant,
     count: Int,
     totalToll: BigDecimal
 )
@@ -36,8 +34,6 @@ object TollBoothEntryStats {
 
       TollBoothEntryStats(
         id = x.id,
-        beginTime = if (x.beginTime.isBefore(y.beginTime)) x.beginTime else y.beginTime,
-        endTime = if (x.endTime.isAfter(y.endTime)) x.endTime else y.endTime,
         count = x.count + y.count,
         totalToll = x.totalToll + y.totalToll
       )
@@ -57,8 +53,6 @@ object TollBoothEntryStats {
 
   def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothEntryStats = TollBoothEntryStats(
     id = boothEntry.id,
-    beginTime = boothEntry.entryTime,
-    endTime = boothEntry.entryTime,
     count = 1,
     totalToll = boothEntry.toll
   )

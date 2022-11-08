@@ -10,7 +10,7 @@ import com.google.api.services.pubsub.PubsubScopes
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.LazyLogging
 
-import org.mkuthan.streamprocessing.shared.test.Random._
+import org.mkuthan.streamprocessing.shared.test.RandomString._
 
 trait PubSubClient extends GcpProjectId with LazyLogging {
 

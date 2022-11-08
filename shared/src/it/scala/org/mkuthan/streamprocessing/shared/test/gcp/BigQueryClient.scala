@@ -20,7 +20,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
-import org.mkuthan.streamprocessing.shared.test.Random._
+import org.mkuthan.streamprocessing.shared.test.RandomString._
 
 trait BigQueryClient extends GcpProjectId with LazyLogging {
 

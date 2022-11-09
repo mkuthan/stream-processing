@@ -39,7 +39,7 @@ lazy val userSessions = (project in file("user-sessions"))
 
 lazy val tollApplication = (project in file("toll-application"))
   .settings(commonSettings)
-  .dependsOn(shared % "compile->compile;test->test", tollDomain, tollInfrastructure)
+  .dependsOn(shared % "compile->compile;test->test", tollDomain % "compile->compile;test->test", tollInfrastructure)
 
 lazy val tollDomain = (project in file("toll-domain"))
   .settings(commonSettings)

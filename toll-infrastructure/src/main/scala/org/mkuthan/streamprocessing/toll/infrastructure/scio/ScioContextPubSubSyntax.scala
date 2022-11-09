@@ -9,6 +9,7 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
@@ -20,7 +21,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
       .fromSubscription(subscription.id)
     self
       .customInput(subscription.id, io)
-      .map(JsonSerde.read[T])
+      .map(readJson[T])
   }
 }
 

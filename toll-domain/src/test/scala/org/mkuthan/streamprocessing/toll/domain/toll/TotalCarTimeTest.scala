@@ -21,7 +21,8 @@ import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 class TotalCarTimeTest extends PipelineSpec
     with TimestampedMatchers
     with TollBoothEntryFixture
-    with TollBoothExitFixture {
+    with TollBoothExitFixture
+    with TotalCarTimeFixture {
 
   import TotalCarTime._
 
@@ -52,9 +53,9 @@ class TotalCarTimeTest extends PipelineSpec
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
         "2014-09-10T12:09:02.999Z",
-        TotalCarTime(
+        anyTotalCarTime.copy(
           tollBoothId = tollBoothId,
-          licencePlate = licensePlate,
+          licensePlate = licensePlate,
           entryTime = entryTime,
           exitTime = exitTime,
           duration = Duration.standardSeconds(62)
@@ -93,5 +94,16 @@ class TotalCarTimeTest extends PipelineSpec
         Diagnostic(tollBoothId, MissingTollBoothExit, 1)
       )
     }
+  }
+
+  it should "encode TollBoothExit into raw" in runWithContext { sc =>
+    val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
+    val inputs = testStreamOf[TotalCarTime]
+      .addElementsAtTime(recordTimestamp, anyTotalCarTime)
+      .advanceWatermarkToInfinity()
+
+    val results = encode(sc.testStream(inputs))
+    results should containSingleValue(anyTotalCarTimeRaw.copy(record_timestamp = recordTimestamp))
+
   }
 }

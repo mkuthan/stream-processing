@@ -9,10 +9,10 @@ object JsonSerde {
 
   implicit val JsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
-  def write[T <: AnyRef](obj: T): String =
+  def writeJson[T <: AnyRef](obj: T): String =
     Serialization.write(obj)
 
-  def read[T <: AnyRef](json: String)(implicit mf: Manifest[T]): T =
+  def readJson[T <: AnyRef](json: String)(implicit mf: Manifest[T]): T =
     Serialization.read[T](json)
 
 }

@@ -8,7 +8,7 @@ trait TollBoothEntryFixture {
 
   val anyTollBoothEntryRaw = TollBoothEntry.Raw(
     id = "1",
-    entry_time = "2014-09-10T12:01:00.000Z",
+    entry_time = "2014-09-10T12:01:00Z",
     license_plate = "JNB 7001",
     state = "NY",
     make = "Honda",
@@ -19,9 +19,13 @@ trait TollBoothEntryFixture {
     tag = "String"
   )
 
+  val tollBoothEntryRawInvalid = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
+
+  val tollBoothEntryRawWithoutExit = anyTollBoothEntryRaw.copy(license_plate = "other license plate")
+
   val anyTollBoothEntry = TollBoothEntry(
     id = TollBoothId("1"),
-    entryTime = Instant.parse("2014-09-10T12:01:00.000Z"),
+    entryTime = Instant.parse("2014-09-10T12:01:00Z"),
     toll = BigDecimal(7),
     licensePlate = LicensePlate("JNB 7001")
   )

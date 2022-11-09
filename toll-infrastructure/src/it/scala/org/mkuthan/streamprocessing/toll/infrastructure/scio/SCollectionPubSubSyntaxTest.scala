@@ -30,7 +30,7 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = pullMessages(subscription.id)
-            .map(JsonSerde.read[ComplexClass])
+            .map(JsonSerde.readJson[ComplexClass])
 
           results should contain.only(complexObject1, complexObject2)
         }

@@ -4,39 +4,27 @@ import com.spotify.scio.bigquery.BigQueryType
 import com.spotify.scio.bigquery.BigQueryTyped
 import com.spotify.scio.bigquery.Table
 import com.spotify.scio.io.CustomIO
+import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.PipelineSpec
 
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
+import org.mkuthan.streamprocessing.shared.test.scio._
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 
-class TollApplicationTest extends PipelineSpec {
-  private val tollBoothEntry = TollBoothEntry.Raw(
-    id = "1",
-    entry_time = "2014-09-10T12:01:00.000Z",
-    license_plate = "JNB 7001",
-    state = "NY",
-    make = "Honda",
-    model = "CRV",
-    vehicle_type = "1",
-    weight_type = "0",
-    toll = "7",
-    tag = "String"
-  )
-  private val tollBoothExit = TollBoothExit.Raw(
-    id = "1",
-    exit_time = "2014-09-10T12:03:00.0000000Z",
-    license_plate = "JNB 7001"
-  )
-  private val vehicleRegistration = VehicleRegistration.Raw(
-    id = "1",
-    licence_plate = "JNB 7001",
-    expired = 0
-  )
+class TollApplicationTest extends PipelineSpec
+    with TollBoothEntryFixture
+    with TollBoothExitFixture
+    with TollBoothEntryStatsFixture
+    with VehicleRegistrationFixture
+    with TotalCarTimeFixture {
 
   "Toll application" should "run" in {
     JobTest[TollApplication.type]
@@ -47,41 +35,53 @@ class TollApplicationTest extends PipelineSpec {
         "--exitDlq=gs://exit_dlq",
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
-        "--entryCountTable=toll.entry_count",
+        "--entryStatsTable=toll.entry_stats",
         "--carTotalTimeTable=toll.car_total_time",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--diagnosticTable=toll.diagnostic"
       )
-      .input(
+      .inputStream[String](
         CustomIO[String]("projects/any-id/subscriptions/entry-subscription"),
-        Seq(JsonSerde.write(tollBoothEntry))
+        testStreamOf[String]
+          .addElementsAtTime(
+            anyTollBoothEntryRaw.entry_time,
+            writeJson(anyTollBoothEntryRaw),
+            writeJson(tollBoothEntryRawInvalid)
+          )
+          .advanceWatermarkToInfinity()
       )
-      .output(CustomIO[TollBoothEntry.Raw]("gs://entry_dlq")) { results =>
-        results should beEmpty
+      .output(CustomIO[String]("gs://entry_dlq")) { results =>
+        results should containSingleValue(writeJson(tollBoothEntryRawInvalid))
       }
-      .input(
+      .inputStream(
         CustomIO[String]("projects/any-id/subscriptions/exit-subscription"),
-        Seq(JsonSerde.write(tollBoothExit))
+        testStreamOf[String]
+          .addElementsAtTime(
+            anyTollBoothExitRaw.exit_time,
+            writeJson(anyTollBoothExitRaw),
+            writeJson(tollBoothExitRawInvalid)
+          ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>
-        results should beEmpty
+        results should containSingleValue(writeJson(tollBoothExitRawInvalid))
       }
       .input(
         BigQueryTyped.Storage[VehicleRegistration.Raw](
           Table.Spec("toll.vehicle_registration"),
-          BigQueryType[VehicleRegistration.Raw].selectedFields.get, // TODO
+          // TODO: hide this complexity
+          BigQueryType[VehicleRegistration.Raw].selectedFields.get,
           BigQueryType[VehicleRegistration.Raw].rowRestriction
         ),
-        Seq(vehicleRegistration)
+        Seq(anyVehicleRegistrationRaw)
       )
       .output(CustomIO[String]("gs://vehicle_registration_dlq")) { results =>
         results should beEmpty
       }
-      .output(BigQueryTyped.Table[TollBoothEntryStats.Raw](Table.Spec("toll.entry_count"))) { results =>
-        results should beEmpty
+      .output(BigQueryTyped.Table[TollBoothEntryStats.Raw](Table.Spec("toll.entry_stats"))) { results =>
+        results should containSingleValue(anyTollBoothEntryStatsRaw)
       }
       .output(BigQueryTyped.Table[TotalCarTime.Raw](Table.Spec("toll.car_total_time"))) { results =>
-        results should beEmpty
+        results should containSingleValue(anyTotalCarTimeRaw)
       }
       .output(CustomIO[String]("vehicles-with-expired-registration")) { results =>
         results should beEmpty

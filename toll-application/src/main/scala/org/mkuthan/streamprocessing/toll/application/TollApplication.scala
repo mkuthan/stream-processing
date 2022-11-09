@@ -2,6 +2,8 @@ package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.ContextAndArgs
 
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+import org.apache.beam.sdk.transforms.PeriodicImpulse
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -40,6 +42,10 @@ object TollApplication extends AllSyntax {
       .decode(sc.subscribeToPubSub(config.exitSubscription))
     boothExistsDlq.saveToStorage(config.exitDlq)
 
+//    val a = sc
+//      .customInput("foo", PeriodicImpulse.create().withInterval(TenMinutes))
+//      .applyTransform(BigQueryIO.readTableRows().from("foo"))
+//
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
       .decode(sc.loadFromBigQuery(config.vehicleRegistrationTable))
     vehicleRegistrationsDlq.saveToStorage(config.vehicleRegistrationDlq)

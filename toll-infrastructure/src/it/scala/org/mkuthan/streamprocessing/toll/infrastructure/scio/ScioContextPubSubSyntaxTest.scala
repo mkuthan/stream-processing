@@ -37,8 +37,8 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
       withSubscription[ComplexClass](topic.id) { subscription =>
         publishMessage(
           topic.id,
-          JsonSerde.write(complexObject1),
-          JsonSerde.write(complexObject2)
+          JsonSerde.writeJson(complexObject1),
+          JsonSerde.writeJson(complexObject2)
         )
 
         val tmpBucket = new StorageBucket[ComplexClass](sc.options.getTempLocation)
@@ -62,7 +62,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
-            .map(JsonSerde.read[ComplexClass])
+            .map(JsonSerde.readJson[ComplexClass])
 
           results should contain.only(complexObject1, complexObject2)
         }

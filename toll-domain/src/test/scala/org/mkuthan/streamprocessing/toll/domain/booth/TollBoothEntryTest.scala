@@ -8,7 +8,9 @@ final class TollBoothEntryTest extends PipelineSpec with TollBoothEntryFixture {
 
   import TollBoothEntry._
 
-  "Valid TollBoothEntry" should "be decoded" in runWithContext { sc =>
+  behavior of "TollBoothEntry"
+
+  it should "decode valid TollBoothEntry into raw" in runWithContext { sc =>
     val inputs = testStreamOf[TollBoothEntry.Raw]
       .addElements(anyTollBoothEntryRaw)
       .advanceWatermarkToInfinity()
@@ -19,18 +21,16 @@ final class TollBoothEntryTest extends PipelineSpec with TollBoothEntryFixture {
     dlq should beEmpty
   }
 
-  "Invalid TollBoothEntry" should "go to DLQ" in {
+  it should "put invalid TollBoothEntry into DLQ" in {
     val run = runWithContext { sc =>
-      val invalidTollBoothEntryRaw = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
-
       val inputs = testStreamOf[TollBoothEntry.Raw]
-        .addElements(invalidTollBoothEntryRaw)
+        .addElements(tollBoothEntryRawInvalid)
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decode(sc.testStream(inputs))
 
       results should beEmpty
-      dlq should containSingleValue(invalidTollBoothEntryRaw)
+      dlq should containSingleValue(tollBoothEntryRawInvalid)
     }
 
     val result = run.waitUntilDone()

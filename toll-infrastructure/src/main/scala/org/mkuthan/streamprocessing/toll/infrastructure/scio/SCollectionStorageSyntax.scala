@@ -8,6 +8,7 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.io.TextIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
@@ -16,12 +17,12 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
   )(implicit c: Coder[T]): Unit = {
     val io = TextIO.write()
       .to(location.id)
-      .withNumShards(1)
+      .withNumShards(location.numShards)
       .withSuffix(".json")
       .withWindowedWrites()
 
     self
-      .map(JsonSerde.write)
+      .map(writeJson)
       .saveAsCustomOutput(location.id, io)
     ()
   }

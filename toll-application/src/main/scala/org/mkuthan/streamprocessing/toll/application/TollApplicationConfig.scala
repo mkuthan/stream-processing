@@ -35,7 +35,7 @@ object TollApplicationConfig {
     exitDlq = StorageBucket(args.required("exitDlq")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
     vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
-    entryStatsTable = BigQueryTable(args.required("entryCountTable")),
+    entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
     carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
     vehiclesWithExpiredRegistrationTopic = PubSubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
     diagnosticTable = BigQueryTable(args.required("diagnosticTable"))

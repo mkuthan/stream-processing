@@ -11,8 +11,15 @@ import org.joda.time.Instant
 final case class TollBoothEntryStats(
     id: TollBoothId,
     count: Int,
-    totalToll: BigDecimal
-)
+    totalToll: BigDecimal,
+    firstEntryTime: Instant,
+    lastEntryTime: Instant
+) {
+  def before(other: TollBoothEntryStats): Boolean =
+    firstEntryTime.isBefore(other.firstEntryTime)
+  def after(other: TollBoothEntryStats): Boolean =
+    lastEntryTime.isAfter(other.lastEntryTime)
+}
 
 object TollBoothEntryStats {
 
@@ -21,11 +28,12 @@ object TollBoothEntryStats {
 
   @BigQueryType.toTable
   final case class Raw(
+      record_timestamp: Instant,
       id: String,
-      begin_time: Instant,
-      end_time: Instant,
       count: Int,
-      total_toll: String
+      total_toll: BigDecimal,
+      first_entry_time: Instant,
+      last_entry_time: Instant
   )
 
   object TollBoothEntrySemigroup extends Semigroup[TollBoothEntryStats] {
@@ -35,7 +43,9 @@ object TollBoothEntryStats {
       TollBoothEntryStats(
         id = x.id,
         count = x.count + y.count,
-        totalToll = x.totalToll + y.totalToll
+        totalToll = x.totalToll + y.totalToll,
+        firstEntryTime = if (x.before(y)) x.firstEntryTime else y.firstEntryTime,
+        lastEntryTime = if (x.after(y)) x.lastEntryTime else y.lastEntryTime
       )
     }
   }
@@ -49,11 +59,22 @@ object TollBoothEntryStats {
       .values
 
   def encode(input: SCollection[TollBoothEntryStats]): SCollection[Raw] =
-    input.context.empty[Raw]()
+    input.withTimestamp.map { case (r, t) =>
+      Raw(
+        record_timestamp = t,
+        id = r.id.id,
+        count = r.count,
+        total_toll = r.totalToll,
+        first_entry_time = r.firstEntryTime,
+        last_entry_time = r.lastEntryTime
+      )
+    }
 
   def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothEntryStats = TollBoothEntryStats(
     id = boothEntry.id,
     count = 1,
-    totalToll = boothEntry.toll
+    totalToll = boothEntry.toll,
+    firstEntryTime = boothEntry.entryTime,
+    lastEntryTime = boothEntry.entryTime
   )
 }

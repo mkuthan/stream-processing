@@ -16,7 +16,7 @@ import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
 final case class TotalCarTime(
-    licencePlate: LicensePlate,
+    licensePlate: LicensePlate,
     tollBoothId: TollBoothId,
     entryTime: Instant,
     exitTime: Instant,
@@ -30,11 +30,12 @@ object TotalCarTime {
 
   @BigQueryType.toTable
   final case class Raw(
-      licence_plate: String,
+      record_timestamp: Instant,
+      license_plate: String,
       toll_booth_id: String,
       entry_time: Instant,
       exit_time: Instant,
-      duration_seconds: Int
+      duration_seconds: Long
   )
 
   def calculateInSessionWindow(
@@ -65,12 +66,21 @@ object TotalCarTime {
   }
 
   def encode(input: SCollection[TotalCarTime]): SCollection[Raw] =
-    input.context.empty[Raw]()
+    input.withTimestamp.map { case (r, t) =>
+      Raw(
+        record_timestamp = t,
+        license_plate = r.licensePlate.number,
+        toll_booth_id = r.tollBoothId.id,
+        entry_time = r.entryTime,
+        exit_time = r.exitTime,
+        duration_seconds = r.duration.getStandardSeconds
+      )
+    }
 
   private def totalCarTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalCarTime = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis
     TotalCarTime(
-      licencePlate = boothEntry.licensePlate,
+      licensePlate = boothEntry.licensePlate,
       tollBoothId = boothEntry.id,
       entryTime = boothEntry.entryTime,
       exitTime = boothExit.exitTime,

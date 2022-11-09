@@ -34,11 +34,11 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
           simpleClassBigQueryType.toAvro(simpleObject2)
         )
 
-        val tmpBucket = new StorageBucket[SimpleClass](sc.options.getTempLocation)
+        val tmpBucket = new StorageBucket[SimpleClass](bucket = sc.options.getTempLocation, numShards = 1)
 
         sc
           .loadFromBigQuery(bigQueryTable)
-          .saveToStorage(tmpBucket)
+          .saveToStorageAsJson(tmpBucket)
 
         sc.run().waitUntilDone()
 

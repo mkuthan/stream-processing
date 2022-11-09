@@ -2,8 +2,6 @@ package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.ContextAndArgs
 
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
-import org.apache.beam.sdk.transforms.PeriodicImpulse
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -36,19 +34,15 @@ object TollApplication extends AllSyntax {
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry
       .decode(sc.subscribeToPubSub(config.entrySubscription))
-    boothEntriesDlq.saveToStorage(config.entryDlq)
+    boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
     val (boothExits, boothExistsDlq) = TollBoothExit
       .decode(sc.subscribeToPubSub(config.exitSubscription))
-    boothExistsDlq.saveToStorage(config.exitDlq)
+    boothExistsDlq.saveToStorageAsJson(config.exitDlq)
 
-//    val a = sc
-//      .customInput("foo", PeriodicImpulse.create().withInterval(TenMinutes))
-//      .applyTransform(BigQueryIO.readTableRows().from("foo"))
-//
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
       .decode(sc.loadFromBigQuery(config.vehicleRegistrationTable))
-    vehicleRegistrationsDlq.saveToStorage(config.vehicleRegistrationDlq)
+    vehicleRegistrationsDlq.saveToStorageAsJson(config.vehicleRegistrationDlq)
 
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
     TollBoothEntryStats

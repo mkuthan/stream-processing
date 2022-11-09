@@ -91,4 +91,7 @@ class TollApplicationTest extends PipelineSpec
       }
       .run()
   }
+
+  // TODO: e2e scenario for diagnostics, e.g toll entry without toll exit
+  // TODO: how to reuse setup between test scenarios and modifiy only relevant inputs/outputs
 }

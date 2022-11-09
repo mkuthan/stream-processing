@@ -12,6 +12,7 @@ import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
+// TODO: How to define dictionary for diagnostic to make it generic?
 sealed trait Reason { def name: String }
 case object MissingTollBoothExit extends Reason { val name = "Missing TollBoothExit to calculate TotalCarTime" }
 
@@ -26,6 +27,7 @@ object Diagnostic {
   implicit val CoderCache: Coder[Diagnostic] = Coder.gen
   implicit val CoderCacheRaw: Coder[Diagnostic.Raw] = Coder.gen
 
+  // TODO: finish type
   @BigQueryType.toTable
   final case class Raw(
       reason: String
@@ -42,9 +44,11 @@ object Diagnostic {
     SCollection.unionAll(diagnosticsInGlobalWindow)
   }
 
+  // TODO: implement
   def aggregateInFixedWindow(input: SCollection[Diagnostic], duration: Duration): SCollection[Diagnostic] =
     input.context.empty[Diagnostic]()
 
+  // TODO: implement
   def encode(input: SCollection[Diagnostic]): SCollection[Raw] =
     input.context.empty[Raw]()
 }

@@ -12,18 +12,18 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
-  def saveToStorage(
+  def saveToStorageAsJson(
       location: StorageBucket[T]
   )(implicit c: Coder[T]): Unit = {
     val io = TextIO.write()
-      .to(location.id)
+      .to(location.bucket)
       .withNumShards(location.numShards)
       .withSuffix(".json")
       .withWindowedWrites()
 
     self
       .map(writeJson)
-      .saveAsCustomOutput(location.id, io)
+      .saveAsCustomOutput(location.bucket, io)
     ()
   }
 }

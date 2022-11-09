@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 
 class SCollectionPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
@@ -21,7 +22,7 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
 
   it should "publish messages" in withScioContext { sc =>
     withTopic[ComplexClass] { topic =>
-      withSubscription[ComplexClass](topic.id) { subscription =>
+      withSubscription[ComplexClass](topic.topic) { subscription =>
         sc
           .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
           .publishToPubSub(topic)
@@ -29,9 +30,10 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
         sc.run().waitUntilDone()
 
         eventually {
-          val results = pullMessages(subscription.id)
-            .map(JsonSerde.readJson[ComplexClass])
+          val results = pullMessages(subscription.subscription)
+            .map(readJson[ComplexClass])
 
+          // TODO: check for id/ts attributes
           results should contain.only(complexObject1, complexObject2)
         }
       }

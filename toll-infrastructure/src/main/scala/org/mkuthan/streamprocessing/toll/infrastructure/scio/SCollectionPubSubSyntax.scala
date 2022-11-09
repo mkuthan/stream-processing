@@ -12,13 +12,15 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
+  // TODO: add json in the method name
   def publishToPubSub(
       topic: PubSubTopic[T]
   )(implicit c: Coder[T]): Unit = {
-    val io = PubsubIO.writeStrings().to(topic.id)
+    val io = PubsubIO.writeStrings().to(topic.topic)
+    // TODO: handle id/ts attributes, perhaps two functions T => id/ts attributes needed
     self
       .map(writeJson[T])
-      .saveAsCustomOutput(topic.id, io)
+      .saveAsCustomOutput(topic.topic, io)
     ()
   }
 }

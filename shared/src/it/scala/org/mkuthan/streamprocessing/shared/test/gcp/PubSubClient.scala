@@ -9,8 +9,10 @@ import com.google.api.services.pubsub.Pubsub
 import com.google.api.services.pubsub.PubsubScopes
 import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.LazyLogging
+import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.test.RandomString._
+import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 trait PubSubClient extends GcpProjectId with LazyLogging {
 
@@ -66,11 +68,19 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     }
   }
 
-  def publishMessage(topicName: String, messages: String*): Unit = {
+  def publishMessage(topicName: String, idAttribute: String, tsAttribute: String, messages: String*): Unit = {
     logger.debug("Publish {} messages to: '{}'", messages.size, topicName)
 
+    val now = Instant.now().toString
+
     val pubsubMessages = messages.map { message =>
+      val attributes = Map(
+        idAttribute -> randomString(),
+        tsAttribute -> now
+      ).asJava
+
       new PubsubMessage()
+        .setAttributes(attributes)
         .encodeData(
           ByteString
             .copyFromUtf8(message)

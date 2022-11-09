@@ -14,8 +14,15 @@ object IntegrationTestFixtures {
   val simpleClassBigQueryType = BigQueryType[SimpleClass]
   val simpleClassBigQuerySchema = simpleClassBigQueryType.schema
 
-  val simpleObject1 = SimpleClass("simple 1", 1)
-  val simpleObject2 = SimpleClass("simple 2", 2)
+  val simpleObject1 = SimpleClass(
+    stringField = "simple 1",
+    intField = 1
+  )
+
+  val simpleObject2 = SimpleClass(
+    stringField = "simple 2",
+    intField = 2
+  )
 
   @BigQueryType.toTable
   final case class ComplexClass(
@@ -30,18 +37,18 @@ object IntegrationTestFixtures {
   val complexClassBigQuerySchema = complexClassBigQueryType.schema
 
   val complexObject1 = ComplexClass(
-    "complex 1",
-    Some("complex 1"),
-    1,
-    BigDecimal(1),
-    Instant.parse("2014-09-10T12:03:01Z")
+    stringField = "complex 1",
+    optionalStringField = Some("complex 1"),
+    intField = 1,
+    bigDecimalField = BigDecimal(1),
+    instantField = Instant.parse("2014-09-10T12:03:01Z")
   )
 
   val complexObject2 = ComplexClass(
-    "complex 2",
-    None,
-    2,
-    BigDecimal(2),
-    Instant.parse("2014-09-10T12:03:02Z")
+    stringField = "complex 2",
+    optionalStringField = None,
+    intField = 2,
+    bigDecimalField = BigDecimal(2),
+    instantField = Instant.parse("2014-09-10T12:03:02Z")
   )
 }

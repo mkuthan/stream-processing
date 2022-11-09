@@ -18,11 +18,15 @@ trait PubSubScioContext extends GcpScioContext with PubSubClient {
       deleteTopic(topicName)
   }
 
-  def withSubscription[T](topicName: String)(fn: PubSubSubscription[T] => Any): Any = {
+  def withSubscription[T](
+      topicName: String,
+      idAttribute: Option[String] = None,
+      tsAttribute: Option[String] = None
+  )(fn: PubSubSubscription[T] => Any): Any = {
     val subscriptionName = generateSubscriptionName()
     try {
       createSubscription(topicName, subscriptionName)
-      fn(PubSubSubscription[T](subscriptionName))
+      fn(PubSubSubscription[T](subscriptionName, idAttribute, tsAttribute))
     } finally
       deleteSubscription(subscriptionName)
   }

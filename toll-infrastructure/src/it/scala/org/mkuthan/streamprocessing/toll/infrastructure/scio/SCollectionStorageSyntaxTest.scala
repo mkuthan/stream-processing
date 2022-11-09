@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio.StorageScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 
 final class SCollectionStorageSyntaxTest extends AnyFlatSpec
     with Matchers
@@ -24,14 +25,14 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
     withBucket[ComplexClass] { bucket =>
       sc
         .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
-        .saveToStorage(bucket)
+        .saveToStorageAsJson(bucket)
 
       sc.run().waitUntilDone()
 
       eventually {
         val results =
           readObjectLines(bucket.name, "GlobalWindow-pane-0-last-00000-of-00001.json")
-            .map(JsonSerde.readJson[ComplexClass])
+            .map(readJson[ComplexClass])
 
         results should contain.only(complexObject1, complexObject2)
       }
@@ -48,7 +49,7 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
           )
         )
         .withFixedWindows(Duration.standardSeconds(10))
-        .saveToStorage(bucket)
+        .saveToStorageAsJson(bucket)
 
       sc.run().waitUntilDone()
 
@@ -58,7 +59,7 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
       eventually {
         val results =
           readObjectLines(bucket.name, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
-            .map(JsonSerde.readJson[ComplexClass])
+            .map(readJson[ComplexClass])
 
         results should contain.only(complexObject1, complexObject2)
       }

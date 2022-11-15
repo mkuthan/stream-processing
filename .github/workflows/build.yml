@@ -37,3 +37,16 @@ jobs:
 
       - name: Upload test coverage results
         uses: codecov/codecov-action@v3
+
+  merge:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'scala-steward' }}
+    needs:
+      - build
+
+    steps:
+      - name: Merge
+        uses: desbo/merge-pr-action@v0
+        with:
+          GITHUB_TOKEN:  ${{secrets.GITHUB_TOKEN}}

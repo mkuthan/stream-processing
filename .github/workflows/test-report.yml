@@ -1,21 +1,21 @@
-name: 'Test Report'
+name: Test Report
 
 on:
   workflow_run:
-    workflows: [ 'Build' ]
+    workflows: [ Build ]
     types:
       - completed
 
 jobs:
-  report:
+  test-report:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()
-      with:
-        artifact: test-results
-        name: Test Report
-        path: '*.xml'
-        reporter: java-junit
+    steps:
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          artifact: test-results
+          name: Test Report
+          path: '*.xml'
+          reporter: java-junit

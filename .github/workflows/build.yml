@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - 'main'
+      - main
   pull_request:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          cache: 'sbt'
+          cache: sbt
 
       - name: Check formatting
         run: sbt scalafmtCheckAll
@@ -41,7 +41,8 @@ jobs:
         if: github.repository == 'mkuthan/stream-processing'
         run: sbt IntegrationTest/jacoco
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload test results
+        uses: actions/upload-artifact@v2
         if: success() || failure()
         with:
           name: test-results

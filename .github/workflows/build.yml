@@ -41,5 +41,11 @@ jobs:
         if: github.repository == 'mkuthan/stream-processing'
         run: sbt IntegrationTest/jacoco
 
+      - uses: actions/upload-artifact@v2
+        if: success() || failure()
+        with:
+          name: test-results
+          path: '**/test-reports/*.xml'
+
       - name: Upload test coverage results
         uses: codecov/codecov-action@v3

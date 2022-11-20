@@ -19,38 +19,26 @@ jobs:
       - uses: ./.github/actions/setup
       - run: sbt scalafmtCheckAll
 
-  build:
+  unit-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup
-        uses: ./.github/actions/setup
-
-      - name: Check formatting
-        run: sbt scalafmtCheckAll
-
-      - name: Unit test
-        run: sbt jacoco
-
-#      - name: Authenticate to Google Cloud
-#        uses: google-github-actions/auth@v1
-#        if: github.repository == 'mkuthan/stream-processing'
-#        with:
-#          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
-#
-#      - name: Integration test
-#        if: github.repository == 'mkuthan/stream-processing'
-#        run: sbt IntegrationTest/jacoco
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v2
-        if: success() || failure()
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - run: sbt jacoco
+      - uses: codecov/codecov-action@v3
         with:
-          name: test-results
-          path: '**/test-reports/*.xml'
+          flags: unit-tests
 
-      - name: Upload test coverage results
-        uses: codecov/codecov-action@v3
+  integration-test:
+    runs-on: ubuntu-latest
+    if: github.repository == 'mkuthan/stream-processing'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+      - run: sbt IntegrationTest/jacoco
+      - uses: codecov/codecov-action@v3
+        with:
+          flags: integration-tests

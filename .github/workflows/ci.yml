@@ -31,7 +31,7 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'mkuthan'
+    if: github.repository == 'mkuthan/foo'
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup

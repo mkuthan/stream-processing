@@ -31,7 +31,7 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-latest
-    if: github.repository == 'mkuthan/stream-processing'
+    if: github.repository_owner == 'mkuthan'
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup

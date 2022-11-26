@@ -2,7 +2,7 @@ pull_request_rules:
   - name: automatic merge when author is dependabot
     conditions:
       - author=dependabot[bot]
-      - check-success=unit-test
+      - check-success=all-checks
       - base=main
     actions:
       merge:
@@ -10,7 +10,7 @@ pull_request_rules:
   - name: automatic merge when author is scala-steward
     conditions:
       - author=scala-steward
-      - check-success=unit-test
+      - check-success=all-checks
       - base=main
     actions:
       merge:

@@ -38,13 +38,13 @@ jobs:
       - uses: ./.github/actions/setup
       - uses: google-github-actions/auth@v1
         with:
-          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
       - run: sbt IntegrationTest/jacoco
       - uses: codecov/codecov-action@v3
         with:
           flags: integration-tests
 
-   all-checks:
+  all-checks:
     needs: [lint, unit-test, integration-test]
     runs-on: ubuntu-latest
     steps:

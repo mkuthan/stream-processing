@@ -53,7 +53,7 @@ jobs:
   dependabot:
     runs-on: ubuntu-latest
     needs: [required-checks]
-    if: ${{ (github.actor == 'dependabot[bot]' || github.actor == 'scala-steward') && github.event_name == 'pull_request' }}
+    if: ${{ (github.actor == 'dependabot[bot]' || github.actor == 'mkuthan') && github.event_name == 'pull_request' }}
 
     permissions:
       pull-requests: write

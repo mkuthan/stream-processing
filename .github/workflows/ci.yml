@@ -60,8 +60,8 @@ jobs:
       contents: write
 
     env:
-      PR_URL: ${{github.event.pull_request.html_url}}
-      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - run: gh pr review --approve "$PR_URL"

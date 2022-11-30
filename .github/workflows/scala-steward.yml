@@ -1,0 +1,14 @@
+name: Scala Steward
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # 00:00 every Sunday
+  workflow_dispatch:
+
+jobs:
+  scala-steward:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: scala-steward-org/scala-steward-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

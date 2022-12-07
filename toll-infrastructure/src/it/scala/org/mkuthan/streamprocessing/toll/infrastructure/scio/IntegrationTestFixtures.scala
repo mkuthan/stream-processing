@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
+import org.joda.time.LocalDate
 
 object IntegrationTestFixtures {
   @BigQueryType.toTable
@@ -30,7 +31,8 @@ object IntegrationTestFixtures {
       optionalStringField: Option[String],
       intField: Int,
       bigDecimalField: BigDecimal,
-      instantField: Instant
+      instantField: Instant,
+      localDateField: LocalDate
   )
 
   val complexClassBigQueryType = BigQueryType[ComplexClass]
@@ -41,7 +43,8 @@ object IntegrationTestFixtures {
     optionalStringField = Some("complex 1"),
     intField = 1,
     bigDecimalField = BigDecimal(1),
-    instantField = Instant.parse("2014-09-10T12:03:01Z")
+    instantField = Instant.parse("2014-09-10T12:03:01Z"),
+    localDateField = LocalDate.parse("2014-09-10")
   )
 
   val complexObject2 = ComplexClass(
@@ -49,6 +52,7 @@ object IntegrationTestFixtures {
     optionalStringField = None,
     intField = 2,
     bigDecimalField = BigDecimal(2),
-    instantField = Instant.parse("2014-09-10T12:03:02Z")
+    instantField = Instant.parse("2014-09-10T12:03:02Z"),
+    localDateField = LocalDate.parse("2014-09-10")
   )
 }

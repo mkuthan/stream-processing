@@ -11,5 +11,5 @@ jobs:
     steps:
       - uses: scala-steward-org/scala-steward-action@v2
         with:
-          github-token: ${{ secrets.SCALA_STEWARD_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           author-email: 1560526+mkuthan@users.noreply.github.com

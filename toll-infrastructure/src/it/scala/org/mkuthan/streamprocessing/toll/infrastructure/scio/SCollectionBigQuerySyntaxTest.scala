@@ -20,7 +20,7 @@ class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
 
   behavior of "SCollectionBigQuerySyntax"
 
-  it should "save into table" in withScioContext { sc =>
+  it should "save into table simple object" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable[SimpleClass](datasetName) { bigQueryTable =>
         sc
@@ -34,6 +34,25 @@ class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
             .map(simpleClassBigQueryType.fromAvro)
 
           results should contain.only(simpleObject1, simpleObject2)
+        }
+      }
+    }
+  }
+
+  it should "save into table complex object" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable[ComplexClass](datasetName) { bigQueryTable =>
+        sc
+          .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
+          .saveToBigQuery(bigQueryTable)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          val results = readTable(bigQueryTable.datasetName, bigQueryTable.tableName)
+            .map(complexClassBigQueryType.fromAvro)
+
+          results should contain.only(complexObject1, complexObject2)
         }
       }
     }

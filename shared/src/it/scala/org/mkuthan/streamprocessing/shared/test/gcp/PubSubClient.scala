@@ -4,7 +4,6 @@ import java.{util => ju}
 
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
-import scala.util.Try
 
 import com.google.api.services.pubsub.model._
 import com.google.api.services.pubsub.Pubsub
@@ -52,15 +51,18 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
   def deleteTopic(topicName: String): Unit = {
     logger.debug("Delete pubsub topic: '{}'", topicName)
 
-    val _ = Try(pubsub.projects.topics.delete(topicName).execute).recover {
+    try {
+      val _ = pubsub.projects.topics.delete(topicName).execute
+    } catch {
       case NonFatal(e) => logger.warn("Couldn't delete topic", e)
     }
   }
 
   def deleteSubscription(subscriptionName: String): Unit = {
     logger.debug("Delete subscription: '{}'", subscriptionName)
-
-    val _ = Try(pubsub.projects.subscriptions.delete(subscriptionName).execute).recover {
+    try {
+      val _ = pubsub.projects.subscriptions.delete(subscriptionName).execute
+    } catch {
       case NonFatal(e) => logger.warn("Couldn't delete subscription", e)
     }
   }

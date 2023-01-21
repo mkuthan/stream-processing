@@ -7,7 +7,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio.StorageScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 
 final class SCollectionStorageSyntaxTest extends AnyFlatSpec

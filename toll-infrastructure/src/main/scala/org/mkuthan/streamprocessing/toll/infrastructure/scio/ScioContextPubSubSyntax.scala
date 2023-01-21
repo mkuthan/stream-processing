@@ -12,19 +12,18 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
-  // TODO: add json in the method name
-  def subscribeToPubSub[T <: AnyRef: Coder: Manifest](
+  def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
       subscription: PubSubSubscription[T]
   ): SCollection[T] = {
     val io = PubsubIO
       .readStrings()
-      .fromSubscription(subscription.subscription)
+      .fromSubscription(subscription.id)
 
     subscription.idAttribute.foreach(io.withIdAttribute(_))
     subscription.tsAttribute.foreach(io.withTimestampAttribute(_))
 
     self
-      .customInput(subscription.subscription, io)
+      .customInput(subscription.id, io)
       .map(readJson[T])
   }
 }

@@ -30,28 +30,19 @@ final case class TollApplicationConfig(
 object TollApplicationConfig {
   def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
     entrySubscription = PubSubSubscription(
-      subscription = args.required("entrySubscription"),
+      id = args.required("entrySubscription"),
       idAttribute = None,
       tsAttribute = None
     ),
-    entryDlq = StorageBucket(
-      bucket = args.required("entryDlq"),
-      numShards = 1
-    ),
+    entryDlq = StorageBucket(args.required("entryDlq")),
     exitSubscription = PubSubSubscription(
-      subscription = args.required("exitSubscription"),
+      id = args.required("exitSubscription"),
       idAttribute = None,
       tsAttribute = None
     ),
-    exitDlq = StorageBucket(
-      bucket = args.required("exitDlq"),
-      numShards = 1
-    ),
+    exitDlq = StorageBucket(args.required("exitDlq")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
-    vehicleRegistrationDlq = StorageBucket(
-      bucket = args.required("vehicleRegistrationDlq"),
-      numShards = 1
-    ),
+    vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
     entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
     carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
     vehiclesWithExpiredRegistrationTopic = PubSubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),

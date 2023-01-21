@@ -12,7 +12,6 @@ import com.typesafe.scalalogging.LazyLogging
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.test.RandomString._
-import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 trait PubSubClient extends GcpProjectId with LazyLogging {
 
@@ -58,6 +57,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     Try(pubsub.projects.topics.delete(topicName).execute).recover {
       case NonFatal(e) => logger.warn("Couldn't delete topic", e)
     }
+    ()
   }
 
   def deleteSubscription(subscriptionName: String): Unit = {
@@ -66,6 +66,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     Try(pubsub.projects.subscriptions.delete(subscriptionName).execute).recover {
       case NonFatal(e) => logger.warn("Couldn't delete subscription", e)
     }
+    ()
   }
 
   def publishMessage(topicName: String, idAttribute: String, tsAttribute: String, messages: String*): Unit = {

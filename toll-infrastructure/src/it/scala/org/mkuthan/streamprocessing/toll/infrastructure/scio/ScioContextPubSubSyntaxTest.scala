@@ -16,7 +16,6 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
@@ -51,20 +50,20 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
   it should "subscribe to topic" in withScioContextInBackground { sc =>
     withTopic[ComplexClass] { topic =>
-      withSubscription[ComplexClass](topic.topic, Some(idAttribute), Some(tsAttribute)) { subscription =>
+      withSubscription[ComplexClass](topic.id, Some(idAttribute), Some(tsAttribute)) { subscription =>
         publishMessage(
-          topic.topic,
+          topic.id,
           idAttribute,
           tsAttribute,
           writeJson(complexObject1),
           writeJson(complexObject2)
         )
 
-        val tmpBucket = new StorageBucket[ComplexClass](bucket = sc.options.getTempLocation, numShards = 1)
+        val tmpBucket = new StorageBucket[ComplexClass](sc.options.getTempLocation)
 
         // TODO: contribute to sc.materialize for windowing write support
         sc
-          .subscribeToPubSub(subscription)
+          .subscribeJsonFromPubSub(subscription)
           .withGlobalWindow(globalWindowOptions)
           .saveToStorageAsJson(tmpBucket)
 

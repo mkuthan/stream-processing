@@ -33,11 +33,11 @@ object TollApplication extends AllSyntax {
     val config = TollApplicationConfig.parse(args)
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry
-      .decode(sc.subscribeToPubSub(config.entrySubscription))
+      .decode(sc.subscribeJsonFromPubSub(config.entrySubscription))
     boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
     val (boothExits, boothExistsDlq) = TollBoothExit
-      .decode(sc.subscribeToPubSub(config.exitSubscription))
+      .decode(sc.subscribeJsonFromPubSub(config.exitSubscription))
     boothExistsDlq.saveToStorageAsJson(config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration

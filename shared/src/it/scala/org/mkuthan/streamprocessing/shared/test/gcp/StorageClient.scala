@@ -70,6 +70,7 @@ trait StorageClient extends GcpProjectId with LazyLogging {
     Try(storage.buckets().delete(bucketName).execute()).recover {
       case NonFatal(e) => logger.warn("Couldn't delete bucket", e)
     }
+    ()
   }
 
   def readObjectLines(bucketName: String, objectName: String): Iterable[String] = {

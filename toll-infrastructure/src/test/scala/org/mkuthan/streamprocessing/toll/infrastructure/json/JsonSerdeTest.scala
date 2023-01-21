@@ -14,11 +14,11 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers {
   behavior of "JsonSerde"
 
   it should "serialize sample object" in {
-    JsonSerde.writeJson(anySampleObject) should be(anySampleJson)
+    JsonSerde.writeJsonAsString(anySampleObject) should be(anySampleJson)
   }
 
   it should "deserialize sample object" in {
-    JsonSerde.readJson[Sample](anySampleJson) should be(anySampleObject)
+    JsonSerde.readJsonFromString[Sample](anySampleJson) should be(anySampleObject)
   }
 }
 

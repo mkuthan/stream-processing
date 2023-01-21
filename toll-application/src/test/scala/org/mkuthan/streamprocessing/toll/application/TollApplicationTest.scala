@@ -17,7 +17,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 
 class TollApplicationTest extends PipelineSpec
     with TollBoothEntryFixture
@@ -45,25 +45,25 @@ class TollApplicationTest extends PipelineSpec
         testStreamOf[String]
           .addElementsAtTime(
             anyTollBoothEntryRaw.entry_time,
-            writeJson(anyTollBoothEntryRaw),
-            writeJson(tollBoothEntryRawInvalid)
+            writeJsonAsString(anyTollBoothEntryRaw),
+            writeJsonAsString(tollBoothEntryRawInvalid)
           )
           .advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://entry_dlq")) { results =>
-        results should containSingleValue(writeJson(tollBoothEntryRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothEntryRawInvalid))
       }
       .inputStream(
         CustomIO[String]("projects/any-id/subscriptions/exit-subscription"),
         testStreamOf[String]
           .addElementsAtTime(
             anyTollBoothExitRaw.exit_time,
-            writeJson(anyTollBoothExitRaw),
-            writeJson(tollBoothExitRawInvalid)
+            writeJsonAsString(anyTollBoothExitRaw),
+            writeJsonAsString(tollBoothExitRawInvalid)
           ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>
-        results should containSingleValue(writeJson(tollBoothExitRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothExitRawInvalid))
       }
       .input(
         BigQueryTyped.Storage[VehicleRegistration.Raw](

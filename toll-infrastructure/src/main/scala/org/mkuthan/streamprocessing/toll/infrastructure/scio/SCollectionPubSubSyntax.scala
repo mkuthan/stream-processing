@@ -7,7 +7,7 @@ import com.spotify.scio.values.SCollection
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
@@ -18,7 +18,7 @@ final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) 
     val io = PubsubIO.writeStrings().to(topic.id)
     // TODO: handle id/ts attributes, perhaps two functions T => id/ts attributes needed
     val _ = self
-      .map(writeJson[T])
+      .map(writeJsonAsString[T])
       .saveAsCustomOutput(topic.id, io)
   }
 }

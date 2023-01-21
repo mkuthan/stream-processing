@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
 
 class SCollectionPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
@@ -30,7 +30,7 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = pullMessages(subscription.id)
-            .map(readJson[ComplexClass])
+            .map(readJsonFromString[ComplexClass])
 
           // TODO: check for id/ts attributes
           results should contain.only(complexObject1, complexObject2)

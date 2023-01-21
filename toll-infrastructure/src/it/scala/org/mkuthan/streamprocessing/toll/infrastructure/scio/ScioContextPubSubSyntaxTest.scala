@@ -16,8 +16,8 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 class ScioContextPubSubSyntaxTest extends AnyFlatSpec
@@ -55,8 +55,8 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
           topic.id,
           idAttribute,
           tsAttribute,
-          writeJson(complexObject1),
-          writeJson(complexObject2)
+          writeJsonAsString(complexObject1),
+          writeJsonAsString(complexObject2)
         )
 
         val tmpBucket = new StorageBucket[ComplexClass](sc.options.getTempLocation)
@@ -71,7 +71,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
-            .map(readJson[ComplexClass])
+            .map(readJsonFromString[ComplexClass])
 
           // TODO: how to verify id attribute and timestamp attribute?
           results should contain.only(complexObject1, complexObject2)

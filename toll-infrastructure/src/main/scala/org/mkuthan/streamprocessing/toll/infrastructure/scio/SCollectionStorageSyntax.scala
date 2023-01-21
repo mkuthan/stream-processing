@@ -7,7 +7,7 @@ import com.spotify.scio.values.SCollection
 
 import org.apache.beam.sdk.io.TextIO
 
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
@@ -22,7 +22,7 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
       .withWindowedWrites()
 
     val _ = self
-      .map(writeJson)
+      .map(writeJsonAsString)
       .saveAsCustomOutput(location.id, io)
   }
 }

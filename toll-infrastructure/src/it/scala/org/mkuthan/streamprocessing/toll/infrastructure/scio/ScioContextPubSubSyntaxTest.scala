@@ -50,7 +50,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
   it should "subscribe to topic" in withScioContextInBackground { sc =>
     withTopic[ComplexClass] { topic =>
-      withSubscription[ComplexClass](topic.id, Some(idAttribute), Some(tsAttribute)) { subscription =>
+      withSubscription[ComplexClass](topic.id) { subscription =>
         publishMessage(
           topic.id,
           idAttribute,

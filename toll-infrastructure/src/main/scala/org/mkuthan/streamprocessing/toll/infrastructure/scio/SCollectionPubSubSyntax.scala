@@ -17,10 +17,9 @@ final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[T]) 
   )(implicit c: Coder[T]): Unit = {
     val io = PubsubIO.writeStrings().to(topic.id)
     // TODO: handle id/ts attributes, perhaps two functions T => id/ts attributes needed
-    self
+    val _ = self
       .map(writeJson[T])
       .saveAsCustomOutput(topic.id, io)
-    ()
   }
 }
 

@@ -15,8 +15,7 @@ final class BigQuerySCollectionOps[T <: HasAnnotation](private val self: SCollec
   import com.spotify.scio.bigquery._
 
   def saveToBigQuery(table: BigQueryTable[T])(implicit c: Coder[T], ct: ClassTag[T], tt: TypeTag[T]): Unit = {
-    self.saveAsTypedBigQueryTable(table.spec)
-    ()
+    val _ = self.saveAsTypedBigQueryTable(table.spec)
   }
 }
 

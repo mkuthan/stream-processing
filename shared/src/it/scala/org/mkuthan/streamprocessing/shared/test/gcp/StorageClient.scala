@@ -41,8 +41,7 @@ trait StorageClient extends GcpProjectId with LazyLogging {
       .setName(bucketName)
       .setLocation("eu")
 
-    storage.buckets().insert(projectId, request).execute
-    ()
+    val _= storage.buckets().insert(projectId, request).execute
   }
 
   def deleteBucket(bucketName: String): Unit = {
@@ -67,10 +66,9 @@ trait StorageClient extends GcpProjectId with LazyLogging {
       batch.execute()
     }
 
-    Try(storage.buckets().delete(bucketName).execute()).recover {
+    val _ = Try(storage.buckets().delete(bucketName).execute()).recover {
       case NonFatal(e) => logger.warn("Couldn't delete bucket", e)
     }
-    ()
   }
 
   def readObjectLines(bucketName: String, objectName: String): Iterable[String] = {

@@ -21,10 +21,9 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
       .withSuffix(".json")
       .withWindowedWrites()
 
-    self
+    val _ = self
       .map(writeJson)
       .saveAsCustomOutput(location.id, io)
-    ()
   }
 }
 

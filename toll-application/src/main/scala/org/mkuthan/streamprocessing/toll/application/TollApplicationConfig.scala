@@ -29,17 +29,9 @@ final case class TollApplicationConfig(
 
 object TollApplicationConfig {
   def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
-    entrySubscription = PubSubSubscription(
-      id = args.required("entrySubscription"),
-      idAttribute = None,
-      tsAttribute = None
-    ),
+    entrySubscription = PubSubSubscription(args.required("entrySubscription")),
     entryDlq = StorageBucket(args.required("entryDlq")),
-    exitSubscription = PubSubSubscription(
-      id = args.required("exitSubscription"),
-      idAttribute = None,
-      tsAttribute = None
-    ),
+    exitSubscription = PubSubSubscription(args.required("exitSubscription")),
     exitDlq = StorageBucket(args.required("exitDlq")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
     vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),

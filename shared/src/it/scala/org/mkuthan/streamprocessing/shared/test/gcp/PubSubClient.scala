@@ -35,8 +35,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     logger.debug("Create pubsub topic: '{}'", topicName)
 
     val request = new Topic
-    pubsub.projects.topics.create(topicName, request).execute
-    ()
+    val _ = pubsub.projects.topics.create(topicName, request).execute
   }
 
   def createSubscription(topicName: String, subscriptionName: String): Unit = {
@@ -47,26 +46,23 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
       .setAckDeadlineSeconds(10) // 10 seconds is a minimum
       .setRetainAckedMessages(true)
 
-    pubsub.projects.subscriptions.create(subscriptionName, request).execute
-    ()
+    val _ = pubsub.projects.subscriptions.create(subscriptionName, request).execute
   }
 
   def deleteTopic(topicName: String): Unit = {
     logger.debug("Delete pubsub topic: '{}'", topicName)
 
-    Try(pubsub.projects.topics.delete(topicName).execute).recover {
+    val _ = Try(pubsub.projects.topics.delete(topicName).execute).recover {
       case NonFatal(e) => logger.warn("Couldn't delete topic", e)
     }
-    ()
   }
 
   def deleteSubscription(subscriptionName: String): Unit = {
     logger.debug("Delete subscription: '{}'", subscriptionName)
 
-    Try(pubsub.projects.subscriptions.delete(subscriptionName).execute).recover {
+    val _ = Try(pubsub.projects.subscriptions.delete(subscriptionName).execute).recover {
       case NonFatal(e) => logger.warn("Couldn't delete subscription", e)
     }
-    ()
   }
 
   def publishMessage(topicName: String, idAttribute: String, tsAttribute: String, messages: String*): Unit = {
@@ -92,8 +88,7 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     val request = new PublishRequest()
       .setMessages(pubsubMessages.asJava)
 
-    pubsub.projects().topics().publish(topicName, request).execute
-    ()
+    val _ = pubsub.projects().topics().publish(topicName, request).execute
   }
 
   def pullMessages(subscriptionName: String, maxMessages: Int = 1000): Seq[String] = {

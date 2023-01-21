@@ -13,14 +13,16 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
   def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
-      subscription: PubSubSubscription[T]
+      subscription: PubSubSubscription[T],
+      idAttribute: Option[String] = None,
+      tsAttribute: Option[String] = None
   ): SCollection[T] = {
     val io = PubsubIO
       .readStrings()
       .fromSubscription(subscription.id)
 
-    subscription.idAttribute.foreach(io.withIdAttribute(_))
-    subscription.tsAttribute.foreach(io.withTimestampAttribute(_))
+    idAttribute.foreach(io.withIdAttribute(_))
+    tsAttribute.foreach(io.withTimestampAttribute(_))
 
     self
       .customInput(subscription.id, io)

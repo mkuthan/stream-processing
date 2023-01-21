@@ -8,7 +8,7 @@ import com.spotify.scio.ScioContext
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
@@ -16,9 +16,11 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
       subscription: PubSubSubscription[T],
       idAttribute: Option[String] = None,
       tsAttribute: Option[String] = None
-  ): SCollection[T] = {
+  ): SCollection[PubSubMessage[T]] = {
+    import scala.jdk.CollectionConverters._
+
     val io = PubsubIO
-      .readStrings()
+      .readMessagesWithAttributes()
       .fromSubscription(subscription.id)
 
     idAttribute.foreach(io.withIdAttribute(_))
@@ -26,7 +28,15 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
 
     self
       .customInput(subscription.id, io)
-      .map(readJsonFromString[T])
+      .map { msg =>
+        val payload = readJsonFromBytes(msg.getPayload())
+        val attributes = if (msg.getAttributeMap() == null) {
+          Map.empty[String, String]
+        } else {
+          msg.getAttributeMap().asScala.toMap
+        }
+        PubSubMessage(payload, attributes)
+      }
   }
 }
 

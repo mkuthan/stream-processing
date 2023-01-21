@@ -8,6 +8,7 @@ import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
 import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
+import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
@@ -16,8 +17,9 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
+import org.mkuthan.streamprocessing.shared.test.RandomString.randomString
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 class ScioContextPubSubSyntaxTest extends AnyFlatSpec
@@ -51,17 +53,14 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
   it should "subscribe to topic" in withScioContextInBackground { sc =>
     withTopic[ComplexClass] { topic =>
       withSubscription[ComplexClass](topic.id) { subscription =>
-        publishMessage(
-          topic.id,
-          idAttribute,
-          tsAttribute,
-          writeJsonAsString(complexObject1),
-          writeJsonAsString(complexObject2)
-        )
+        val attr1 = Map(idAttribute -> randomString(), tsAttribute -> Instant.now().toString)
+        publishMessage(topic.id, writeJsonAsBytes(complexObject1), attr1)
 
-        val tmpBucket = new StorageBucket[ComplexClass](sc.options.getTempLocation)
+        val attr2 = Map(idAttribute -> randomString(), tsAttribute -> Instant.now().toString)
+        publishMessage(topic.id, writeJsonAsBytes(complexObject2), attr2)
 
-        // TODO: contribute to sc.materialize for windowing write support
+        val tmpBucket = new StorageBucket[PubSubMessage[ComplexClass]](sc.options.getTempLocation)
+
         sc
           .subscribeJsonFromPubSub(subscription)
           .withGlobalWindow(globalWindowOptions)
@@ -71,10 +70,12 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
-            .map(readJsonFromString[ComplexClass])
+            .map(readJsonFromString[PubSubMessage[ComplexClass]])
 
-          // TODO: how to verify id attribute and timestamp attribute?
-          results should contain.only(complexObject1, complexObject2)
+          results should contain.only(
+            PubSubMessage(complexObject1, attr1),
+            PubSubMessage(complexObject2, attr2)
+          )
         }
 
         run.pipelineResult.cancel()

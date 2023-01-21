@@ -12,6 +12,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.AllSyntax
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubMessage
 
 /**
  * A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world.
@@ -33,11 +34,11 @@ object TollApplication extends AllSyntax {
     val config = TollApplicationConfig.parse(args)
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry
-      .decode(sc.subscribeJsonFromPubSub(config.entrySubscription))
+      .decode(sc.subscribeJsonFromPubSub(config.entrySubscription).extractPayload())
     boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
     val (boothExits, boothExistsDlq) = TollBoothExit
-      .decode(sc.subscribeJsonFromPubSub(config.exitSubscription))
+      .decode(sc.subscribeJsonFromPubSub(config.exitSubscription).extractPayload())
     boothExistsDlq.saveToStorageAsJson(config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
@@ -59,6 +60,7 @@ object TollApplication extends AllSyntax {
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
+      .map(PubSubMessage(_, Map.empty)) // TODO: encapsulate somewhere
       .publishToPubSub(config.vehiclesWithExpiredRegistrationTopic)
 
     val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)

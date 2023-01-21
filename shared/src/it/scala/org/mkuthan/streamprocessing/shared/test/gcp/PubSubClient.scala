@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.shared.test.gcp
 
+import java.{util => ju}
+
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 import scala.util.Try
@@ -7,9 +9,7 @@ import scala.util.Try
 import com.google.api.services.pubsub.model._
 import com.google.api.services.pubsub.Pubsub
 import com.google.api.services.pubsub.PubsubScopes
-import com.google.protobuf.ByteString
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.test.RandomString._
 
@@ -65,33 +65,20 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
     }
   }
 
-  def publishMessage(topicName: String, idAttribute: String, tsAttribute: String, messages: String*): Unit = {
-    logger.debug("Publish {} messages to: '{}'", messages.size, topicName)
+  def publishMessage(topicName: String, payload: Array[Byte], attributes: Map[String, String]): Unit = {
+    logger.debug("Publish message to: '{}'", topicName)
 
-    val now = Instant.now().toString
-
-    val pubsubMessages = messages.map { message =>
-      val attributes = Map(
-        idAttribute -> randomString(),
-        tsAttribute -> now
-      ).asJava
-
-      new PubsubMessage()
-        .setAttributes(attributes)
-        .encodeData(
-          ByteString
-            .copyFromUtf8(message)
-            .toByteArray
-        )
-    }
+    val message = new PubsubMessage()
+      .setAttributes(attributes.asJava)
+      .encodeData(payload)
 
     val request = new PublishRequest()
-      .setMessages(pubsubMessages.asJava)
+      .setMessages(ju.List.of(message))
 
     val _ = pubsub.projects().topics().publish(topicName, request).execute
   }
 
-  def pullMessages(subscriptionName: String, maxMessages: Int = 1000): Seq[String] = {
+  def pullMessages(subscriptionName: String, maxMessages: Int = 1000): Seq[(Array[Byte], Map[String, String])] = {
     logger.debug("Pull messages from: '{}'", subscriptionName)
 
     val request = new PullRequest()
@@ -106,12 +93,17 @@ trait PubSubClient extends GcpProjectId with LazyLogging {
       response.getReceivedMessages.asScala.toSeq
 
     receivedMessages.map { receivedMessage =>
-      val decodedData = if (receivedMessage.getMessage == null || receivedMessage.getMessage.getData == null)
+      val payload = if (receivedMessage.getMessage == null || receivedMessage.getMessage.getData == null)
         Array.empty[Byte]
       else
         receivedMessage.getMessage.decodeData()
 
-      ByteString.copyFrom(decodedData).toStringUtf8
+      val attributes = if (receivedMessage.getMessage() == null || receivedMessage.getMessage.getAttributes == null)
+        Map.empty[String, String]
+      else
+        receivedMessage.getMessage.getAttributes.asScala.toMap
+
+      (payload, attributes)
     }
 
     // TODO: ack or not to ack :)

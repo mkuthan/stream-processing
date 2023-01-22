@@ -3,9 +3,13 @@ package org.mkuthan.streamprocessing.toll.application
 import com.spotify.scio.bigquery.BigQueryType
 import com.spotify.scio.bigquery.BigQueryTyped
 import com.spotify.scio.bigquery.Table
+import com.spotify.scio.coders.Coder
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.PipelineSpec
+
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder
 
 import org.mkuthan.streamprocessing.shared.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
@@ -17,7 +21,8 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 
 class TollApplicationTest extends PipelineSpec
     with TollBoothEntryFixture
@@ -25,6 +30,10 @@ class TollApplicationTest extends PipelineSpec
     with TollBoothEntryStatsFixture
     with VehicleRegistrationFixture
     with TotalCarTimeFixture {
+
+  // TODO: move somewhere
+  implicit def messageCoder: Coder[PubsubMessage] =
+    Coder.beam(PubsubMessageWithAttributesCoder.of())
 
   "Toll application" should "run" in {
     JobTest[TollApplication.type]
@@ -40,30 +49,30 @@ class TollApplicationTest extends PipelineSpec
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--diagnosticTable=toll.diagnostic"
       )
-      .inputStream[String](
-        CustomIO[String]("projects/any-id/subscriptions/entry-subscription"),
-        testStreamOf[String]
+      .inputStream[PubsubMessage](
+        CustomIO[PubsubMessage]("projects/any-id/subscriptions/entry-subscription"),
+        testStreamOf[PubsubMessage]
           .addElementsAtTime(
             anyTollBoothEntryRaw.entry_time,
-            writeJson(anyTollBoothEntryRaw),
-            writeJson(tollBoothEntryRawInvalid)
+            new PubsubMessage(writeJsonAsBytes(anyTollBoothEntryRaw), null),
+            new PubsubMessage(writeJsonAsBytes(tollBoothEntryRawInvalid), null)
           )
           .advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://entry_dlq")) { results =>
-        results should containSingleValue(writeJson(tollBoothEntryRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothEntryRawInvalid))
       }
       .inputStream(
-        CustomIO[String]("projects/any-id/subscriptions/exit-subscription"),
-        testStreamOf[String]
+        CustomIO[PubsubMessage]("projects/any-id/subscriptions/exit-subscription"),
+        testStreamOf[PubsubMessage]
           .addElementsAtTime(
             anyTollBoothExitRaw.exit_time,
-            writeJson(anyTollBoothExitRaw),
-            writeJson(tollBoothExitRawInvalid)
+            new PubsubMessage(writeJsonAsBytes(anyTollBoothExitRaw), null),
+            new PubsubMessage(writeJsonAsBytes(tollBoothExitRawInvalid), null)
           ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>
-        results should containSingleValue(writeJson(tollBoothExitRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothExitRawInvalid))
       }
       .input(
         BigQueryTyped.Storage[VehicleRegistration.Raw](
@@ -93,5 +102,5 @@ class TollApplicationTest extends PipelineSpec
   }
 
   // TODO: e2e scenario for diagnostics, e.g toll entry without toll exit
-  // TODO: how to reuse setup between test scenarios and modifiy only relevant inputs/outputs
+  // TODO: how to reuse setup between test scenarios and modify only relevant inputs/outputs
 }

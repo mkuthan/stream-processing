@@ -6,8 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
 
 class SCollectionPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
@@ -22,19 +21,27 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
 
   it should "publish messages" in withScioContext { sc =>
     withTopic[ComplexClass] { topic =>
-      withSubscription[ComplexClass](topic.topic) { subscription =>
+      withSubscription[ComplexClass](topic.id) { subscription =>
+        val attr1 = Map("key" -> "value1")
+        val attr2 = Map("key" -> "value2")
+
         sc
-          .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
+          .parallelize[PubSubMessage[ComplexClass]](Seq(
+            PubSubMessage(complexObject1, attr1),
+            PubSubMessage(complexObject2, attr2)
+          ))
           .publishToPubSub(topic)
 
         sc.run().waitUntilDone()
 
         eventually {
-          val results = pullMessages(subscription.subscription)
-            .map(readJson[ComplexClass])
+          val results = pullMessages(subscription.id)
+            .map { case (payload, attributes) => (readJsonFromBytes[ComplexClass](payload), attributes) }
 
-          // TODO: check for id/ts attributes
-          results should contain.only(complexObject1, complexObject2)
+          results should contain.only(
+            (complexObject1, attr1),
+            (complexObject2, attr2)
+          )
         }
       }
     }

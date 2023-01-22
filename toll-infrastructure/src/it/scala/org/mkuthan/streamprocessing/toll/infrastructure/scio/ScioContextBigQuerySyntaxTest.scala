@@ -34,7 +34,7 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
           simpleClassBigQueryType.toAvro(simpleObject2)
         )
 
-        val tmpBucket = new StorageBucket[SimpleClass](bucket = sc.options.getTempLocation, numShards = 1)
+        val tmpBucket = new StorageBucket[SimpleClass](sc.options.getTempLocation)
 
         sc
           .loadFromBigQuery(bigQueryTable)
@@ -44,7 +44,7 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
 
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
-            .map(JsonSerde.readJson[SimpleClass])
+            .map(JsonSerde.readJsonFromString[SimpleClass])
 
           results should contain.only(simpleObject1, simpleObject2)
         }

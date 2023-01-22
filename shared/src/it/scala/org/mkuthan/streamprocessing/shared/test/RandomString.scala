@@ -7,5 +7,5 @@ object RandomString {
     UUID.randomUUID.toString
 
   def randomStringUnderscored(): String =
-    randomString.replace('-', '_')
+    randomString().replace('-', '_')
 }

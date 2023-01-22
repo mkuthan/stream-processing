@@ -8,24 +8,35 @@ import com.spotify.scio.ScioContext
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJson
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
-  // TODO: add json in the method name
-  def subscribeToPubSub[T <: AnyRef: Coder: Manifest](
-      subscription: PubSubSubscription[T]
-  ): SCollection[T] = {
-    val io = PubsubIO
-      .readStrings()
-      .fromSubscription(subscription.subscription)
+  def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
+      subscription: PubSubSubscription[T],
+      idAttribute: Option[String] = None,
+      tsAttribute: Option[String] = None
+  ): SCollection[PubSubMessage[T]] = {
+    import scala.jdk.CollectionConverters._
 
-    subscription.idAttribute.foreach(io.withIdAttribute(_))
-    subscription.tsAttribute.foreach(io.withTimestampAttribute(_))
+    val io = PubsubIO
+      .readMessagesWithAttributes()
+      .fromSubscription(subscription.id)
+
+    idAttribute.foreach(io.withIdAttribute(_))
+    tsAttribute.foreach(io.withTimestampAttribute(_))
 
     self
-      .customInput(subscription.subscription, io)
-      .map(readJson[T])
+      .customInput(subscription.id, io)
+      .map { msg =>
+        val payload = readJsonFromBytes(msg.getPayload())
+        val attributes = if (msg.getAttributeMap() == null) {
+          Map.empty[String, String]
+        } else {
+          msg.getAttributeMap().asScala.toMap
+        }
+        PubSubMessage(payload, attributes)
+      }
   }
 }
 

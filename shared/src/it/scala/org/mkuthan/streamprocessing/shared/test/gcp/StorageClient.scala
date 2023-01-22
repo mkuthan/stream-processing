@@ -6,7 +6,6 @@ import java.io.InputStreamReader
 import scala.collection.immutable.Iterable
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
-import scala.util.Try
 import scala.util.Using
 
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback
@@ -41,8 +40,7 @@ trait StorageClient extends GcpProjectId with LazyLogging {
       .setName(bucketName)
       .setLocation("eu")
 
-    storage.buckets().insert(projectId, request).execute
-    ()
+    val _ = storage.buckets().insert(projectId, request).execute
   }
 
   def deleteBucket(bucketName: String): Unit = {
@@ -67,7 +65,9 @@ trait StorageClient extends GcpProjectId with LazyLogging {
       batch.execute()
     }
 
-    Try(storage.buckets().delete(bucketName).execute()).recover {
+    try {
+      val _ = storage.buckets().delete(bucketName).execute()
+    } catch {
       case NonFatal(e) => logger.warn("Couldn't delete bucket", e)
     }
   }

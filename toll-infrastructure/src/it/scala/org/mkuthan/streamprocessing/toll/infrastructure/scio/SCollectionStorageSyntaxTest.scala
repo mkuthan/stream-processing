@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonF
 final class SCollectionStorageSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
-    with IntegrationPatience
+    with IntegrationTestPatience
     with StorageScioContext
     with SCollectionStorageSyntax {
 

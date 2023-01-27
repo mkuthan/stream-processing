@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +10,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonF
 class SCollectionPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
-    with IntegrationPatience
+    with IntegrationTestPatience
     with PubSubScioContext
     with SCollectionPubSubSyntax {
 

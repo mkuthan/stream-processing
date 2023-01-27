@@ -13,7 +13,7 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
-    with IntegrationPatience
+    with IntegrationTestPatience
     with BigQueryScioContext
     with BigQueryClient
     with ScioContextBigQuerySyntax

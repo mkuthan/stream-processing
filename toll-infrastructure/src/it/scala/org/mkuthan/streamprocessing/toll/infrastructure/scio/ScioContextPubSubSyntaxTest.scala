@@ -25,7 +25,7 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
-    with IntegrationPatience
+    with IntegrationTestPatience
     with PubSubScioContext
     with PubSubClient
     with StorageClient

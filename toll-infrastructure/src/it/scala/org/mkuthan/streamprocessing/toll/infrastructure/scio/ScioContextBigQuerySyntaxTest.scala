@@ -1,11 +1,11 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient
+import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
@@ -15,7 +15,6 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
     with Eventually
     with IntegrationTestPatience
     with BigQueryScioContext
-    with BigQueryClient
     with ScioContextBigQuerySyntax
     with SCollectionStorageSyntax {
 

@@ -20,9 +20,9 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
-import org.mkuthan.streamprocessing.shared.test.RandomString._
+import org.mkuthan.streamprocessing.shared.test.common.RandomString._
 
-trait BigQueryClient extends GcpProjectId with LazyLogging {
+object BigQueryClient extends GcpProjectId with LazyLogging {
 
   private[this] val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
   private[this] val datasetService = BigQueryServicesFactory.getDatasetService(options)

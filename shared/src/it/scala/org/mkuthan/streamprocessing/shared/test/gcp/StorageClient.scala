@@ -16,9 +16,10 @@ import com.google.api.services.storage.Storage
 import com.google.api.services.storage.StorageScopes
 import com.typesafe.scalalogging.LazyLogging
 
-import org.mkuthan.streamprocessing.shared.test.RandomString._
+import org.mkuthan.streamprocessing.shared.test.common.RandomString._
+import org.mkuthan.streamprocessing.shared.test.gcp.GoogleJsonClientUtils
 
-trait StorageClient extends GcpProjectId with LazyLogging {
+object StorageClient extends GcpProjectId with LazyLogging {
 
   import GoogleJsonClientUtils._
 

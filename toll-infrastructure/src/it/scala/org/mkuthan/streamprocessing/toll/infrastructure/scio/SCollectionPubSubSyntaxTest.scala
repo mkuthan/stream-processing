@@ -4,6 +4,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
 

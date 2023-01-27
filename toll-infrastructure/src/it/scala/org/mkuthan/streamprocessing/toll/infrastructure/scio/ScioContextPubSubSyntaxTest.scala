@@ -10,14 +10,13 @@ import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient
-import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
+import org.mkuthan.streamprocessing.shared.test.common.RandomString._
+import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.shared.test.RandomString.randomString
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
@@ -27,8 +26,6 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     with Eventually
     with IntegrationTestPatience
     with PubSubScioContext
-    with PubSubClient
-    with StorageClient
     with ScioContextPubSubSyntax
     with SCollectionStorageSyntax {
 

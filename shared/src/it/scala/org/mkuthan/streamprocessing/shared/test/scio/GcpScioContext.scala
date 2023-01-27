@@ -7,9 +7,9 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite
 
 import org.mkuthan.streamprocessing.shared.test.gcp.GcpProjectId
-import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient
+import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 
-trait GcpScioContext extends BeforeAndAfterAll with GcpProjectId with StorageClient {
+trait GcpScioContext extends BeforeAndAfterAll with GcpProjectId {
   this: Suite =>
 
   private val tmpBucketName = generateBucketName()

@@ -4,7 +4,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient
+import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
 
 class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
@@ -12,7 +12,6 @@ class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
     with Eventually
     with IntegrationTestPatience
     with BigQueryScioContext
-    with BigQueryClient
     with SCollectionBigQuerySyntax {
 
   import IntegrationTestFixtures._

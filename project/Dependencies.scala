@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  private val scioVersion = "0.12.2"
+  private val scioVersion = "0.12.3"
   private val scalaLoggingVersion = "3.9.5"
   private val slf4jVersion = "2.0.6"
   private val logbackVersion = "1.4.5"

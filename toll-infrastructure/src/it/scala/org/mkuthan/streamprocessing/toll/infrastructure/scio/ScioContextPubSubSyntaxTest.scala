@@ -68,6 +68,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
             .map(readJsonFromString[PubSubMessage[ComplexClass]])
+            .flatMap(_.toOption)
 
           results should contain.only(
             PubSubMessage(complexObject1, attr1),

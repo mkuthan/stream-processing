@@ -44,6 +44,7 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
         eventually {
           val results = readObjectLines(tmpBucket.name, "GlobalWindow-pane-0-00000-of-00001.json")
             .map(JsonSerde.readJsonFromString[SimpleClass])
+            .flatMap(_.toOption)
 
           results should contain.only(simpleObject1, simpleObject2)
         }

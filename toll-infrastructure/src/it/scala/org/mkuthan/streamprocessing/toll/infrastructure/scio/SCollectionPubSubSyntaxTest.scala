@@ -37,6 +37,7 @@ class SCollectionPubSubSyntaxTest extends AnyFlatSpec
         eventually {
           val results = pullMessages(subscription.id)
             .map { case (payload, attributes) => (readJsonFromBytes[ComplexClass](payload), attributes) }
+            .flatMap(_.toOption)
 
           results should contain.only(
             (complexObject1, attr1),

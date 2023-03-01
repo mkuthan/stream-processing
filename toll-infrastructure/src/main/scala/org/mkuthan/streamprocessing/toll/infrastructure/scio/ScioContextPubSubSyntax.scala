@@ -29,7 +29,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
     self
       .customInput(subscription.id, io)
       .map { msg =>
-        val payload = readJsonFromBytes(msg.getPayload())
+        val payload = readJsonFromBytes(msg.getPayload()).get // TODO: handle errors
         val attributes = if (msg.getAttributeMap() == null) {
           Map.empty[String, String]
         } else {

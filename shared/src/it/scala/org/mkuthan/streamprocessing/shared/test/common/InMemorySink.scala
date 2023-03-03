@@ -1,0 +1,14 @@
+package org.mkuthan.streamprocessing.shared.test.common
+
+import com.spotify.scio.coders.Coder
+import com.spotify.scio.values.SCollection
+
+/**
+ * Sink for the materialized content of SCollection.
+ */
+case class InMemorySink[T](private val input: SCollection[T])(implicit c: Coder[T]) {
+  private val id = RandomString.randomString()
+  InMemoryCache.put(id, input)
+
+  def toSeq: Seq[T] = InMemoryCache.get(id)
+}

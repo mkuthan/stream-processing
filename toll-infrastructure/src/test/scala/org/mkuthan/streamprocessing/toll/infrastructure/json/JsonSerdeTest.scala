@@ -9,8 +9,8 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers {
 
   import JsonSerdeTest._
 
-  private val anySampleObject = Sample("a", 0, Instant.EPOCH)
-  private val anySampleJson = """{"f1":"a","f2":0,"f3":0}"""
+  private val anySampleObject = Sample("a", 0, 0.0, Instant.EPOCH)
+  private val anySampleJson = """{"f1":"a","f2":0,"f3":0.0,"f4":0}"""
 
   behavior of "JsonSerde"
 
@@ -32,5 +32,5 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers {
 
 object JsonSerdeTest {
   // define all types used in domain
-  final case class Sample(f1: String, f2: Int, f3: Instant)
+  final case class Sample(f1: String, f2: Int, f3: Double, f4: Instant)
 }

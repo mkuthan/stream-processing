@@ -19,7 +19,7 @@ private[common] case object InMemoryCache {
 
   def put[T](id: String, input: SCollection[T])(implicit @unused c: Coder[T]): Unit = {
     cache += id -> ArrayBuffer.empty
-    val _ = input.map { element =>
+    val _ = input.tap { element =>
       cache(id) += element
     }
   }

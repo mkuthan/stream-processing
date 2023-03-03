@@ -35,10 +35,11 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
         val attr2 = Map(idAttribute -> randomString(), tsAttribute -> Instant.now().toString)
         publishMessage(topic.id, writeJsonAsBytes(complexObject2), attr2)
 
-        val results = sc
+        val (results, dlq) = sc
           .subscribeJsonFromPubSub(subscription)
 
         val resultsSink = InMemorySink(results)
+        val dlqSink = InMemorySink(dlq)
 
         val run = sc.run()
 
@@ -47,6 +48,8 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
             PubSubMessage(complexObject1, attr1),
             PubSubMessage(complexObject2, attr2)
           )
+
+          dlqSink.toSeq should be(empty)
         }
 
         run.pipelineResult.cancel()

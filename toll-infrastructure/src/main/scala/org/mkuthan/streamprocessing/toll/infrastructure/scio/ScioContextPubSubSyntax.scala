@@ -1,9 +1,13 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import scala.language.implicitConversions
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.SideOutput
 import com.spotify.scio.ScioContext
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
@@ -12,13 +16,13 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonF
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
+  import PubSubScioContextOps._
+
   def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
       subscription: PubSubSubscription[T],
       idAttribute: Option[String] = None,
       tsAttribute: Option[String] = None
-  ): SCollection[PubSubMessage[T]] = {
-    import scala.jdk.CollectionConverters._
-
+  ): (SCollection[PubSubMessage[T]], SCollection[Array[Byte]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()
       .fromSubscription(subscription.id)
@@ -26,17 +30,39 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
     idAttribute.foreach(io.withIdAttribute(_))
     tsAttribute.foreach(io.withTimestampAttribute(_))
 
-    self
+    val dlq = SideOutput[Array[Byte]]()
+
+    val (results, sideOutputs) = self
       .customInput(subscription.id, io)
-      .map { msg =>
-        val payload = readJsonFromBytes(msg.getPayload())
-        val attributes = if (msg.getAttributeMap() == null) {
-          Map.empty[String, String]
-        } else {
-          msg.getAttributeMap().asScala.toMap
+      .withSideOutputs(dlq)
+      .flatMap { (msg, ctx) =>
+        val pubSubMessage = for {
+          payload <- readJsonFromBytes[T](msg.getPayload)
+          attributes <- readAttributes(msg.getAttributeMap)
+        } yield PubSubMessage(payload, attributes)
+
+        pubSubMessage match {
+          case Success(m) => Some(m)
+          case Failure(_) => // TODO: put error message into DLQ
+            ctx.output(dlq, msg.getPayload) // TODO: what about attributes
+            None
         }
-        PubSubMessage(payload, attributes)
       }
+
+    (results, sideOutputs(dlq))
+  }
+}
+
+object PubSubScioContextOps {
+  private def readAttributes(attributes: java.util.Map[String, String]): Try[Map[String, String]] = {
+    import scala.jdk.CollectionConverters._
+
+    val results = if (attributes == null) {
+      Map.empty[String, String]
+    } else {
+      attributes.asScala.toMap
+    }
+    Success(results)
   }
 }
 

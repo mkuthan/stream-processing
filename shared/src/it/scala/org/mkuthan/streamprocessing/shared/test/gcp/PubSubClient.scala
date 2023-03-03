@@ -44,7 +44,7 @@ object PubSubClient extends GcpProjectId with LazyLogging {
     val request = new Subscription()
       .setTopic(topicName)
       .setAckDeadlineSeconds(10) // 10 seconds is a minimum
-      .setRetainAckedMessages(true)
+      .setRetainAckedMessages(true) // keep tests messages for debug purposes
 
     val _ = pubsub.projects.subscriptions.create(subscriptionName, request).execute
   }

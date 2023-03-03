@@ -32,6 +32,7 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
         val results =
           readObjectLines(bucket.name, "GlobalWindow-pane-0-last-00000-of-00001.json")
             .map(readJsonFromString[ComplexClass])
+            .flatMap(_.toOption)
 
         results should contain.only(complexObject1, complexObject2)
       }
@@ -59,6 +60,7 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
         val results =
           readObjectLines(bucket.name, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
             .map(readJsonFromString[ComplexClass])
+            .flatMap(_.toOption)
 
         results should contain.only(complexObject1, complexObject2)
       }

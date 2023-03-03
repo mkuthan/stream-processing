@@ -36,6 +36,7 @@ final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[PubS
       }.saveAsCustomOutput(topic.id, io)
   }
 
+  // TODO: remove, smell
   def extractPayload()(implicit c: Coder[T]): SCollection[T] =
     self.map(_.payload)
 }

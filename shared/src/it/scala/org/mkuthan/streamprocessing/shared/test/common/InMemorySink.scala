@@ -11,4 +11,6 @@ case class InMemorySink[T](private val input: SCollection[T])(implicit c: Coder[
   InMemoryCache.put(id, input)
 
   def toSeq: Seq[T] = InMemoryCache.get(id)
+
+  def toElement: T = InMemoryCache.get(id)(0)
 }

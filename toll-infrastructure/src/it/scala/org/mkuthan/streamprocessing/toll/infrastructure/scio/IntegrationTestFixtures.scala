@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
+import java.nio.charset.StandardCharsets
+
 import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
@@ -55,4 +57,6 @@ object IntegrationTestFixtures {
     instantField = Instant.parse("2014-09-10T12:03:02Z"),
     localDateField = LocalDate.parse("2014-09-10")
   )
+
+  val invalidJson = "invalid json".getBytes(StandardCharsets.UTF_8)
 }

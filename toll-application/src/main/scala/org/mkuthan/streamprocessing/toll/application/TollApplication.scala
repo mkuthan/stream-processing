@@ -33,12 +33,12 @@ object TollApplication extends AllSyntax {
 
     val config = TollApplicationConfig.parse(args)
 
-    // TODO: handle DLQ
+    // TODO: handle deserialization errors
     val (boothEntriesRaw, _) = sc.subscribeJsonFromPubSub(config.entrySubscription)
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload())
     boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
-    // TODO: handle DLQ
+    // TODO: handle deserialization errors
     val (boothExitsRaw, _) = sc.subscribeJsonFromPubSub(config.exitSubscription)
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload())
     boothExistsDlq.saveToStorageAsJson(config.exitDlq)

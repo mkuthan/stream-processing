@@ -1,9 +1,10 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import scala.language.implicitConversions
+import java.util.{Map => JMap}
+
+import scala.jdk.CollectionConverters._
 import scala.util.Failure
 import scala.util.Success
-import scala.util.Try
 
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
@@ -22,7 +23,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
       subscription: PubSubSubscription[T],
       idAttribute: Option[String] = None,
       tsAttribute: Option[String] = None
-  ): (SCollection[PubSubMessage[T]], SCollection[Array[Byte]]) = {
+  ): (SCollection[PubSubMessage[T]], SCollection[PubSubDeserializationError[T]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()
       .fromSubscription(subscription.id)
@@ -30,42 +31,46 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
     idAttribute.foreach(io.withIdAttribute(_))
     tsAttribute.foreach(io.withTimestampAttribute(_))
 
-    val dlq = SideOutput[Array[Byte]]()
-
-    val (results, sideOutputs) = self
+    val messagesOrDeserializationErrors = self
       .customInput(subscription.id, io)
-      .withSideOutputs(dlq)
-      .flatMap { (msg, ctx) =>
-        val pubSubMessage = for {
-          payload <- readJsonFromBytes[T](msg.getPayload)
-          attributes <- readAttributes(msg.getAttributeMap)
-        } yield PubSubMessage(payload, attributes)
+      .map { msg =>
+        val payload = msg.getPayload()
+        val attributes = readAttributes(msg.getAttributeMap)
 
-        pubSubMessage match {
-          case Success(m) => Some(m)
-          case Failure(_) => // TODO: put error message into DLQ
-            ctx.output(dlq, msg.getPayload) // TODO: what about attributes
-            None
+        readJsonFromBytes[T](msg.getPayload) match {
+          case Success(deserialized) =>
+            Right(PubSubMessage(deserialized, attributes))
+          case Failure(ex) =>
+            Left(PubSubDeserializationError[T](payload, attributes, ex.getMessage))
         }
       }
 
-    (results, sideOutputs(dlq))
+    val deserializationErrorOutput = SideOutput[PubSubDeserializationError[T]]()
+
+    val (messages, sideOutputs) = messagesOrDeserializationErrors
+      .withSideOutputs(deserializationErrorOutput)
+      .flatMap {
+        case (Right(message), _) => Some(message)
+        case (Left(deserializationError), ctx) =>
+          ctx.output(deserializationErrorOutput, deserializationError)
+          None
+      }
+
+    (messages, sideOutputs(deserializationErrorOutput))
   }
 }
 
 object PubSubScioContextOps {
-  private def readAttributes(attributes: java.util.Map[String, String]): Try[Map[String, String]] = {
-    import scala.jdk.CollectionConverters._
-
-    val results = if (attributes == null) {
+  private def readAttributes(attributes: JMap[String, String]): Map[String, String] =
+    if (attributes == null) {
       Map.empty[String, String]
     } else {
       attributes.asScala.toMap
     }
-    Success(results)
-  }
 }
 
 trait ScioContextPubSubSyntax {
+  import scala.language.implicitConversions
+
   implicit def pubSubScioContextOps(sc: ScioContext): PubSubScioContextOps = new PubSubScioContextOps(sc)
 }

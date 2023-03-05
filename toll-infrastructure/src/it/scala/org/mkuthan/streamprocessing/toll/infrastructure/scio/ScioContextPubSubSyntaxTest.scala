@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
 import org.mkuthan.streamprocessing.shared.test.common.InMemorySink
 import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.common.RandomString._

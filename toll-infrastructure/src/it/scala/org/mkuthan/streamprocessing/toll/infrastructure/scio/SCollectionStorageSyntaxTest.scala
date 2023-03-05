@@ -1,10 +1,11 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import org.joda.time.Duration
-import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.scio.StorageScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString

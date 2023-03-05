@@ -3,7 +3,6 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio
 import java.util.{Map => JMap}
 
 import scala.jdk.CollectionConverters._
-import scala.language.implicitConversions
 import scala.util.Failure
 import scala.util.Success
 
@@ -32,25 +31,32 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
     idAttribute.foreach(io.withIdAttribute(_))
     tsAttribute.foreach(io.withTimestampAttribute(_))
 
-    val dlq = SideOutput[PubSubDeserializationError[T]]()
-
-    val (results, sideOutputs) = self
+    val messagesOrDeserializationErrors = self
       .customInput(subscription.id, io)
-      .withSideOutputs(dlq)
-      .flatMap { (msg, ctx) =>
+      .map { msg =>
         val payload = msg.getPayload()
         val attributes = readAttributes(msg.getAttributeMap)
 
         readJsonFromBytes[T](msg.getPayload) match {
           case Success(deserialized) =>
-            Some(PubSubMessage(deserialized, attributes))
+            Right(PubSubMessage(deserialized, attributes))
           case Failure(ex) =>
-            ctx.output(dlq, PubSubDeserializationError[T](payload, attributes, ex))
-            None
+            Left(PubSubDeserializationError[T](payload, attributes, ex.getMessage))
         }
       }
 
-    (results, sideOutputs(dlq))
+    val deserializationErrorOutput = SideOutput[PubSubDeserializationError[T]]()
+
+    val (messages, sideOutputs) = messagesOrDeserializationErrors
+      .withSideOutputs(deserializationErrorOutput)
+      .flatMap {
+        case (Right(message), _) => Some(message)
+        case (Left(deserializationError), ctx) =>
+          ctx.output(deserializationErrorOutput, deserializationError)
+          None
+      }
+
+    (messages, sideOutputs(deserializationErrorOutput))
   }
 }
 
@@ -64,5 +70,7 @@ object PubSubScioContextOps {
 }
 
 trait ScioContextPubSubSyntax {
+  import scala.language.implicitConversions
+
   implicit def pubSubScioContextOps(sc: ScioContext): PubSubScioContextOps = new PubSubScioContextOps(sc)
 }

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.shared.test.common
 
 import org.scalatest.concurrent.AbstractPatienceConfiguration
 import org.scalatest.concurrent.PatienceConfiguration

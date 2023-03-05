@@ -10,11 +10,11 @@ import org.apache.beam.sdk.io.TextIO
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
-final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T]) extends AnyVal {
+final class StorageSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
       location: StorageBucket[T],
       numShards: Int = 1
-  )(implicit c: Coder[T]): Unit = {
+  ): Unit = {
     val io = TextIO.write()
       .to(location.id)
       .withNumShards(numShards)
@@ -28,6 +28,6 @@ final class StorageSCollectionOps[T <: AnyRef](private val self: SCollection[T])
 }
 
 trait SCollectionStorageSyntax {
-  implicit def storageSCollectionOps[T <: AnyRef](sc: SCollection[T]): StorageSCollectionOps[T] =
+  implicit def storageSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): StorageSCollectionOps[T] =
     new StorageSCollectionOps(sc)
 }

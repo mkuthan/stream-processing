@@ -63,7 +63,7 @@ object TollApplication extends AllSyntax {
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
       .map(PubSubMessage(_, Map.empty)) // TODO: encapsulate somewhere
-      .publishToPubSub(config.vehiclesWithExpiredRegistrationTopic)
+      .publishJsonToPubSub(config.vehiclesWithExpiredRegistrationTopic)
 
     val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
     val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)

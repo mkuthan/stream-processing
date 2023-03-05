@@ -1,10 +1,10 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
 import org.joda.time.Duration
+import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.scio.StorageScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
@@ -21,9 +21,9 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
   behavior of "SCollectionStorageSyntax"
 
   it should "save file on GCS in global window" in withScioContext { sc =>
-    withBucket[ComplexClass] { bucket =>
+    withBucket[SampleClass] { bucket =>
       sc
-        .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
+        .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
         .saveToStorageAsJson(bucket)
 
       sc.run().waitUntilDone()
@@ -31,21 +31,21 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
       eventually {
         val results =
           readObjectLines(bucket.name, "GlobalWindow-pane-0-last-00000-of-00001.json")
-            .map(readJsonFromString[ComplexClass])
+            .map(readJsonFromString[SampleClass])
             .flatMap(_.toOption)
 
-        results should contain.only(complexObject1, complexObject2)
+        results should contain.only(SampleObject1, SampleObject2)
       }
     }
   }
 
   it should "save file on GCS in fixed window" in withScioContext { sc =>
-    withBucket[ComplexClass] { bucket =>
+    withBucket[SampleClass] { bucket =>
       sc
-        .parallelizeTimestamped[ComplexClass](
+        .parallelizeTimestamped[SampleClass](
           Seq(
-            (complexObject1, complexObject1.instantField),
-            (complexObject2, complexObject2.instantField)
+            (SampleObject1, SampleObject1.instantField),
+            (SampleObject2, SampleObject2.instantField)
           )
         )
         .withFixedWindows(Duration.standardSeconds(10))
@@ -59,10 +59,10 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
       eventually {
         val results =
           readObjectLines(bucket.name, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
-            .map(readJsonFromString[ComplexClass])
+            .map(readJsonFromString[SampleClass])
             .flatMap(_.toOption)
 
-        results should contain.only(complexObject1, complexObject2)
+        results should contain.only(SampleObject1, SampleObject2)
       }
     }
   }

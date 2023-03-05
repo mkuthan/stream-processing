@@ -2,11 +2,12 @@ package org.mkuthan.streamprocessing.shared.test.scio
 
 import org.scalatest.Suite
 
-import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 trait StorageScioContext extends GcpScioContext {
   this: Suite =>
+
+  import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 
   def withBucket[T](fn: StorageBucket[T] => Any): Any = {
     val bucketName = generateBucketName()

@@ -21,15 +21,15 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
 
   def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
       subscription: PubSubSubscription[T],
-      idAttribute: Option[String] = None,
-      tsAttribute: Option[String] = None
+      idAttribute: Option[PubSubAttribute.Id] = None,
+      tsAttribute: Option[PubSubAttribute.Timestamp] = None
   ): (SCollection[PubSubMessage[T]], SCollection[PubSubDeserializationError[T]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()
       .fromSubscription(subscription.id)
 
-    idAttribute.foreach(io.withIdAttribute(_))
-    tsAttribute.foreach(io.withTimestampAttribute(_))
+    idAttribute.foreach(attribute => io.withIdAttribute(attribute.name))
+    tsAttribute.foreach(attribute => io.withTimestampAttribute(attribute.name))
 
     val messagesOrDeserializationErrors = self
       .customInput(subscription.id, io)

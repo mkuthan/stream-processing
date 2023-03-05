@@ -5,6 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.common.InMemorySink
+import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
 
@@ -23,12 +24,12 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
   // TODO: implement writeTable to prepare test data
   ignore should "load from table" in withScioContext { sc =>
     withDataset { datasetName =>
-      withTable[SimpleClass](datasetName) { bigQueryTable =>
+      withTable[SampleClass](datasetName) { bigQueryTable =>
         writeTable(
           bigQueryTable.datasetName,
           bigQueryTable.tableName,
-          simpleClassBigQueryType.toAvro(simpleObject1),
-          simpleClassBigQueryType.toAvro(simpleObject2)
+          SampleClassBigQueryType.toAvro(SampleObject1),
+          SampleClassBigQueryType.toAvro(SampleObject2)
         )
 
         val results = sc
@@ -39,7 +40,7 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
         sc.run().waitUntilDone()
 
         eventually {
-          resultsSink.toSeq should contain.only(simpleObject1, simpleObject2)
+          resultsSink.toSeq should contain.only(SampleObject1, SampleObject2)
         }
       }
     }

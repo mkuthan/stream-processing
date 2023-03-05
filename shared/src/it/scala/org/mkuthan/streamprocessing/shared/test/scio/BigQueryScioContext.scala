@@ -7,11 +7,12 @@ import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 
 import org.scalatest.Suite
 
-import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 
 trait BigQueryScioContext extends GcpScioContext {
   this: Suite =>
+
+  import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 
   def withDataset(fn: String => Any): Any = {
     val datasetName = generateDatasetName()

@@ -9,26 +9,7 @@ import org.joda.time.LocalDate
 
 object IntegrationTestFixtures {
   @BigQueryType.toTable
-  final case class SimpleClass(
-      stringField: String,
-      intField: Int
-  )
-
-  val simpleClassBigQueryType = BigQueryType[SimpleClass]
-  val simpleClassBigQuerySchema = simpleClassBigQueryType.schema
-
-  val simpleObject1 = SimpleClass(
-    stringField = "simple 1",
-    intField = 1
-  )
-
-  val simpleObject2 = SimpleClass(
-    stringField = "simple 2",
-    intField = 2
-  )
-
-  @BigQueryType.toTable
-  final case class ComplexClass(
+  final case class SampleClass(
       stringField: String,
       optionalStringField: Option[String],
       intField: Int,
@@ -37,10 +18,10 @@ object IntegrationTestFixtures {
       localDateField: LocalDate
   )
 
-  val complexClassBigQueryType = BigQueryType[ComplexClass]
-  val complexClassBigQuerySchema = complexClassBigQueryType.schema
+  val SampleClassBigQueryType = BigQueryType[SampleClass]
+  val SampleClassBigQuerySchema = SampleClassBigQueryType.schema
 
-  val complexObject1 = ComplexClass(
+  val SampleObject1 = SampleClass(
     stringField = "complex 1",
     optionalStringField = Some("complex 1"),
     intField = 1,
@@ -49,7 +30,7 @@ object IntegrationTestFixtures {
     localDateField = LocalDate.parse("2014-09-10")
   )
 
-  val complexObject2 = ComplexClass(
+  val SampleObject2 = SampleClass(
     stringField = "complex 2",
     optionalStringField = None,
     intField = 2,
@@ -58,5 +39,5 @@ object IntegrationTestFixtures {
     localDateField = LocalDate.parse("2014-09-10")
   )
 
-  val invalidJson = "invalid json".getBytes(StandardCharsets.UTF_8)
+  val InvalidJson = "invalid json".getBytes(StandardCharsets.UTF_8)
 }

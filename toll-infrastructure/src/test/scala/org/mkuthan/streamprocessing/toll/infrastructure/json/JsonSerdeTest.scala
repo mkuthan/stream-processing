@@ -9,18 +9,15 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers {
 
   import JsonSerdeTest._
 
-  private val anySampleObject = Sample("a", 0, 0.0, Instant.EPOCH)
-  private val anySampleJson = """{"f1":"a","f2":0,"f3":0.0,"f4":0}"""
-
   behavior of "JsonSerde"
 
   it should "serialize sample object" in {
-    JsonSerde.writeJsonAsString(anySampleObject) should be(anySampleJson)
+    JsonSerde.writeJsonAsString(SampleObject) should be(SampleJson)
   }
 
   it should "deserialize sample object" in {
-    val result = JsonSerde.readJsonFromString[Sample](anySampleJson)
-    result.success.value should be(anySampleObject)
+    val result = JsonSerde.readJsonFromString[Sample](SampleJson)
+    result.success.value should be(SampleObject)
   }
 
   it should "not deserialize unknown object" in {
@@ -31,6 +28,8 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers {
 }
 
 object JsonSerdeTest {
-  // define all types used in domain
+  private val SampleObject = Sample("a", 0, 0.0, Instant.EPOCH)
+  private val SampleJson = """{"f1":"a","f2":0,"f3":0.0,"f4":0}"""
+
   final case class Sample(f1: String, f2: Int, f3: Double, f4: Instant)
 }

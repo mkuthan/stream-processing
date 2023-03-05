@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio
 
-import scala.language.implicitConversions
-
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
@@ -12,36 +10,42 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
-final class PubSubSCollectionOps[T <: AnyRef](private val self: SCollection[PubSubMessage[T]]) extends AnyVal {
+final class PubSubSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubSubMessage[T]]) {
 
   implicit def messageCoder: Coder[PubsubMessage] =
     Coder.beam(PubsubMessageWithAttributesCoder.of())
 
-  // TODO: add json in the method name
-  def publishToPubSub(
-      topic: PubSubTopic[T]
-  )(implicit c: Coder[PubSubMessage[T]]): Unit = {
+  def publishJsonToPubSub(
+      topic: PubSubTopic[T],
+      idAttribute: Option[PubSubAttribute.Id] = None,
+      tsAttribute: Option[PubSubAttribute.Timestamp] = None
+  ): Unit = {
     import scala.jdk.CollectionConverters._
 
     val io = PubsubIO
       .writeMessages()
       .to(topic.id)
 
-    // TODO: handle id/ts attributes, perhaps two functions T => id/ts attributes needed
-    val _ = self
+    idAttribute.foreach(attribute => io.withIdAttribute(attribute.name))
+    tsAttribute.foreach(attribute => io.withTimestampAttribute(attribute.name))
+
+    val serializedMessages = self
       .map { msg =>
         val payload = writeJsonAsBytes[T](msg.payload)
         val attributes = msg.attributes.asJava
         new PubsubMessage(payload, attributes)
-      }.saveAsCustomOutput(topic.id, io)
+      }
+
+    serializedMessages.saveAsCustomOutput(topic.id, io)
   }
 
-  // TODO: remove, smell
-  def extractPayload()(implicit c: Coder[T]): SCollection[T] =
+  def extractPayload(): SCollection[T] =
     self.map(_.payload)
 }
 
 trait SCollectionPubSubSyntax {
-  implicit def pubSubSCollectionOps[T <: AnyRef](sc: SCollection[PubSubMessage[T]]): PubSubSCollectionOps[T] =
+  import scala.language.implicitConversions
+
+  implicit def pubSubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[PubSubMessage[T]]): PubSubSCollectionOps[T] =
     new PubSubSCollectionOps(sc)
 }

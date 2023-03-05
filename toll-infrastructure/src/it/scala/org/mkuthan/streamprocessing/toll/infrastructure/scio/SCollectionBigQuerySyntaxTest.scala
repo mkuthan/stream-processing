@@ -4,6 +4,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
 
@@ -18,39 +19,20 @@ class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
 
   behavior of "SCollectionBigQuerySyntax"
 
-  it should "save into table simple object" in withScioContext { sc =>
+  it should "save into table" in withScioContext { sc =>
     withDataset { datasetName =>
-      withTable[SimpleClass](datasetName) { bigQueryTable =>
+      withTable[SampleClass](datasetName) { bigQueryTable =>
         sc
-          .parallelize[SimpleClass](Seq(simpleObject1, simpleObject2))
+          .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
           .saveToBigQuery(bigQueryTable)
 
         sc.run().waitUntilDone()
 
         eventually {
           val results = readTable(bigQueryTable.datasetName, bigQueryTable.tableName)
-            .map(simpleClassBigQueryType.fromAvro)
+            .map(SampleClassBigQueryType.fromAvro)
 
-          results should contain.only(simpleObject1, simpleObject2)
-        }
-      }
-    }
-  }
-
-  it should "save into table complex object" in withScioContext { sc =>
-    withDataset { datasetName =>
-      withTable[ComplexClass](datasetName) { bigQueryTable =>
-        sc
-          .parallelize[ComplexClass](Seq(complexObject1, complexObject2))
-          .saveToBigQuery(bigQueryTable)
-
-        sc.run().waitUntilDone()
-
-        eventually {
-          val results = readTable(bigQueryTable.datasetName, bigQueryTable.tableName)
-            .map(complexClassBigQueryType.fromAvro)
-
-          results should contain.only(complexObject1, complexObject2)
+          results should contain.only(SampleObject1, SampleObject2)
         }
       }
     }

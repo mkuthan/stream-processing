@@ -60,7 +60,7 @@ class TollApplicationTest extends PipelineSpec
           .advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://entry_dlq")) { results =>
-        results should containSingleValue(writeJsonAsString(tollBoothEntryRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothEntryDecodingError))
       }
       .inputStream(
         CustomIO[PubsubMessage]("projects/any-id/subscriptions/exit-subscription"),
@@ -72,7 +72,7 @@ class TollApplicationTest extends PipelineSpec
           ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>
-        results should containSingleValue(writeJsonAsString(tollBoothExitRawInvalid))
+        results should containSingleValue(writeJsonAsString(tollBoothExitDecodingError))
       }
       .input(
         BigQueryTyped.Storage[VehicleRegistration.Raw](

@@ -30,7 +30,7 @@ final class TollBoothExitTest extends PipelineSpec with TollBoothExitFixture {
       val (results, dlq) = decode(sc.testStream(inputs))
 
       results should beEmpty
-      dlq should containSingleValue(tollBoothExitRawInvalid)
+      dlq should containSingleValue(tollBoothExitDecodingError)
     }
 
     val result = run.waitUntilDone()

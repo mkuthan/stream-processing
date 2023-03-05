@@ -39,16 +39,16 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[Raw]) = {
-    val dlq = SideOutput[Raw]()
+  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[TollBoothEntryDecodingError]) = {
+    val dlq = SideOutput[TollBoothEntryDecodingError]()
     val (results, sideOutputs) = inputs
       .withSideOutputs(dlq)
       .flatMap { case (input, ctx) =>
         try
           Some(fromRaw(input))
         catch {
-          case NonFatal(_) =>
-            ctx.output(dlq, input)
+          case NonFatal(ex) =>
+            ctx.output(dlq, TollBoothEntryDecodingError(input, ex.getMessage()))
             DlqCounter.inc()
             None
         }

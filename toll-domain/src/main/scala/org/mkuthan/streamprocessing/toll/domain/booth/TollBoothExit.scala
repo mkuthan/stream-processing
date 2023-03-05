@@ -31,16 +31,16 @@ object TollBoothExit {
       license_plate: String
   )
 
-  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothExit], SCollection[Raw]) = {
-    val dlq = SideOutput[Raw]()
+  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothExit], SCollection[TollBoothExitDecodingError]) = {
+    val dlq = SideOutput[TollBoothExitDecodingError]()
     val (results, sideOutputs) = inputs
       .withSideOutputs(dlq)
       .flatMap { case (input, ctx) =>
         try
           Some(fromRaw(input))
         catch {
-          case NonFatal(_) =>
-            ctx.output(dlq, input)
+          case NonFatal(ex) =>
+            ctx.output(dlq, TollBoothExitDecodingError(input, ex.getMessage()))
             DlqCounter.inc()
             None
         }

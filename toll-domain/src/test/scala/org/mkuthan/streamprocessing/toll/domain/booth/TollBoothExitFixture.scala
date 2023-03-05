@@ -14,6 +14,11 @@ trait TollBoothExitFixture {
 
   val tollBoothExitRawInvalid = anyTollBoothExitRaw.copy(exit_time = "invalid time")
 
+  val tollBoothExitDecodingError = TollBoothExitDecodingError(
+    data = tollBoothExitRawInvalid,
+    error = "Invalid format: \"invalid time\""
+  )
+
   val anyTollBoothExit = TollBoothExit(
     id = TollBoothId("1"),
     exitTime = Instant.parse("2014-09-10T12:03:00Z"),

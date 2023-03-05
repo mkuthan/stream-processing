@@ -30,7 +30,7 @@ final class TollBoothEntryTest extends PipelineSpec with TollBoothEntryFixture {
       val (results, dlq) = decode(sc.testStream(inputs))
 
       results should beEmpty
-      dlq should containSingleValue(tollBoothEntryRawInvalid)
+      dlq should containSingleValue(tollBoothEntryDecodingError)
     }
 
     val result = run.waitUntilDone()

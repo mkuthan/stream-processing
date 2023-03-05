@@ -21,6 +21,11 @@ trait TollBoothEntryFixture {
 
   val tollBoothEntryRawInvalid = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
 
+  val tollBoothEntryDecodingError = TollBoothEntryDecodingError(
+    data = tollBoothEntryRawInvalid,
+    error = "Invalid format: \"invalid time\""
+  )
+
   val tollBoothEntryRawWithoutExit = anyTollBoothEntryRaw.copy(license_plate = "other license plate")
 
   val anyTollBoothEntry = TollBoothEntry(

@@ -36,7 +36,7 @@ final class PubSubSCollectionOps[T <: AnyRef: Coder](private val self: SCollecti
         new PubsubMessage(payload, attributes)
       }
 
-    serializedMessages.saveAsCustomOutput(topic.id, io)
+    val _ = serializedMessages.saveAsCustomOutput(topic.id, io)
   }
 
   def extractPayload(): SCollection[T] =

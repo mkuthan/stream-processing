@@ -2,7 +2,6 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import scala.util.control.NonFatal
 
-import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.ScioMetrics
@@ -11,6 +10,7 @@ import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
+import org.mkuthan.streamprocessing.toll.shared.DeadLetter
 
 final case class TollBoothEntry(
     id: TollBoothId,
@@ -21,8 +21,7 @@ final case class TollBoothEntry(
 
 object TollBoothEntry {
 
-  implicit val CoderCache: Coder[TollBoothEntry] = Coder.gen
-  implicit val CoderCacheRaw: Coder[TollBoothEntry.Raw] = Coder.gen
+  type DeadLetterRaw = DeadLetter[Raw]
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
 
@@ -39,8 +38,8 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[TollBoothEntryDecodingError]) = {
-    val dlq = SideOutput[TollBoothEntryDecodingError]()
+  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[DeadLetterRaw]) = {
+    val dlq = SideOutput[DeadLetterRaw]()
     val (results, sideOutputs) = inputs
       .withSideOutputs(dlq)
       .flatMap { case (input, ctx) =>
@@ -48,7 +47,7 @@ object TollBoothEntry {
           Some(fromRaw(input))
         catch {
           case NonFatal(ex) =>
-            ctx.output(dlq, TollBoothEntryDecodingError(input, ex.getMessage()))
+            ctx.output(dlq, DeadLetter(input, ex.getMessage()))
             DlqCounter.inc()
             None
         }

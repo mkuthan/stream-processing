@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
+import org.mkuthan.streamprocessing.toll.shared.DeadLetter
 
 trait TollBoothEntryFixture {
 
@@ -21,7 +22,7 @@ trait TollBoothEntryFixture {
 
   val tollBoothEntryRawInvalid = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
 
-  val tollBoothEntryDecodingError = TollBoothEntryDecodingError(
+  val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Raw](
     data = tollBoothEntryRawInvalid,
     error = "Invalid format: \"invalid time\""
   )

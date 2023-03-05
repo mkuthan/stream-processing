@@ -3,10 +3,8 @@ package org.mkuthan.streamprocessing.toll.application
 import com.spotify.scio.Args
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryDecodingError
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitDecodingError
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
@@ -18,9 +16,9 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
 final case class TollApplicationConfig(
     entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
-    entryDlq: StorageBucket[TollBoothEntryDecodingError],
+    entryDlq: StorageBucket[TollBoothEntry.DeadLetterRaw],
     exitSubscription: PubSubSubscription[TollBoothExit.Raw],
-    exitDlq: StorageBucket[TollBoothExitDecodingError],
+    exitDlq: StorageBucket[TollBoothExit.DeadLetterRaw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
     entryStatsTable: BigQueryTable[TollBoothEntryStats.Raw],

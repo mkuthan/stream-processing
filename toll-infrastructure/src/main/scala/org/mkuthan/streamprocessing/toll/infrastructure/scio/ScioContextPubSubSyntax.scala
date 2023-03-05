@@ -14,6 +14,7 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubDeadLetter
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
 
 final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
@@ -23,7 +24,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
       subscription: PubSubSubscription[T],
       idAttribute: Option[PubSubAttribute.Id] = None,
       tsAttribute: Option[PubSubAttribute.Timestamp] = None
-  ): (SCollection[PubSubMessage[T]], SCollection[PubSubDeserializationError[T]]) = {
+  ): (SCollection[PubSubMessage[T]], SCollection[PubSubDeadLetter[T]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()
       .fromSubscription(subscription.id)
@@ -41,11 +42,11 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
           case Success(deserialized) =>
             Right(PubSubMessage(deserialized, attributes))
           case Failure(ex) =>
-            Left(PubSubDeserializationError[T](payload, attributes, ex.getMessage))
+            Left(PubSubDeadLetter[T](payload, attributes, ex.getMessage))
         }
       }
 
-    val deserializationErrorOutput = SideOutput[PubSubDeserializationError[T]]()
+    val deserializationErrorOutput = SideOutput[PubSubDeadLetter[T]]()
 
     val (messages, sideOutputs) = messagesOrDeserializationErrors
       .withSideOutputs(deserializationErrorOutput)

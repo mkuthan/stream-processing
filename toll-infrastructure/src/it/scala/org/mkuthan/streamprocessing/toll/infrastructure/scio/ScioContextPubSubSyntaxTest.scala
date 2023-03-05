@@ -38,7 +38,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
         val attr3 = Map(DefaultId.name -> randomString(), DefaultTimestamp.name -> Instant.now().toString)
         publishMessage(topic.id, InvalidJson, attr3)
 
-        val (messages, deserializationErrors) = sc
+        val (messages, dlq) = sc
           .subscribeJsonFromPubSub(
             subscription,
             Some(DefaultId),
@@ -46,7 +46,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
           )
 
         val messagesSink = InMemorySink(messages)
-        val deserializationErrorsSink = InMemorySink(deserializationErrors)
+        val dlqSink = InMemorySink(dlq)
 
         val run = sc.run()
 
@@ -56,7 +56,7 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
             PubSubMessage(SampleObject2, attr2)
           )
 
-          val error = deserializationErrorsSink.toElement
+          val error = dlqSink.toElement
           error.payload should be(InvalidJson)
           error.attributes should be(attr3)
           error.error should startWith("Unrecognized token 'invalid'")

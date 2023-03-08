@@ -12,22 +12,17 @@ import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 final class PubSubSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubSubMessage[T]]) {
 
-  implicit def messageCoder: Coder[PubsubMessage] =
+  implicit def pubsubMessageCoder: Coder[PubsubMessage] =
     Coder.beam(PubsubMessageWithAttributesCoder.of())
 
   def publishJsonToPubSub(
-      topic: PubSubTopic[T],
-      idAttribute: Option[PubSubAttribute.Id] = None,
-      tsAttribute: Option[PubSubAttribute.Timestamp] = None
+      topic: PubSubTopic[T]
   ): Unit = {
     import scala.jdk.CollectionConverters._
 
     val io = PubsubIO
       .writeMessages()
       .to(topic.id)
-
-    idAttribute.foreach(attribute => io.withIdAttribute(attribute.name))
-    tsAttribute.foreach(attribute => io.withTimestampAttribute(attribute.name))
 
     val serializedMessages = self
       .map { msg =>

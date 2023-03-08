@@ -10,7 +10,7 @@ import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
-import org.mkuthan.streamprocessing.toll.shared.DeadLetter
+import org.mkuthan.streamprocessing.toll.shared.core.DeadLetter
 
 final case class TollBoothEntry(
     id: TollBoothId,

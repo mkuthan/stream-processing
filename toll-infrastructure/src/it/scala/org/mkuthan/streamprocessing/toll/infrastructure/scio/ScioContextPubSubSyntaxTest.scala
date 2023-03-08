@@ -7,10 +7,9 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.common.InMemorySink
 import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.test.common.RandomString._
+import org.mkuthan.streamprocessing.shared.test.common.RandomString.randomString
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubAttribute.DefaultId
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubAttribute.DefaultTimestamp
 
@@ -29,21 +28,14 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
   it should "subscribe JSON messages" in withScioContextInBackground { sc =>
     withTopic[SampleClass] { topic =>
       withSubscription[SampleClass](topic.id) { subscription =>
-        val attr1 = Map(DefaultId.name -> randomString(), DefaultTimestamp.name -> Instant.now().toString)
-        publishMessage(topic.id, writeJsonAsBytes(SampleObject1), attr1)
+        publishMessages(
+          topic.id,
+          (SampleJson1, SampleMap1),
+          (SampleJson2, SampleMap2),
+          (InvalidJson, SampleMap3)
+        )
 
-        val attr2 = Map(DefaultId.name -> randomString(), DefaultTimestamp.name -> Instant.now().toString)
-        publishMessage(topic.id, writeJsonAsBytes(SampleObject2), attr2)
-
-        val attr3 = Map(DefaultId.name -> randomString(), DefaultTimestamp.name -> Instant.now().toString)
-        publishMessage(topic.id, InvalidJson, attr3)
-
-        val (messages, dlq) = sc
-          .subscribeJsonFromPubSub(
-            subscription,
-            Some(DefaultId),
-            Some(DefaultTimestamp)
-          )
+        val (messages, dlq) = sc.subscribeJsonFromPubSub(subscription)
 
         val messagesSink = InMemorySink(messages)
         val dlqSink = InMemorySink(dlq)
@@ -52,14 +44,73 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
 
         eventually {
           messagesSink.toSeq should contain.only(
-            PubSubMessage(SampleObject1, attr1),
-            PubSubMessage(SampleObject2, attr2)
+            PubSubMessage(SampleObject1, SampleMap1),
+            PubSubMessage(SampleObject2, SampleMap2)
           )
 
           val error = dlqSink.toElement
           error.payload should be(InvalidJson)
-          error.attributes should be(attr3)
+          error.attributes should be(SampleMap3)
           error.error should startWith("Unrecognized token 'invalid'")
+        }
+
+        run.pipelineResult.cancel()
+      }
+    }
+  }
+
+  it should "subscribe JSON messages with id attribute" in withScioContextInBackground { sc =>
+    withTopic[SampleClass] { topic =>
+      withSubscription[SampleClass](topic.id) { subscription =>
+        val id = randomString()
+        val attributes = SampleMap1 + (DefaultId.name -> id)
+
+        publishMessages(
+          topic.id,
+          (SampleJson1, attributes),
+          (SampleJson1, attributes), // duplicate
+          (SampleJson1, attributes) // duplicate
+        )
+
+        val (messages, _) = sc.subscribeJsonFromPubSub(
+          subscription = subscription,
+          idAttribute = Some(DefaultId)
+        )
+
+        val messagesSink = InMemorySink(messages)
+
+        val run = sc.run()
+
+        eventually {
+          messagesSink.toSeq should contain.only(PubSubMessage(SampleObject1, attributes))
+        }
+
+        run.pipelineResult.cancel()
+      }
+    }
+  }
+
+  it should "subscribe JSON messages with timestamp attribute" in withScioContextInBackground { sc =>
+    withTopic[SampleClass] { topic =>
+      withSubscription[SampleClass](topic.id) { subscription =>
+        val timestamp = Instant.now()
+        val attributes = SampleMap1 + (DefaultTimestamp.name -> timestamp.toString)
+
+        publishMessages(topic.id, (SampleJson1, attributes))
+
+        val (messages, _) = sc.subscribeJsonFromPubSub(
+          subscription = subscription,
+          tsAttribute = Some(DefaultTimestamp)
+        )
+
+        val messagesSink = InMemorySink(messages.withTimestamp)
+
+        val run = sc.run()
+
+        eventually {
+          val (msg, ts) = messagesSink.toElement
+          msg should be(PubSubMessage(SampleObject1, attributes))
+          ts should be(timestamp)
         }
 
         run.pipelineResult.cancel()

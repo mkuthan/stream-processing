@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.shared.test.gcp
 
-import java.{util => ju}
-
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
@@ -68,15 +66,18 @@ object PubSubClient extends GcpProjectId with LazyLogging {
     }
   }
 
-  def publishMessage(topicName: String, payload: Array[Byte], attributes: Map[String, String]): Unit = {
-    logger.debug("Publish message to: '{}'", topicName)
+  def publishMessages(topicName: String, messages: (Array[Byte], Map[String, String])*): Unit = {
+    logger.debug("Publish messages to: '{}'", topicName)
 
-    val message = new PubsubMessage()
-      .setAttributes(attributes.asJava)
-      .encodeData(payload)
+    val pubsubMessages = messages.map {
+      case (payload, attributes) =>
+        new PubsubMessage()
+          .setAttributes(attributes.asJava)
+          .encodeData(payload)
+    }
 
     val request = new PublishRequest()
-      .setMessages(ju.List.of(message))
+      .setMessages(pubsubMessages.asJava)
 
     val _ = pubsub.projects().topics().publish(topicName, request).execute
   }

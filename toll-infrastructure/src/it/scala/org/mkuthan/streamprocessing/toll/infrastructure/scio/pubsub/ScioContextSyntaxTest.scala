@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
 import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
@@ -10,20 +10,19 @@ import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.common.RandomString.randomString
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubAttribute.DefaultId
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubAttribute.DefaultTimestamp
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultId
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultTimestamp
 
 class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with PubSubScioContext
-    with ScioContextPubSubSyntax
-    with SCollectionStorageSyntax {
+    with PubSubScioContext {
 
   import IntegrationTestFixtures._
 
-  behavior of "ScioContextPubSubSyntaxTest"
+  behavior of "PubSub ScioContext syntax"
 
   it should "subscribe JSON messages" in withScioContextInBackground { sc =>
     withTopic[SampleClass] { topic =>

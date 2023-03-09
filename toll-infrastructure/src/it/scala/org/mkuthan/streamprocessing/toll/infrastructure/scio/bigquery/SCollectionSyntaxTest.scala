@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
@@ -7,17 +7,17 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
 class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with BigQueryScioContext
-    with SCollectionBigQuerySyntax {
+    with BigQueryScioContext {
 
   import IntegrationTestFixtures._
 
-  behavior of "SCollectionBigQuerySyntax"
+  behavior of "BigQuery SCollection syntax"
 
   it should "save into table" in withScioContext { sc =>
     withDataset { datasetName =>

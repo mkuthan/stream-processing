@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe.TypeTag
@@ -12,13 +12,13 @@ import com.spotify.scio.ScioContext
 
 import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 
-final class BigQueryScioContextOps(private val self: ScioContext) extends AnyVal {
+private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
   def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
       table: BigQueryTable[T]
   ): SCollection[T] =
     self.typedBigQueryStorage(table.spec)
 }
 
-trait ScioContextBigQuerySyntax {
-  implicit def bigQueryScioContextOps(sc: ScioContext): BigQueryScioContextOps = new BigQueryScioContextOps(sc)
+trait ScioContextSyntax {
+  implicit def bigQueryScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
 }

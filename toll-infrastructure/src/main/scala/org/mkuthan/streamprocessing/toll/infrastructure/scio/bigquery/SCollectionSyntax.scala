@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
@@ -9,7 +9,7 @@ import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
 
-final class BigQuerySCollectionOps[T <: HasAnnotation](private val self: SCollection[T])
+private[bigquery] final class SCollectionOps[T <: HasAnnotation](private val self: SCollection[T])
     extends AnyVal {
 
   import com.spotify.scio.bigquery._
@@ -19,9 +19,9 @@ final class BigQuerySCollectionOps[T <: HasAnnotation](private val self: SCollec
   }
 }
 
-trait SCollectionBigQuerySyntax {
+trait SCollectionSyntax {
   import scala.language.implicitConversions
 
-  implicit def bigQuerySCollectionOps[T <: HasAnnotation](sc: SCollection[T]): BigQuerySCollectionOps[T] =
-    new BigQuerySCollectionOps(sc)
+  implicit def bigQuerySCollectionOps[T <: HasAnnotation](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sc)
 }

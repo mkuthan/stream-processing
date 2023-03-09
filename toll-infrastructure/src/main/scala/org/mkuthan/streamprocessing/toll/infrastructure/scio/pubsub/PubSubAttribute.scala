@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO.Read
 

@@ -11,8 +11,8 @@ import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.AllSyntax
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubMessage
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubMessage
 
 /**
  * A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world.
@@ -24,7 +24,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubMessage
  * See:
  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
  */
-object TollApplication extends AllSyntax {
+object TollApplication {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
@@ -35,12 +35,12 @@ object TollApplication extends AllSyntax {
 
     // TODO: handle deserialization errors
     val (boothEntriesRaw, _) = sc.subscribeJsonFromPubSub(config.entrySubscription)
-    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload())
+    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload)
     boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
     // TODO: handle deserialization errors
     val (boothExitsRaw, _) = sc.subscribeJsonFromPubSub(config.exitSubscription)
-    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload())
+    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload)
     boothExistsDlq.saveToStorageAsJson(config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration

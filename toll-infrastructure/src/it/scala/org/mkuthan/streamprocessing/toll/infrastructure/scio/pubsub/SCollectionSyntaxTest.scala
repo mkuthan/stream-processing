@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
 import scala.collection.mutable
 
@@ -10,17 +10,18 @@ import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubMessage
 
-class SCollectionPubSubSyntaxTest extends AnyFlatSpec
+class SCollectionSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with PubSubScioContext
-    with SCollectionPubSubSyntax {
+    with PubSubScioContext {
 
   import IntegrationTestFixtures._
 
-  behavior of "SCollectionPubSubSyntax"
+  behavior of "PubSub SCollection syntax"
 
   it should "publish JSON messages" in withScioContext { sc =>
     withTopic[SampleClass] { topic =>

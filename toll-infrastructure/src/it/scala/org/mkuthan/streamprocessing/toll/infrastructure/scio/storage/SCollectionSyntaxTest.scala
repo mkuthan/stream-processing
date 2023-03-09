@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.storage
 
 import org.joda.time.Duration
 import org.scalatest.concurrent.Eventually
@@ -9,17 +9,17 @@ import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.scio.StorageScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
 final class SCollectionStorageSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with StorageScioContext
-    with SCollectionStorageSyntax {
+    with StorageScioContext {
 
   import IntegrationTestFixtures._
 
-  behavior of "SCollectionStorageSyntax"
+  behavior of "Storage SCollection syntax"
 
   it should "save file on GCS in global window" in withScioContext { sc =>
     withBucket[SampleClass] { bucket =>

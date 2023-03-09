@@ -9,8 +9,8 @@ import com.spotify.scio.ScioMetrics
 import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.toll.domain.common.DeadLetter
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
-import org.mkuthan.streamprocessing.toll.shared.core.DeadLetter
 
 final case class TollBoothExit(
     id: TollBoothId,

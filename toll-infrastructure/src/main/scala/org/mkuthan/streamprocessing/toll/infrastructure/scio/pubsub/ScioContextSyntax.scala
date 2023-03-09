@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
 import java.util.{Map => JMap}
 
@@ -14,12 +14,13 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.PubSubDeadLetter
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubDeadLetter
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubMessage
 import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubSubscription
-import org.mkuthan.streamprocessing.toll.shared.core.SCollectionSyntax._
 
-final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
-  import PubSubScioContextOps._
+private[pubsub] final class ScioContextOps(private val self: ScioContext) extends AnyVal {
+  import ScioContextOps._
 
   def subscribeJsonFromPubSub[T <: AnyRef: Coder: Manifest](
       subscription: PubSubSubscription[T],
@@ -49,7 +50,7 @@ final class PubSubScioContextOps(private val self: ScioContext) extends AnyVal {
   }
 }
 
-object PubSubScioContextOps {
+private[pubsub] object ScioContextOps {
   private def readAttributes(attributes: JMap[String, String]): Map[String, String] =
     if (attributes == null) {
       Map.empty[String, String]
@@ -58,8 +59,8 @@ object PubSubScioContextOps {
     }
 }
 
-trait ScioContextPubSubSyntax {
+trait ScioContextSyntax {
   import scala.language.implicitConversions
 
-  implicit def pubSubScioContextOps(sc: ScioContext): PubSubScioContextOps = new PubSubScioContextOps(sc)
+  implicit def pubSubScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
 }

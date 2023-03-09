@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.storage
 
 import scala.language.implicitConversions
 
@@ -10,7 +10,7 @@ import org.apache.beam.sdk.io.TextIO
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 import org.mkuthan.streamprocessing.toll.shared.configuration.StorageBucket
 
-final class StorageSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
+private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
       location: StorageBucket[T],
       numShards: Int = 1
@@ -27,7 +27,7 @@ final class StorageSCollectionOps[T <: AnyRef: Coder](private val self: SCollect
   }
 }
 
-trait SCollectionStorageSyntax {
-  implicit def storageSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): StorageSCollectionOps[T] =
-    new StorageSCollectionOps(sc)
+trait SCollectionSyntax {
+  implicit def storageSCollectionOps[T <: AnyRef: Coder](sColl: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sColl)
 }

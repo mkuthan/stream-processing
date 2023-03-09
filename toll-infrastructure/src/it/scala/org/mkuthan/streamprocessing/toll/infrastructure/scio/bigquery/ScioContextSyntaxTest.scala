@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.infrastructure.scio
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
@@ -8,18 +8,17 @@ import org.mkuthan.streamprocessing.shared.test.common.InMemorySink
 import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.scio.BigQueryScioContext
+import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
+class ScioContextSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with BigQueryScioContext
-    with ScioContextBigQuerySyntax
-    with SCollectionStorageSyntax {
+    with BigQueryScioContext {
 
   import IntegrationTestFixtures._
 
-  behavior of "SCollectionBigQuerySyntax"
+  behavior of "BigQuery ScioContext syntax"
 
   // TODO: implement writeTable to prepare test data
   ignore should "load from table" in withScioContext { sc =>
@@ -32,8 +31,7 @@ class ScioContextBigQuerySyntaxTest extends AnyFlatSpec
           SampleClassBigQueryType.toAvro(SampleObject2)
         )
 
-        val results = sc
-          .loadFromBigQuery(bigQueryTable)
+        val results = sc.loadFromBigQuery(bigQueryTable)
 
         val resultsSink = InMemorySink(results)
 

@@ -27,7 +27,9 @@ lazy val shared = (project in file("shared"))
       scalaTest % Test,
       scalaTest % IntegrationTest,
       scalaTestPlusScalaCheck % Test,
-      scalaTestPlusScalaCheck % IntegrationTest
+      scalaTestPlusScalaCheck % IntegrationTest,
+      scalaCheckDateTime % Test,
+      scalaCheckDateTime % IntegrationTest
     )
   )
 

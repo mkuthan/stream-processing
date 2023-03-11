@@ -1,7 +1,11 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.json
 
+import com.fortysevendeg.scalacheck.datetime.instances.joda._
+import com.fortysevendeg.scalacheck.datetime.GenDateTime._
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.Instant
-import org.joda.time.LocalDate
+import org.joda.time.Period
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalatest.flatspec.AnyFlatSpec
@@ -32,20 +36,25 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
   }
 
   it should "serialize and deserialize" in {
+    val from: DateTime = DateTime.now(DateTimeZone.UTC)
+    val range: Period = Period.years(100)
+
     implicit val sampleArb: Arbitrary[Sample] = Arbitrary {
       for {
         stringField <- Gen.alphaStr
-        intField <- Gen.chooseNum(-100, 100)
+        intField <- Gen.chooseNum(Int.MinValue, Int.MaxValue)
         doubleField <- Gen.chooseNum(-100.0, 100.0)
         bigDecimalField <- Gen.choose(BigDecimal(-100), BigDecimal(100))
-        millis <- Gen.posNum[Long]
+        dateTime <- genDateTimeWithinRange(from, range)
       } yield Sample(
         stringField,
         intField,
         doubleField,
         bigDecimalField,
-        Instant.ofEpochMilli(millis),
-        Instant.ofEpochMilli(millis).toDateTime().toLocalDate()
+        // TODO: it looks that Joda serializer doesn't support millis
+        // https://github.com/json4s/json4s/issues/277
+        dateTime.withMillis(0).toInstant(),
+        dateTime.withMillis(0)
       )
     }
 
@@ -64,7 +73,7 @@ object JsonSerdeTest {
       doubleField: Double,
       bigDecimalField: BigDecimal,
       instantField: Instant,
-      localDateField: LocalDate
+      dateTime: DateTime
   )
 
   private val SampleObject = Sample(
@@ -73,7 +82,7 @@ object JsonSerdeTest {
     0.0,
     BigDecimal(0),
     Instant.EPOCH,
-    LocalDate.parse("1970-01-01")
+    Instant.EPOCH.toDateTime(DateTimeZone.UTC)
   )
 
   private val SampleJson = """{
@@ -82,6 +91,6 @@ object JsonSerdeTest {
     |"doubleField":0.0,
     |"bigDecimalField":"0",
     |"instantField":0,
-    |"localDateField":{"year":1970,"month":1,"day":1}
+    |"dateTime":"1970-01-01T00:00:00Z"
     |}""".stripMargin.replaceAll("\\n", "")
 }

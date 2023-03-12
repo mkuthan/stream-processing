@@ -13,7 +13,7 @@ import org.json4s.JString
 
 object JsonSerde {
 
-  implicit val JsonFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all ++ customFormats
+  implicit val JsonFormats: Formats = DefaultFormats.lossless ++ JodaTimeSerializers.all ++ customFormats
 
   def writeJsonAsString[T <: AnyRef](obj: T): String =
     Serialization.write(obj)

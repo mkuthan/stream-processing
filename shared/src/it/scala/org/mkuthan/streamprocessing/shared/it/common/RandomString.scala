@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test.common
+package org.mkuthan.streamprocessing.shared.it.common
 
 import java.util.UUID
 

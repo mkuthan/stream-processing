@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test.gcp
+package org.mkuthan.streamprocessing.shared.it.gcp
 
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
@@ -20,7 +20,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
-import org.mkuthan.streamprocessing.shared.test.common.RandomString._
+import org.mkuthan.streamprocessing.shared.it.common.RandomString._
 
 object BigQueryClient extends GcpProjectId with LazyLogging {
 

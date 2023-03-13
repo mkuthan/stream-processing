@@ -5,11 +5,11 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.common.InMemorySink
-import org.mkuthan.streamprocessing.shared.test.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.test.common.RandomString.randomString
-import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
-import org.mkuthan.streamprocessing.shared.test.scio.PubSubScioContext
+import org.mkuthan.streamprocessing.shared.it.common.InMemorySink
+import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
+import org.mkuthan.streamprocessing.shared.it.common.RandomString.randomString
+import org.mkuthan.streamprocessing.shared.it.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.shared.it.scio.PubSubScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultId
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultTimestamp

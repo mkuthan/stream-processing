@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test.gcp
+package org.mkuthan.streamprocessing.shared.it.gcp
 
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
@@ -8,12 +8,11 @@ import com.google.api.services.pubsub.Pubsub
 import com.google.api.services.pubsub.PubsubScopes
 import com.typesafe.scalalogging.LazyLogging
 
-import org.mkuthan.streamprocessing.shared.test.common.RandomString._
-import org.mkuthan.streamprocessing.shared.test.gcp.GoogleJsonClientUtils
+import org.mkuthan.streamprocessing.shared.it.common.RandomString._
 
 object PubSubClient extends GcpProjectId with LazyLogging {
 
-  import GoogleJsonClientUtils._
+  import GoogleClientUtils._
 
   private[this] val pubsub = new Pubsub.Builder(
     httpTransport,

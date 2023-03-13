@@ -7,9 +7,9 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder
 
+import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubMessage
-import org.mkuthan.streamprocessing.toll.shared.configuration.PubSubTopic
 
 private[pubsub] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubSubMessage[T]]) {
 

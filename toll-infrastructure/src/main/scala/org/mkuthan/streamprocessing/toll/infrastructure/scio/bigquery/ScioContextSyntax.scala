@@ -10,7 +10,7 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
 
-import org.mkuthan.streamprocessing.toll.shared.configuration.BigQueryTable
+import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
   def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](

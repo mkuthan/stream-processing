@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test.gcp
+package org.mkuthan.streamprocessing.shared.it.gcp
 
 import com.google.cloud.ServiceOptions
 

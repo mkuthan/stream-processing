@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
 import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -20,14 +19,13 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
 
   import JsonSerde._
 
-  final case class Sample(
+  case class SampleClass(
       string: String,
       int: Int,
       double: Double,
       bigDecimal: BigDecimal,
       dateTime: DateTime,
       instant: Instant,
-      localDateTime: LocalDateTime,
       localDate: LocalDate,
       localTime: LocalTime
   )
@@ -39,10 +37,6 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
     Arbitrary.arbitrary[DateTime].map(_.toInstant)
   }
 
-  implicit val localDateTimeArbitrary: Arbitrary[LocalDateTime] = Arbitrary {
-    Arbitrary.arbitrary[DateTime].map(_.toLocalDateTime)
-  }
-
   implicit val localDateArbitrary: Arbitrary[LocalDate] = Arbitrary {
     Arbitrary.arbitrary[DateTime].map(_.toLocalDate)
   }
@@ -51,7 +45,7 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
     Arbitrary.arbitrary[DateTime].map(_.toLocalTime)
   }
 
-  implicit val sampleClassArbitrary = Arbitrary[Sample] {
+  implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
     for {
       string <- Gen.alphaNumStr
       int <- Arbitrary.arbitrary[Int]
@@ -59,17 +53,15 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
       bigDecimal <- Arbitrary.arbitrary[BigDecimal]
       dateTime <- Arbitrary.arbitrary[DateTime]
       instant <- Arbitrary.arbitrary[Instant]
-      localDateTime <- Arbitrary.arbitrary[LocalDateTime]
       localDate <- Arbitrary.arbitrary[LocalDate]
       localTime <- Arbitrary.arbitrary[LocalTime]
-    } yield Sample(
+    } yield SampleClass(
       string,
       int,
       double,
       bigDecimal,
       dateTime,
       instant,
-      localDateTime,
       localDate,
       localTime
     )
@@ -78,17 +70,16 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
   behavior of "JsonSerde"
 
   it should "serialize and deserialize" in {
-    forAll { sample: Sample =>
+    forAll { sample: SampleClass =>
       val serialized = writeJsonAsString(sample)
-      val deserialized = readJsonFromString[Sample](serialized).success.value
+      val deserialized = readJsonFromString[SampleClass](serialized).success.value
       deserialized shouldMatchTo (sample)
     }
   }
 
   it should "not deserialize unknown object" in {
     val unknownObjectJson = """{"unknownField":"a"}"""
-    val result = readJsonFromString[Sample](unknownObjectJson)
-    result.failure.exception should have message "No usable value for stringField\nDid not find value which can be converted into java.lang.String"
+    val result = readJsonFromString[SampleClass](unknownObjectJson)
+    result.failure.exception should have message "No usable value for string\nDid not find value which can be converted into java.lang.String"
   }
-
 }

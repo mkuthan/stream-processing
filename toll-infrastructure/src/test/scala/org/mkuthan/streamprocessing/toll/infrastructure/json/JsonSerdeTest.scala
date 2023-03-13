@@ -1,13 +1,15 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.json
 
-import com.fortysevendeg.scalacheck.datetime.instances.joda._
-import com.fortysevendeg.scalacheck.datetime.GenDateTime._
+import com.fortysevendeg.scalacheck.datetime.joda.ArbitraryJoda._
+import com.fortysevendeg.scalacheck.datetime.YearRange
+import com.softwaremill.diffx.generic.auto._
+import com.softwaremill.diffx.scalatest.DiffShouldMatcher._
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
-import org.joda.time.Period
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
+import org.joda.time.LocalDate
+import org.joda.time.LocalTime
+import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
@@ -16,81 +18,68 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
 
   import JsonSerde._
-  import JsonSerdeTest._
+
+  case class SampleClass(
+      string: String,
+      int: Int,
+      double: Double,
+      bigDecimal: BigDecimal,
+      dateTime: DateTime,
+      instant: Instant,
+      localDate: LocalDate,
+      localTime: LocalTime
+  )
+
+  implicit val timeZone = DateTimeZone.UTC
+  implicit val yearRange = YearRange.between(1900, 2100)
+
+  implicit val instantArbitrary: Arbitrary[Instant] = Arbitrary {
+    Arbitrary.arbitrary[DateTime].map(_.toInstant)
+  }
+
+  implicit val localDateArbitrary: Arbitrary[LocalDate] = Arbitrary {
+    Arbitrary.arbitrary[DateTime].map(_.toLocalDate)
+  }
+
+  implicit val localTimeArbitrary: Arbitrary[LocalTime] = Arbitrary {
+    Arbitrary.arbitrary[DateTime].map(_.toLocalTime)
+  }
+
+  implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
+    for {
+      string <- Gen.alphaNumStr
+      int <- Arbitrary.arbitrary[Int]
+      double <- Arbitrary.arbitrary[Double]
+      bigDecimal <- Arbitrary.arbitrary[BigDecimal]
+      dateTime <- Arbitrary.arbitrary[DateTime]
+      instant <- Arbitrary.arbitrary[Instant]
+      localDate <- Arbitrary.arbitrary[LocalDate]
+      localTime <- Arbitrary.arbitrary[LocalTime]
+    } yield SampleClass(
+      string,
+      int,
+      double,
+      bigDecimal,
+      dateTime,
+      instant,
+      localDate,
+      localTime
+    )
+  }
 
   behavior of "JsonSerde"
 
-  it should "serialize sample object" in {
-    writeJsonAsString(SampleObject) should be(SampleJson)
-  }
-
-  it should "deserialize sample object" in {
-    val result = readJsonFromString[Sample](SampleJson)
-    result.success.value should be(SampleObject)
+  it should "serialize and deserialize" in {
+    forAll { sample: SampleClass =>
+      val serialized = writeJsonAsString(sample)
+      val deserialized = readJsonFromString[SampleClass](serialized).success.value
+      deserialized shouldMatchTo (sample)
+    }
   }
 
   it should "not deserialize unknown object" in {
     val unknownObjectJson = """{"unknownField":"a"}"""
-    val result = readJsonFromString[Sample](unknownObjectJson)
-    result.failure.exception should have message "No usable value for stringField\nDid not find value which can be converted into java.lang.String"
+    val result = readJsonFromString[SampleClass](unknownObjectJson)
+    result.failure.exception should have message "No usable value for string\nDid not find value which can be converted into java.lang.String"
   }
-
-  it should "serialize and deserialize" in {
-    val from: DateTime = DateTime.now(DateTimeZone.UTC)
-    val range: Period = Period.years(100)
-
-    implicit val sampleArb: Arbitrary[Sample] = Arbitrary {
-      for {
-        stringField <- Gen.alphaStr
-        intField <- Gen.chooseNum(Int.MinValue, Int.MaxValue)
-        doubleField <- Gen.chooseNum(-100.0, 100.0)
-        bigDecimalField <- Gen.choose(BigDecimal(-100), BigDecimal(100))
-        dateTime <- genDateTimeWithinRange(from, range)
-      } yield Sample(
-        stringField,
-        intField,
-        doubleField,
-        bigDecimalField,
-        // TODO: it looks that Joda serializer doesn't support millis
-        // https://github.com/json4s/json4s/issues/277
-        dateTime.withMillis(0).toInstant(),
-        dateTime.withMillis(0)
-      )
-    }
-
-    forAll { sample: Sample =>
-      val serialized = writeJsonAsString(sample)
-      val deserialized = readJsonFromString[Sample](serialized).success.value
-      deserialized should be(sample)
-    }
-  }
-}
-
-object JsonSerdeTest {
-  final case class Sample(
-      stringField: String,
-      intField: Int,
-      doubleField: Double,
-      bigDecimalField: BigDecimal,
-      instantField: Instant,
-      dateTime: DateTime
-  )
-
-  private val SampleObject = Sample(
-    "a",
-    0,
-    0.0,
-    BigDecimal(0),
-    Instant.EPOCH,
-    Instant.EPOCH.toDateTime(DateTimeZone.UTC)
-  )
-
-  private val SampleJson = """{
-    |"stringField":"a",
-    |"intField":0,
-    |"doubleField":0.0,
-    |"bigDecimalField":"0",
-    |"instantField":0,
-    |"dateTime":"1970-01-01T00:00:00Z"
-    |}""".stripMargin.replaceAll("\\n", "")
 }

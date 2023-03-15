@@ -1,11 +1,8 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.json
 
-import com.fortysevendeg.scalacheck.datetime.joda.ArbitraryJoda._
-import com.fortysevendeg.scalacheck.datetime.YearRange
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher._
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalTime
@@ -15,12 +12,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
+import org.mkuthan.streamprocessing.shared.test.scalacheck.JodaTimeArbitrary
+
+final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks with JodaTimeArbitrary {
 
   import JsonSerde._
 
   case class SampleClass(
       string: String,
+      optionString: Option[String],
       int: Int,
       double: Double,
       bigDecimal: BigDecimal,
@@ -30,24 +30,10 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
       localTime: LocalTime
   )
 
-  implicit val timeZone = DateTimeZone.UTC
-  implicit val yearRange = YearRange.between(1900, 2100)
-
-  implicit val instantArbitrary: Arbitrary[Instant] = Arbitrary {
-    Arbitrary.arbitrary[DateTime].map(_.toInstant)
-  }
-
-  implicit val localDateArbitrary: Arbitrary[LocalDate] = Arbitrary {
-    Arbitrary.arbitrary[DateTime].map(_.toLocalDate)
-  }
-
-  implicit val localTimeArbitrary: Arbitrary[LocalTime] = Arbitrary {
-    Arbitrary.arbitrary[DateTime].map(_.toLocalTime)
-  }
-
   implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
     for {
       string <- Gen.alphaNumStr
+      optionString <- Gen.option(Gen.alphaNumStr)
       int <- Arbitrary.arbitrary[Int]
       double <- Arbitrary.arbitrary[Double]
       bigDecimal <- Arbitrary.arbitrary[BigDecimal]
@@ -57,6 +43,7 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
       localTime <- Arbitrary.arbitrary[LocalTime]
     } yield SampleClass(
       string,
+      optionString,
       int,
       double,
       bigDecimal,

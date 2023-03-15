@@ -15,8 +15,6 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.15"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0"
 
-  val scalaCheckDateTime = "com.47deg" %% "scalacheck-toolbox-datetime" % "0.7.0"
-
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.7.0"
 
   val json4s = "org.json4s" %% "json4s-jackson" % "4.0.6"

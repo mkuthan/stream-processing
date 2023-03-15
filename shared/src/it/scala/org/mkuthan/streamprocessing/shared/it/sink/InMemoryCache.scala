@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.common
+package org.mkuthan.streamprocessing.shared.it.sink
 
 import scala.annotation.unused
 import scala.collection.concurrent.TrieMap

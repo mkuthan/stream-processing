@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.gcp
+package org.mkuthan.streamprocessing.shared.it.client
 
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
@@ -20,13 +20,13 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 
+import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
 import org.mkuthan.streamprocessing.shared.it.common.RandomString._
-
 object BigQueryClient extends GcpProjectId with LazyLogging {
 
-  private[this] val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
-  private[this] val datasetService = BigQueryServicesFactory.getDatasetService(options)
-  private[this] val storageClient = BigQueryServicesFactory.getStorageClient(options)
+  private val options = PipelineOptionsFactory.create().as(classOf[BigQueryOptions])
+  private val datasetService = BigQueryServicesFactory.getDatasetService(options)
+  private val storageClient = BigQueryServicesFactory.getStorageClient(options)
 
   def generateDatasetName(): String =
     s"test_dataset_temp_${randomStringUnderscored()}"

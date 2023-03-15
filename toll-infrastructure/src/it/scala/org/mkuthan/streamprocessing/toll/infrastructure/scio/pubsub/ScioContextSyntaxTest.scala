@@ -5,11 +5,12 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.it.common.InMemorySink
+import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._
 import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
 import org.mkuthan.streamprocessing.shared.it.common.RandomString.randomString
-import org.mkuthan.streamprocessing.shared.it.gcp.PubSubClient._
-import org.mkuthan.streamprocessing.shared.it.scio.PubSubScioContext
+import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
+import org.mkuthan.streamprocessing.shared.it.context.PubSubContext
+import org.mkuthan.streamprocessing.shared.it.sink.InMemorySink
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultId
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubSubAttribute.DefaultTimestamp
@@ -18,13 +19,16 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with PubSubScioContext {
+    with ItScioContext
+    with PubSubContext {
 
   import IntegrationTestFixtures._
 
   behavior of "PubSub ScioContext syntax"
 
-  it should "subscribe JSON messages" in withScioContextInBackground { sc =>
+  it should "subscribe JSON messages" in withScioContext { implicit sc =>
+    options.setBlockOnRun(false)
+
     withTopic[SampleClass] { topic =>
       withSubscription[SampleClass](topic.id) { subscription =>
         publishMessages(
@@ -58,7 +62,9 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     }
   }
 
-  it should "subscribe JSON messages with id attribute" in withScioContextInBackground { sc =>
+  it should "subscribe JSON messages with id attribute" in withScioContext { implicit sc =>
+    options.setBlockOnRun(false)
+
     withTopic[SampleClass] { topic =>
       withSubscription[SampleClass](topic.id) { subscription =>
         val id = randomString()
@@ -89,7 +95,9 @@ class ScioContextPubSubSyntaxTest extends AnyFlatSpec
     }
   }
 
-  it should "subscribe JSON messages with timestamp attribute" in withScioContextInBackground { sc =>
+  it should "subscribe JSON messages with timestamp attribute" in withScioContext { implicit sc =>
+    options.setBlockOnRun(false)
+
     withTopic[SampleClass] { topic =>
       withSubscription[SampleClass](topic.id) { subscription =>
         val timestamp = Instant.now()

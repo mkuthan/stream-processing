@@ -5,9 +5,10 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.shared.it.client.StorageClient._
 import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.it.gcp.StorageClient._
-import org.mkuthan.streamprocessing.shared.it.scio.StorageScioContext
+import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
+import org.mkuthan.streamprocessing.shared.it.context.StorageContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
@@ -15,7 +16,8 @@ final class SCollectionStorageSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience
-    with StorageScioContext {
+    with ItScioContext
+    with StorageContext {
 
   import IntegrationTestFixtures._
 

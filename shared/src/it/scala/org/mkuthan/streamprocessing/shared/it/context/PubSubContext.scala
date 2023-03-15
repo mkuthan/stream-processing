@@ -1,14 +1,14 @@
-package org.mkuthan.streamprocessing.shared.it.scio
+package org.mkuthan.streamprocessing.shared.it.context
 
 import org.scalatest.Suite
 
 import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 
-trait PubSubScioContext extends GcpScioContext {
+trait PubSubContext {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.gcp.PubSubClient._
+  import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._
 
   def withTopic[T](fn: PubSubTopic[T] => Any): Any = {
     val topicName = generateTopicName()

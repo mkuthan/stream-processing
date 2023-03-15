@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.gcp
+package org.mkuthan.streamprocessing.shared.it.client
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -16,13 +16,13 @@ import com.google.api.services.storage.Storage
 import com.google.api.services.storage.StorageScopes
 import com.typesafe.scalalogging.LazyLogging
 
+import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
 import org.mkuthan.streamprocessing.shared.it.common.RandomString._
-
 object StorageClient extends GcpProjectId with LazyLogging {
 
   import GoogleClientUtils._
 
-  private[this] val storage = new Storage.Builder(
+  private val storage = new Storage.Builder(
     httpTransport,
     jsonFactory,
     requestInitializer(

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.scio
+package org.mkuthan.streamprocessing.shared.it.context
 
 import scala.reflect.runtime.universe.TypeTag
 
@@ -9,10 +9,10 @@ import org.scalatest.Suite
 
 import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
-trait BigQueryScioContext extends GcpScioContext {
+trait BigQueryContext {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.gcp.BigQueryClient._
+  import org.mkuthan.streamprocessing.shared.it.client.BigQueryClient._
 
   def withDataset(fn: String => Any): Any = {
     val datasetName = generateDatasetName()

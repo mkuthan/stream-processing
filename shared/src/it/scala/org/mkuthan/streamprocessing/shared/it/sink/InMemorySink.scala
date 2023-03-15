@@ -1,7 +1,9 @@
-package org.mkuthan.streamprocessing.shared.it.common
+package org.mkuthan.streamprocessing.shared.it.sink
 
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
+
+import org.mkuthan.streamprocessing.shared.it.sink.InMemoryCache
 
 /**
  * Sink for the materialized content of SCollection.

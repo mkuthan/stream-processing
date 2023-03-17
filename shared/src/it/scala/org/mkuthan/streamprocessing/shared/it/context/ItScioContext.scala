@@ -7,8 +7,8 @@ import org.apache.beam.sdk.testing.TestPipelineOptions
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite
 
-import org.mkuthan.streamprocessing.shared.it.client.GcpProjectId
 import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
+
 trait ItScioContext extends BeforeAndAfterAll with GcpProjectId {
   this: Suite =>
 

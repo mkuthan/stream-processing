@@ -10,6 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
 import org.mkuthan.streamprocessing.shared.it.common.RandomString._
+
 object PubSubClient extends GcpProjectId with LazyLogging {
 
   import GoogleClientUtils._
@@ -85,7 +86,7 @@ object PubSubClient extends GcpProjectId with LazyLogging {
     logger.debug("Pull messages from: '{}'", subscriptionName)
 
     val request = new PullRequest()
-      .setReturnImmediately(true)
+      .setReturnImmediately(false)
       .setMaxMessages(maxMessages)
 
     val response = pubsub.projects.subscriptions.pull(subscriptionName, request).execute()
@@ -101,7 +102,7 @@ object PubSubClient extends GcpProjectId with LazyLogging {
       else
         receivedMessage.getMessage.decodeData()
 
-      val attributes = if (receivedMessage.getMessage() == null || receivedMessage.getMessage.getAttributes == null)
+      val attributes = if (receivedMessage.getMessage == null || receivedMessage.getMessage.getAttributes == null)
         Map.empty[String, String]
       else
         receivedMessage.getMessage.getAttributes.asScala.toMap

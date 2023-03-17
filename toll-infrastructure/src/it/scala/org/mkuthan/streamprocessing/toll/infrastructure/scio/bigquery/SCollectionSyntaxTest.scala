@@ -10,7 +10,7 @@ import org.mkuthan.streamprocessing.shared.it.context.BigQueryContext
 import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class SCollectionBigQuerySyntaxTest extends AnyFlatSpec
+class SCollectionSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience

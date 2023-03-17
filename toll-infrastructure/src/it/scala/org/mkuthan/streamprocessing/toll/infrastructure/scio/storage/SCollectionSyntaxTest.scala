@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.it.context.StorageContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-final class SCollectionStorageSyntaxTest extends AnyFlatSpec
+final class SCollectionSyntaxTest extends AnyFlatSpec
     with Matchers
     with Eventually
     with IntegrationTestPatience

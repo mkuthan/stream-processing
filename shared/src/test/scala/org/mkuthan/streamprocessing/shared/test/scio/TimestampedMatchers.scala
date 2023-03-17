@@ -55,7 +55,7 @@ trait TimestampedMatchers extends InstantSyntax {
       time: String,
       value: Iterable[T]
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
-    containInAnyOrder(value.map { case v => (v, time.toInstant) })
+    containInAnyOrder(value.map(v => (v, time.toInstant)))
 
   /**
    * Assert that the SCollection contains the provided timestamped elements.

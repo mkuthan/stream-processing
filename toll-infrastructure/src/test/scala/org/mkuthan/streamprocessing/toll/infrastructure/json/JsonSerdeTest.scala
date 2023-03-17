@@ -23,6 +23,7 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
       optionString: Option[String],
       int: Int,
       double: Double,
+      bigInt: BigInt,
       bigDecimal: BigDecimal,
       dateTime: DateTime,
       instant: Instant,
@@ -30,37 +31,39 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
       localTime: LocalTime
   )
 
-  implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
-    for {
-      string <- Gen.alphaNumStr
-      optionString <- Gen.option(Gen.alphaNumStr)
-      int <- Arbitrary.arbitrary[Int]
-      double <- Arbitrary.arbitrary[Double]
-      bigDecimal <- Arbitrary.arbitrary[BigDecimal]
-      dateTime <- Arbitrary.arbitrary[DateTime]
-      instant <- Arbitrary.arbitrary[Instant]
-      localDate <- Arbitrary.arbitrary[LocalDate]
-      localTime <- Arbitrary.arbitrary[LocalTime]
-    } yield SampleClass(
-      string,
-      optionString,
-      int,
-      double,
-      bigDecimal,
-      dateTime,
-      instant,
-      localDate,
-      localTime
-    )
-  }
-
   behavior of "JsonSerde"
 
   it should "serialize and deserialize" in {
+    implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
+      for {
+        string <- Gen.alphaNumStr
+        optionString <- Gen.option(Gen.alphaNumStr)
+        int <- Arbitrary.arbitrary[Int]
+        double <- Arbitrary.arbitrary[Double]
+        bigInt <- Arbitrary.arbitrary[BigInt]
+        bigDecimal <- Arbitrary.arbitrary[BigDecimal]
+        dateTime <- Arbitrary.arbitrary[DateTime]
+        instant <- Arbitrary.arbitrary[Instant]
+        localDate <- Arbitrary.arbitrary[LocalDate]
+        localTime <- Arbitrary.arbitrary[LocalTime]
+      } yield SampleClass(
+        string,
+        optionString,
+        int,
+        double,
+        bigInt,
+        bigDecimal,
+        dateTime,
+        instant,
+        localDate,
+        localTime
+      )
+    }
+
     forAll { sample: SampleClass =>
       val serialized = writeJsonAsString(sample)
       val deserialized = readJsonFromString[SampleClass](serialized).success.value
-      deserialized shouldMatchTo (sample)
+      deserialized shouldMatchTo sample
     }
   }
 

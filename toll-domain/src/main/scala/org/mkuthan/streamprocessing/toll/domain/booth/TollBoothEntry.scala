@@ -47,7 +47,7 @@ object TollBoothEntry {
           Some(fromRaw(input))
         catch {
           case NonFatal(ex) =>
-            ctx.output(dlq, DeadLetter(input, ex.getMessage()))
+            ctx.output(dlq, DeadLetter(input, ex.getMessage))
             DlqCounter.inc()
             None
         }

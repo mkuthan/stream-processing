@@ -11,7 +11,7 @@ import com.spotify.scio.values.SCollection
  * In memory cache for the elements materialized from SCollection. Must be static - if not, Cache will be serialized
  * with the `input.map` closure.
  */
-private[common] case object InMemoryCache {
+private[sink] case object InMemoryCache {
   // TODO: thread-safety / atomicity
   // Current implementation isn't fully thread-safe (ArrayBuffer)
   // Does it really matter? How many threads computes `input.map`?

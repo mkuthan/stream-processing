@@ -5,7 +5,7 @@ import org.scalatest.Suite
 import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 
-trait PubSubContext {
+trait PubsubContext {
   this: Suite =>
 
   import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._

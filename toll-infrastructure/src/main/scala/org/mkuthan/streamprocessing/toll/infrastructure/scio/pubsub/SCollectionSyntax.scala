@@ -19,7 +19,7 @@ private[pubsub] final class SCollectionOps[T <: AnyRef: Coder](private val self:
 
   def publishJsonToPubSub(
       topic: PubSubTopic[T],
-      writeConfiguration: PubsubWriteConfiguration = PubsubWriteConfiguration()
+      writeConfiguration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     import scala.jdk.CollectionConverters._
 

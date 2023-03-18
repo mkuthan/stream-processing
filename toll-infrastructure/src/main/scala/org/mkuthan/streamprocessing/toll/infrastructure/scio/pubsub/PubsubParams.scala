@@ -13,14 +13,14 @@ sealed trait PubsubWriteParam {
   def configure[T](write: Write[T]): Write[T]
 }
 
-case class PubsubReadConfiguration(
+case class JsonReadConfiguration(
     idAttribute: IdAttribute = NoIdAttribute,
     tsAttribute: TimestampAttribute = NoTimestampAttribute
 ) {
-  def withIdAttribute(idAttribute: IdAttribute): PubsubReadConfiguration =
+  def withIdAttribute(idAttribute: IdAttribute): JsonReadConfiguration =
     copy(idAttribute = idAttribute)
 
-  def withTimestampAttribute(tsAttribute: TimestampAttribute): PubsubReadConfiguration =
+  def withTimestampAttribute(tsAttribute: TimestampAttribute): JsonReadConfiguration =
     copy(tsAttribute = tsAttribute)
 
   def configure[T](read: Read[T]): Read[T] =
@@ -32,24 +32,24 @@ case class PubsubReadConfiguration(
   )
 }
 
-case class PubsubWriteConfiguration(
+case class JsonWriteConfiguration(
     idAttribute: IdAttribute = NoIdAttribute,
-    maxBatchBytesSize: MaxBatchBytesSize = MaxBatchBytesSize.Default,
-    maxBatchSize: MaxBatchSize = MaxBatchSize.Default,
+    maxBatchBytesSize: MaxBatchBytesSize = MaxBatchBytesSize.HighThroughput,
+    maxBatchSize: MaxBatchSize = MaxBatchSize.HighThroughput,
     tsAttribute: TimestampAttribute = NoTimestampAttribute
 ) {
-  def withIdAttribute(idAttribute: IdAttribute): PubsubWriteConfiguration =
+  def withIdAttribute(idAttribute: IdAttribute): JsonWriteConfiguration =
     copy(idAttribute = idAttribute)
 
   @unused("how to test batch bytes size?")
-  def withMaxBatchBytesSize(maxBatchBytesSize: MaxBatchBytesSize): PubsubWriteConfiguration =
+  def withMaxBatchBytesSize(maxBatchBytesSize: MaxBatchBytesSize): JsonWriteConfiguration =
     copy(maxBatchBytesSize = maxBatchBytesSize)
 
   @unused("how to test batch size?")
-  def withMaxBatchSize(maxBatchSize: MaxBatchSize): PubsubWriteConfiguration =
+  def withMaxBatchSize(maxBatchSize: MaxBatchSize): JsonWriteConfiguration =
     copy(maxBatchSize = maxBatchSize)
 
-  def withTimestampAttribute(tsAttribute: TimestampAttribute): PubsubWriteConfiguration =
+  def withTimestampAttribute(tsAttribute: TimestampAttribute): JsonWriteConfiguration =
     copy(tsAttribute = tsAttribute)
 
   def configure[T](write: Write[T]): Write[T] =
@@ -115,8 +115,7 @@ case class MaxBatchBytesSize(value: Int) extends PubsubWriteParam {
 }
 
 object MaxBatchBytesSize {
-
-  val Default = MaxBatchBytesSize(5 * 1024 * 1024)
+  val HighThroughput = MaxBatchBytesSize(8 * 1024 * 1024)
 }
 
 case class MaxBatchSize(value: Int) extends PubsubWriteParam {
@@ -127,6 +126,5 @@ case class MaxBatchSize(value: Int) extends PubsubWriteParam {
 }
 
 object MaxBatchSize {
-
-  val Default = MaxBatchSize(100)
+  val HighThroughput = MaxBatchSize(1000)
 }

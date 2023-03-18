@@ -21,7 +21,7 @@ private[pubsub] final class ScioContextOps(private val self: ScioContext) extend
 
   def subscribeJsonFromPubsub[T <: AnyRef: Coder: Manifest](
       subscription: PubSubSubscription[T],
-      readConfiguration: PubsubReadConfiguration = PubsubReadConfiguration()
+      readConfiguration: JsonReadConfiguration = JsonReadConfiguration()
   ): (SCollection[PubsubMessage[T]], SCollection[PubsubDeadLetter[T]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()

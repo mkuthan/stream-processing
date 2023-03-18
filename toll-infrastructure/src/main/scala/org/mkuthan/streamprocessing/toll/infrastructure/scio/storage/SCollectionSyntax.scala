@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.storage
 
 import scala.language.implicitConversions
+import scala.util.chaining._
 
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
@@ -13,13 +14,11 @@ import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJson
 private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
       location: StorageBucket[T],
-      numShards: Int = 1
+      writeConfiguration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     val io = TextIO.write()
       .to(location.id)
-      .withNumShards(numShards)
-      .withSuffix(".json")
-      .withWindowedWrites()
+      .pipe(write => writeConfiguration.configure(write))
 
     val _ = self
       .map(writeJsonAsString)
@@ -28,6 +27,6 @@ private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self
 }
 
 trait SCollectionSyntax {
-  implicit def storageSCollectionOps[T <: AnyRef: Coder](sColl: SCollection[T]): SCollectionOps[T] =
-    new SCollectionOps(sColl)
+  implicit def storageSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sc)
 }

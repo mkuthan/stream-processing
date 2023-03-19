@@ -1,23 +1,20 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.storage
 
+import org.apache.beam.sdk.io.AvroIO
 import org.apache.beam.sdk.io.TextIO
 
-sealed trait TextWriteParam {
-  def configure(write: TextIO.Write): TextIO.Write
-}
-
 case class JsonWriteConfiguration(
-    numShards: TextNumShards = TextNumShards.One,
-    suffix: TextSuffix = TextSuffix.Json,
-    windowedWrites: TextWindowedWrites = TextWindowedWritesOn
+    numShards: NumShards = NumShards.One,
+    suffix: Suffix = Suffix.Json,
+    windowedWrites: WindowedWrites = WindowedWritesOn
 ) {
-  def withNumShards(numShards: TextNumShards): JsonWriteConfiguration =
+  def withNumShards(numShards: NumShards): JsonWriteConfiguration =
     copy(numShards = numShards)
 
-  def withSuffix(suffix: TextSuffix): JsonWriteConfiguration =
+  def withSuffix(suffix: Suffix): JsonWriteConfiguration =
     copy(suffix = suffix)
 
-  def withWindowedWrites(windowedWrites: TextWindowedWrites): JsonWriteConfiguration =
+  def withWindowedWrites(windowedWrites: WindowedWrites): JsonWriteConfiguration =
     copy(windowedWrites = windowedWrites)
 
   def configure(write: TextIO.Write): TextIO.Write =
@@ -30,36 +27,81 @@ case class JsonWriteConfiguration(
   )
 }
 
-case class TextNumShards(value: Int) extends TextWriteParam {
+case class AvroWriteConfiguration(
+    numShards: NumShards = NumShards.One,
+    suffix: Suffix = Suffix.Json,
+    windowedWrites: WindowedWrites = WindowedWritesOn
+) {
+  def withNumShards(numShards: NumShards): AvroWriteConfiguration =
+    copy(numShards = numShards)
+
+  def withSuffix(suffix: Suffix): AvroWriteConfiguration =
+    copy(suffix = suffix)
+
+  def withWindowedWrites(windowedWrites: WindowedWrites): AvroWriteConfiguration =
+    copy(windowedWrites = windowedWrites)
+
+  def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T] =
+    params.foldLeft(write)((write, param) => param.configure(write))
+
+  private lazy val params: Set[AvroWriteParam] = Set(
+    numShards,
+    suffix,
+    windowedWrites
+  )
+}
+
+sealed trait TextWriteParam {
+  def configure(write: TextIO.Write): TextIO.Write
+}
+
+sealed trait AvroWriteParam {
+  def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T]
+}
+
+case class NumShards(value: Int) extends TextWriteParam with AvroWriteParam {
   require(value > 0)
 
   override def configure(write: TextIO.Write): TextIO.Write =
     write.withNumShards(value)
+
+  override def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T] =
+    write.withNumShards(value)
 }
 
-object TextNumShards {
-  val One = TextNumShards(1)
+object NumShards {
+  val One = NumShards(1)
 }
 
-case class TextSuffix(value: String) extends TextWriteParam {
+case class Suffix(value: String) extends TextWriteParam with AvroWriteParam {
   require(!value.isEmpty)
 
   override def configure(write: TextIO.Write): TextIO.Write =
     write.withSuffix(value)
+
+  override def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T] =
+    write.withSuffix(value)
 }
 
-object TextSuffix {
-  val Json = TextSuffix(".json")
+object Suffix {
+  val Json = Suffix(".json")
+  val Avro = Suffix(".avro")
 }
 
-sealed trait TextWindowedWrites extends TextWriteParam
+sealed trait WindowedWrites extends TextWriteParam with AvroWriteParam
 
-case object TextWindowedWritesOn extends TextWindowedWrites {
+case object WindowedWritesOn extends WindowedWrites {
   override def configure(write: TextIO.Write): TextIO.Write =
+    write.withWindowedWrites()
+
+  override def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T] =
     write.withWindowedWrites()
 }
 
-case object TextWindowedWritesOff extends TextWindowedWrites {
+case object WindowedWritesOff extends WindowedWrites {
   override def configure(write: TextIO.Write): TextIO.Write =
+    write
+
+  override def configure[T](write: AvroIO.Write[T]): AvroIO.Write[T] =
     write
 }

@@ -10,7 +10,7 @@ object Dependencies {
   val slf4j = "org.slf4j" % "slf4j-api" % "2.0.7"
   val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % "2.0.7"
 
-  val logback = "ch.qos.logback" % "logback-classic" % "1.4.5"
+  val logback = "ch.qos.logback" % "logback-classic" % "1.4.6"
 
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.15"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0"

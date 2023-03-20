@@ -9,12 +9,13 @@ import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
-private[bigquery] final class SCollectionOps[T <: HasAnnotation](private val self: SCollection[T])
-    extends AnyVal {
+private[bigquery] final class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+    private val self: SCollection[T]
+) {
 
   import com.spotify.scio.bigquery._
 
-  def saveToBigQuery(table: BigQueryTable[T])(implicit c: Coder[T], ct: ClassTag[T], tt: TypeTag[T]): Unit = {
+  def saveToBigQuery(table: BigQueryTable[T]): Unit = {
     val _ = self.saveAsTypedBigQueryTable(table.spec)
   }
 }
@@ -22,6 +23,8 @@ private[bigquery] final class SCollectionOps[T <: HasAnnotation](private val sel
 trait SCollectionSyntax {
   import scala.language.implicitConversions
 
-  implicit def bigQuerySCollectionOps[T <: HasAnnotation](sc: SCollection[T]): SCollectionOps[T] =
+  implicit def bigQuerySCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      sc: SCollection[T]
+  ): SCollectionOps[T] =
     new SCollectionOps(sc)
 }

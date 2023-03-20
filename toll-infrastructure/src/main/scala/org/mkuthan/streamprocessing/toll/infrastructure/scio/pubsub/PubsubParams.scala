@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
-import scala.annotation.unused
-
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO.Read
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO.Write
 
@@ -11,56 +9,6 @@ sealed trait PubsubReadParam {
 
 sealed trait PubsubWriteParam {
   def configure[T](write: Write[T]): Write[T]
-}
-
-case class JsonReadConfiguration(
-    idAttribute: IdAttribute = NoIdAttribute,
-    tsAttribute: TimestampAttribute = NoTimestampAttribute
-) {
-  def withIdAttribute(idAttribute: IdAttribute): JsonReadConfiguration =
-    copy(idAttribute = idAttribute)
-
-  def withTimestampAttribute(tsAttribute: TimestampAttribute): JsonReadConfiguration =
-    copy(tsAttribute = tsAttribute)
-
-  def configure[T](read: Read[T]): Read[T] =
-    params.foldLeft(read)((read, param) => param.configure(read))
-
-  private lazy val params: Set[PubsubReadParam] = Set(
-    idAttribute,
-    tsAttribute
-  )
-}
-
-case class JsonWriteConfiguration(
-    idAttribute: IdAttribute = NoIdAttribute,
-    maxBatchBytesSize: MaxBatchBytesSize = MaxBatchBytesSize.HighThroughput,
-    maxBatchSize: MaxBatchSize = MaxBatchSize.HighThroughput,
-    tsAttribute: TimestampAttribute = NoTimestampAttribute
-) {
-  def withIdAttribute(idAttribute: IdAttribute): JsonWriteConfiguration =
-    copy(idAttribute = idAttribute)
-
-  @unused("how to test batch bytes size?")
-  def withMaxBatchBytesSize(maxBatchBytesSize: MaxBatchBytesSize): JsonWriteConfiguration =
-    copy(maxBatchBytesSize = maxBatchBytesSize)
-
-  @unused("how to test batch size?")
-  def withMaxBatchSize(maxBatchSize: MaxBatchSize): JsonWriteConfiguration =
-    copy(maxBatchSize = maxBatchSize)
-
-  def withTimestampAttribute(tsAttribute: TimestampAttribute): JsonWriteConfiguration =
-    copy(tsAttribute = tsAttribute)
-
-  def configure[T](write: Write[T]): Write[T] =
-    params.foldLeft(write)((write, param) => param.configure(write))
-
-  private lazy val params: Set[PubsubWriteParam] = Set(
-    idAttribute,
-    maxBatchBytesSize,
-    maxBatchSize,
-    tsAttribute
-  )
 }
 
 sealed trait IdAttribute extends PubsubReadParam with PubsubWriteParam

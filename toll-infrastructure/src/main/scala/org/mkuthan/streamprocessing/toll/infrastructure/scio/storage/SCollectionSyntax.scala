@@ -24,6 +24,17 @@ private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self
       .map(writeJsonAsString)
       .saveAsCustomOutput(location.id, io)
   }
+
+//  def saveToStorageAsAvro(
+//      location: StorageBucket[T],
+//      writeConfiguration: AvroWriteConfiguration = AvroWriteConfiguration()
+//  ): Unit = {
+//    val io = AvroIO.write()
+//      .to(location.id)
+//      .pipe(write => writeConfiguration.configure(write))
+//
+//    val _ = self.saveAsCustomOutput(io)
+//  }
 }
 
 trait SCollectionSyntax {

@@ -29,7 +29,7 @@ case class JsonWriteConfiguration(
 
 case class AvroWriteConfiguration(
     numShards: NumShards = NumShards.One,
-    suffix: Suffix = Suffix.Json,
+    suffix: Suffix = Suffix.Avro,
     windowedWrites: WindowedWrites = WindowedWritesOn
 ) {
   def withNumShards(numShards: NumShards): AvroWriteConfiguration =

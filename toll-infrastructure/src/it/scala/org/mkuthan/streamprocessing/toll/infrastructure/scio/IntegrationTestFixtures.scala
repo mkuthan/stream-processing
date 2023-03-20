@@ -49,5 +49,4 @@ object IntegrationTestFixtures {
 
   val SampleMap1 = Map("key1" -> "value1")
   val SampleMap2 = Map("key2" -> "value2")
-  val SampleMap3 = Map("key3" -> "value3")
 }

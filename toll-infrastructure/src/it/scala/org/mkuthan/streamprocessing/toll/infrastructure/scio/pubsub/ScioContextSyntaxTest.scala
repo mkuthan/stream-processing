@@ -33,26 +33,44 @@ class ScioContextSyntaxTest extends AnyFlatSpec
         publishMessages(
           topic.id,
           (SampleJson1, SampleMap1),
-          (SampleJson2, SampleMap2),
-          (InvalidJson, SampleMap3)
+          (SampleJson2, SampleMap2)
         )
 
-        val (messages, dlq) = sc.subscribeJsonFromPubsub(subscription)
+        val (messages, _) = sc.subscribeJsonFromPubsub(subscription)
 
-        val messagesSink = InMemorySink(messages)
-        val dlqSink = InMemorySink(dlq)
+        val sink = InMemorySink(messages)
 
         val run = sc.run()
 
         eventually {
-          messagesSink.toSeq should contain.only(
+          sink.toSeq should contain.only(
             PubsubMessage(SampleObject1, SampleMap1),
             PubsubMessage(SampleObject2, SampleMap2)
           )
+        }
 
-          val error = dlqSink.toElement
+        run.pipelineResult.cancel()
+      }
+    }
+  }
+
+  it should "subscribe invalid JSON and put into DLQ" in withScioContext { implicit sc =>
+    options.setBlockOnRun(false)
+
+    withTopic[SampleClass] { topic =>
+      withSubscription[SampleClass](topic.id) { subscription =>
+        publishMessages(topic.id, (InvalidJson, SampleMap1))
+
+        val (_, dlq) = sc.subscribeJsonFromPubsub(subscription)
+
+        val sink = InMemorySink(dlq)
+
+        val run = sc.run()
+
+        eventually {
+          val error = sink.toElement
           error.payload should be(InvalidJson)
-          error.attributes should be(SampleMap3)
+          error.attributes should be(SampleMap1)
           error.error should startWith("Unrecognized token 'invalid'")
         }
 

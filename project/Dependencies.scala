@@ -15,7 +15,7 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.15"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0"
 
-  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.7.1"
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.8.2"
 
   val json4s = "org.json4s" %% "json4s-jackson" % "4.0.6"
   val json4sExt = "org.json4s" %% "json4s-ext" % "4.0.6"

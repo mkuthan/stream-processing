@@ -54,9 +54,5 @@ lazy val tollInfrastructure = (project in file("toll-infrastructure"))
   .enablePlugins(JacocoItPlugin)
   .settings(
     commonSettings,
-    integrationTestSettings,
-    libraryDependencies ++= Seq(
-      json4s,
-      json4sExt
-    )
+    integrationTestSettings
   ).dependsOn(shared % "compile->compile;test->test;it->it")

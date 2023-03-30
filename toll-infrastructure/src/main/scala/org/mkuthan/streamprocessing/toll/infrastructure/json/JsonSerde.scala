@@ -1,33 +1,29 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.json
 
-import java.nio.charset.StandardCharsets
-
+import scala.reflect.classTag
+import scala.reflect.ClassTag
 import scala.util.Try
 
-import org.json4s.ext.JodaTimeSerializers
-import org.json4s.jackson.Serialization
-import org.json4s.DefaultFormats
-import org.json4s.Formats
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.joda.JodaModule
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 object JsonSerde {
 
-  implicit val JsonFormats: Formats =
-    DefaultFormats
-      .lossless
-      .withBigInt
-      .withBigDecimal ++
-      JodaTimeSerializers.all
+  private lazy val ObjectMapper = new ObjectMapper()
+    .registerModule(DefaultScalaModule)
+    .registerModule(new JodaModule())
 
   def writeJsonAsString[T <: AnyRef](obj: T): String =
-    Serialization.write(obj)
+    ObjectMapper.writeValueAsString(obj)
 
   def writeJsonAsBytes[T <: AnyRef](obj: T): Array[Byte] =
-    writeJsonAsString(obj).getBytes(StandardCharsets.UTF_8)
+    ObjectMapper.writeValueAsBytes(obj)
 
-  def readJsonFromString[T <: AnyRef: Manifest](json: String): Try[T] =
-    Try(Serialization.read[T](json))
+  def readJsonFromString[T <: AnyRef: ClassTag](json: String): Try[T] =
+    Try(ObjectMapper.readValue(json, classTag[T].runtimeClass.asInstanceOf[Class[T]]))
 
-  def readJsonFromBytes[T <: AnyRef: Manifest](json: Array[Byte]): Try[T] =
-    readJsonFromString(new String(json, StandardCharsets.UTF_8))
+  def readJsonFromBytes[T <: AnyRef: ClassTag](json: Array[Byte]): Try[T] =
+    Try(ObjectMapper.readValue(json, classTag[T].runtimeClass.asInstanceOf[Class[T]]))
 
 }

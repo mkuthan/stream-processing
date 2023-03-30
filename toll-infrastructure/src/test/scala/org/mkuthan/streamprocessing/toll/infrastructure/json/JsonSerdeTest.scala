@@ -18,19 +18,6 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
 
   import JsonSerde._
 
-  case class SampleClass(
-      string: String,
-      optionString: Option[String],
-      int: Int,
-      double: Double,
-      bigInt: BigInt,
-      bigDecimal: BigDecimal,
-      dateTime: DateTime,
-      instant: Instant,
-      localDate: LocalDate,
-      localTime: LocalTime
-  )
-
   behavior of "JsonSerde"
 
   it should "serialize and deserialize" in {
@@ -70,6 +57,19 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
   it should "not deserialize unknown object" in {
     val unknownObjectJson = """{"unknownField":"a"}"""
     val result = readJsonFromString[SampleClass](unknownObjectJson)
-    result.failure.exception should have message "No usable value for string\nDid not find value which can be converted into java.lang.String"
+    result.failure.exception.getMessage should startWith("Unrecognized field \"unknownField\"")
   }
 }
+
+case class SampleClass(
+    string: String,
+    optionString: Option[String],
+    int: Int,
+    double: Double,
+    bigInt: BigInt,
+    bigDecimal: BigDecimal,
+    dateTime: DateTime,
+    instant: Instant,
+    localDate: LocalDate,
+    localTime: LocalTime
+)

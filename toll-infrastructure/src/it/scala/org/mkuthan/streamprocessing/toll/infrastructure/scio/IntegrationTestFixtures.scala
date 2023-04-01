@@ -8,7 +8,7 @@ import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.scalacheck._
 
-import org.mkuthan.streamprocessing.shared.test.scalacheck.JodaTimeArbitrary
+import org.mkuthan.streamprocessing.shared.test.common.JodaTimeArbitrary
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 trait IntegrationTestFixtures extends JodaTimeArbitrary {

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.context
+package org.mkuthan.streamprocessing.shared.test.scio
 
 import com.spotify.scio.ScioContext
 
@@ -7,12 +7,12 @@ import org.apache.beam.sdk.testing.TestPipelineOptions
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite
 
-import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
+import org.mkuthan.streamprocessing.shared.test.gcp.GcpProjectId
 
 trait ItScioContext extends BeforeAndAfterAll with GcpProjectId {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.client.StorageClient._
+  import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 
   private val tmpBucketName = generateBucketName()
 
@@ -22,7 +22,7 @@ trait ItScioContext extends BeforeAndAfterAll with GcpProjectId {
   override def afterAll(): Unit =
     deleteBucket(tmpBucketName)
 
-  def withScioContext[T](fn: ScioContext => Any): Any = {
+  def withScioContext(fn: ScioContext => Any): Any = {
     val options = PipelineOptionsFactory.fromArgs(
       s"--appName=${getClass.getName}",
       s"--project=$projectId",

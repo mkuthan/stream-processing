@@ -1,17 +1,17 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 
 import org.joda.time.Duration
 import org.joda.time.Instant
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio._
-import org.mkuthan.streamprocessing.shared.test.scio.TimestampedMatchers
 
-class TollBoothEntryStatsTest extends PipelineSpec
-    with TimestampedMatchers
+class TollBoothEntryStatsTest extends AnyFlatSpec with Matchers
+    with TestScioContext
     with TollBoothEntryFixture
     with TollBoothEntryStatsFixture {
 
@@ -21,7 +21,7 @@ class TollBoothEntryStatsTest extends PipelineSpec
 
   behavior of "TollBoothEntryStats"
 
-  it should "calculate TollBoothEntryStats in fixed window" in runWithContext { sc =>
+  it should "calculate TollBoothEntryStats in fixed window" in runWithScioContext { sc =>
     val tollBoothId1 = TollBoothId("1")
     val tollBoothId2 = TollBoothId("2")
 
@@ -77,7 +77,7 @@ class TollBoothEntryStatsTest extends PipelineSpec
     }
   }
 
-  it should "encode TollBoothEntryStats to raw" in runWithContext { sc =>
+  it should "encode TollBoothEntryStats to raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
     val inputs = testStreamOf[TollBoothEntryStats]
       .addElementsAtTime(recordTimestamp, anyTollBoothEntryStats)

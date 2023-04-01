@@ -11,14 +11,12 @@ import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.shared.test.scio.InMemorySink
-import org.mkuthan.streamprocessing.shared.test.scio.ItScioContext
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class ScioContextSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with GcpTestPatience
-    with ItScioContext
+class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with PubsubContext {
 
   import IntegrationTestFixtures._

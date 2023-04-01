@@ -7,14 +7,12 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
-import org.mkuthan.streamprocessing.shared.test.scio.ItScioContext
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class SCollectionSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with GcpTestPatience
-    with ItScioContext
+class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with BigQueryContext {
 
   import IntegrationTestFixtures._

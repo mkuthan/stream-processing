@@ -14,7 +14,10 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import org.mkuthan.streamprocessing.shared.test.common.JodaTimeArbitrary
 
-final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks with JodaTimeArbitrary {
+final class JsonSerdeTest extends AnyFlatSpec
+    with Matchers
+    with ScalaCheckPropertyChecks
+    with JodaTimeArbitrary {
 
   import JsonSerde._
 

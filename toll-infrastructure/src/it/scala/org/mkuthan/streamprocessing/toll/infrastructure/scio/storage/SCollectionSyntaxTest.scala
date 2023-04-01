@@ -8,15 +8,13 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageContext
-import org.mkuthan.streamprocessing.shared.test.scio.ItScioContext
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-final class SCollectionSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with GcpTestPatience
-    with ItScioContext
+final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with StorageContext {
 
   import IntegrationTestFixtures._

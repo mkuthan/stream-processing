@@ -11,15 +11,14 @@ import com.google.cloud.bigquery.storage.v1.DataFormat
 import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
 import com.google.cloud.bigquery.storage.v1.ReadSession
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.avro.Schema
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.io.BinaryDecoder
 import org.apache.avro.io.DecoderFactory
-import org.apache.avro.Schema
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
 import org.apache.beam.sdk.options.PipelineOptionsFactory
-
 import org.mkuthan.streamprocessing.shared.it.common.GcpProjectId
 import org.mkuthan.streamprocessing.shared.it.common.RandomString._
 object BigQueryClient extends GcpProjectId with LazyLogging {

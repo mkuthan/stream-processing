@@ -60,16 +60,3 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
     result.failure.exception.getMessage should startWith("Unrecognized field \"unknownField\"")
   }
 }
-
-case class SampleClass(
-    string: String,
-    optionString: Option[String],
-    int: Int,
-    double: Double,
-    bigInt: BigInt,
-    bigDecimal: BigDecimal,
-    dateTime: DateTime,
-    instant: Instant,
-    localDate: LocalDate,
-    localTime: LocalTime
-)

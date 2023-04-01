@@ -10,22 +10,19 @@ lazy val root = (project in file("."))
   ).aggregate(shared, wordCount, userSessions, tollApplication, tollDomain, tollInfrastructure)
 
 lazy val shared = (project in file("shared"))
-  .configs(IntegrationTest)
-  .enablePlugins(JacocoItPlugin)
   .settings(
     commonSettings,
-    integrationTestSettings,
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
-      scioTest % "test,it",
+      scioTest % Test,
       scalaLogging,
       slf4j,
       slf4jJcl,
       logback,
-      scalaTest % "test,it",
-      scalaTestPlusScalaCheck % "test,it",
-      diffx % "test,it"
+      scalaTest % Test,
+      scalaTestPlusScalaCheck % Test,
+      diffx % Test
     )
   )
 

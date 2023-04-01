@@ -4,18 +4,16 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.it.client.BigQueryClient._
-import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.it.context.BigQueryContext
-import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
-import org.mkuthan.streamprocessing.shared.it.sink.InMemorySink
+import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
+import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryContext
+import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
+import org.mkuthan.streamprocessing.shared.test.scio.InMemorySink
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class ScioContextSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with IntegrationTestPatience
-    with ItScioContext
+class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with BigQueryContext {
 
   import IntegrationTestFixtures._

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.context
+package org.mkuthan.streamprocessing.shared.test.gcp
 
 import org.scalatest.Suite
 
@@ -8,7 +8,7 @@ import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 trait PubsubContext {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._
+  import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 
   def withTopic[T](fn: PubSubTopic[T] => Any): Any = {
     val topicName = generateTopicName()

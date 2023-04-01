@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.context
+package org.mkuthan.streamprocessing.shared.test.gcp
 
 import org.scalatest.Suite
 
@@ -7,7 +7,7 @@ import org.mkuthan.streamprocessing.shared.configuration.StorageBucket
 trait StorageContext {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.client.StorageClient._
+  import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 
   def withBucket[T](fn: StorageBucket[T] => Any): Any = {
     val bucketName = generateBucketName()

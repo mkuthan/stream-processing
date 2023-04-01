@@ -1,11 +1,21 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.core
 
-import com.spotify.scio.testing.PipelineSpec
+import com.spotify.scio.testing.SCollectionMatchers
 
-class SCollectionSyntaxTest extends PipelineSpec with SCollectionSyntax {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+import org.mkuthan.streamprocessing.shared.test.scio.TestScioContext
+
+class SCollectionSyntaxTest extends AnyFlatSpec
+    with Matchers
+    with TestScioContext
+    with SCollectionMatchers
+    with SCollectionSyntax {
+
   behavior of "Core SCollection syntax"
 
-  it should "unzip Either" in runWithContext { sc =>
+  it should "unzip Either" in runWithScioContext { sc =>
     val (right, left) = sc
       .parallelize[Either[String, String]](Seq(Right("r1"), Left("l1"), Right("r2"), Left("l2"), Right("r3")))
       .unzip

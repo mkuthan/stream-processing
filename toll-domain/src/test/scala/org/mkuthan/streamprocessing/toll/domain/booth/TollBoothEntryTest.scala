@@ -1,16 +1,22 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 
-final class TollBoothEntryTest extends PipelineSpec with TollBoothEntryFixture {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+import org.mkuthan.streamprocessing.shared.test.scio.TestScioContext
+
+final class TollBoothEntryTest extends AnyFlatSpec with Matchers
+    with TestScioContext
+    with TollBoothEntryFixture {
 
   import TollBoothEntry._
 
   behavior of "TollBoothEntry"
 
-  it should "decode valid TollBoothEntry into raw" in runWithContext { sc =>
+  it should "decode valid TollBoothEntry into raw" in runWithScioContext { sc =>
     val inputs = testStreamOf[TollBoothEntry.Raw]
       .addElements(anyTollBoothEntryRaw)
       .advanceWatermarkToInfinity()
@@ -22,7 +28,7 @@ final class TollBoothEntryTest extends PipelineSpec with TollBoothEntryFixture {
   }
 
   it should "put invalid TollBoothEntry into DLQ" in {
-    val run = runWithContext { sc =>
+    val run = runWithScioContext { sc =>
       val inputs = testStreamOf[TollBoothEntry.Raw]
         .addElements(tollBoothEntryRawInvalid)
         .advanceWatermarkToInfinity()

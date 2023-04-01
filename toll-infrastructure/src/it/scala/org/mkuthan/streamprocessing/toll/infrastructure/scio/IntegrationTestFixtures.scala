@@ -6,8 +6,32 @@ import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
 import org.joda.time.LocalDate
+import org.scalacheck._
 
+import org.mkuthan.streamprocessing.shared.test.common.JodaTimeArbitrary
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+
+trait IntegrationTestFixtures extends JodaTimeArbitrary {
+  import IntegrationTestFixtures._
+
+  implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
+    for {
+      string <- Gen.alphaNumStr
+      optionString <- Gen.option(Gen.alphaNumStr)
+      int <- Arbitrary.arbitrary[Int]
+      bigDecimal <- Arbitrary.arbitrary[BigDecimal]
+      instant <- Arbitrary.arbitrary[Instant]
+      localDate <- Arbitrary.arbitrary[LocalDate]
+    } yield SampleClass(
+      string,
+      optionString,
+      int,
+      bigDecimal,
+      instant,
+      localDate
+    )
+  }
+}
 
 object IntegrationTestFixtures {
   @BigQueryType.toTable

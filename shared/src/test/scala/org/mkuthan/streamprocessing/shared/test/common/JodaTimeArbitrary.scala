@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.test.scalacheck
+package org.mkuthan.streamprocessing.shared.test.common
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone

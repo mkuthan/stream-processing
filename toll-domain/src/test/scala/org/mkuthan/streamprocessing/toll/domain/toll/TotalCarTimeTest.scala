@@ -1,14 +1,14 @@
 package org.mkuthan.streamprocessing.toll.domain.toll
 
 import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 
 import org.joda.time.Duration
 import org.joda.time.Instant
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio._
-import org.mkuthan.streamprocessing.shared.test.scio.TimestampedMatchers
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
@@ -18,8 +18,8 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
-class TotalCarTimeTest extends PipelineSpec
-    with TimestampedMatchers
+class TotalCarTimeTest extends AnyFlatSpec with Matchers
+    with TestScioContext
     with TollBoothEntryFixture
     with TollBoothExitFixture
     with TotalCarTimeFixture {
@@ -30,7 +30,7 @@ class TotalCarTimeTest extends PipelineSpec
 
   behavior of "TotalCarTime"
 
-  it should "calculate TotalCarTime in session window" in runWithContext { sc =>
+  it should "calculate TotalCarTime in session window" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -66,7 +66,7 @@ class TotalCarTimeTest extends PipelineSpec
     diagnostic should beEmpty
   }
 
-  it should "emit diagnostic if TollBoothExit is after session window gap" in runWithContext { sc =>
+  it should "emit diagnostic if TollBoothExit is after session window gap" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -96,7 +96,7 @@ class TotalCarTimeTest extends PipelineSpec
     }
   }
 
-  it should "encode TollBoothExit into raw" in runWithContext { sc =>
+  it should "encode TollBoothExit into raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = testStreamOf[TotalCarTime]
       .addElementsAtTime(recordTimestamp, anyTotalCarTime)

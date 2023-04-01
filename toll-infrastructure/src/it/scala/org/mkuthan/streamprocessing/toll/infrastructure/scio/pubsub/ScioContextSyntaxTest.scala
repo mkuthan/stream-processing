@@ -6,19 +6,17 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.LoneElement._
 
-import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._
-import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.it.common.RandomString.randomString
-import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
-import org.mkuthan.streamprocessing.shared.it.context.PubsubContext
-import org.mkuthan.streamprocessing.shared.it.sink.InMemorySink
+import org.mkuthan.streamprocessing.shared.test.common.RandomString.randomString
+import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
+import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.shared.test.gcp.PubsubContext
+import org.mkuthan.streamprocessing.shared.test.scio.InMemorySink
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class ScioContextSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with IntegrationTestPatience
-    with ItScioContext
+class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with PubsubContext {
 
   import IntegrationTestFixtures._

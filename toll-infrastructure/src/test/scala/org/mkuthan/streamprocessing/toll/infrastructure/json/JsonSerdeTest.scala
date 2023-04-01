@@ -12,9 +12,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import org.mkuthan.streamprocessing.shared.test.scalacheck.JodaTimeArbitrary
+import org.mkuthan.streamprocessing.shared.test.common.JodaTimeArbitrary
 
-final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks with JodaTimeArbitrary {
+final class JsonSerdeTest extends AnyFlatSpec
+    with Matchers
+    with ScalaCheckPropertyChecks
+    with JodaTimeArbitrary {
 
   import JsonSerde._
 
@@ -60,16 +63,3 @@ final class JsonSerdeTest extends AnyFlatSpec with Matchers with ScalaCheckPrope
     result.failure.exception.getMessage should startWith("Unrecognized field \"unknownField\"")
   }
 }
-
-case class SampleClass(
-    string: String,
-    optionString: Option[String],
-    int: Int,
-    double: Double,
-    bigInt: BigInt,
-    bigDecimal: BigDecimal,
-    dateTime: DateTime,
-    instant: Instant,
-    localDate: LocalDate,
-    localTime: LocalTime
-)

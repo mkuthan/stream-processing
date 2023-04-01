@@ -1,16 +1,22 @@
 package org.mkuthan.streamprocessing.toll.domain.registration
 
 import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.PipelineSpec
 import com.spotify.scio.testing.TestStreamScioContext
 
-class VehicleRegistrationTest extends PipelineSpec with VehicleRegistrationFixture {
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+import org.mkuthan.streamprocessing.shared.test.scio.TestScioContext
+
+class VehicleRegistrationTest extends AnyFlatSpec with Matchers
+    with TestScioContext
+    with VehicleRegistrationFixture {
 
   import VehicleRegistration._
 
   behavior of "VehicleRegistration"
 
-  it should "decode valid VehicleRegistration into raw" in runWithContext { sc =>
+  it should "decode valid VehicleRegistration into raw" in runWithScioContext { sc =>
     val inputs = testStreamOf[VehicleRegistration.Raw]
       .addElements(anyVehicleRegistrationRaw)
       .advanceWatermarkToInfinity()
@@ -22,7 +28,7 @@ class VehicleRegistrationTest extends PipelineSpec with VehicleRegistrationFixtu
   }
 
   it should "put invalid VehicleRegistration into DLQ" in {
-    val run = runWithContext { sc =>
+    val run = runWithScioContext { sc =>
       val inputs = testStreamOf[VehicleRegistration.Raw]
         .addElements(vehicleRegistrationRawInvalid)
         .advanceWatermarkToInfinity()

@@ -6,10 +6,12 @@ import com.spotify.scio.bigquery.Table
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.PipelineSpec
+import com.spotify.scio.testing.JobTest
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
@@ -24,7 +26,8 @@ import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 
-class TollApplicationTest extends PipelineSpec
+class TollApplicationTest extends AnyFlatSpec with Matchers
+    with JobTestScioContext
     with TollBoothEntryFixture
     with TollBoothExitFixture
     with TollBoothEntryStatsFixture

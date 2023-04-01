@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.sink
+package org.mkuthan.streamprocessing.shared.test.scio
 
 import scala.annotation.unused
 import scala.collection.concurrent.TrieMap
@@ -11,7 +11,7 @@ import com.spotify.scio.values.SCollection
  * In memory cache for the elements materialized from SCollection. Must be static - if not, Cache will be serialized
  * with the `input.map` closure.
  */
-private[sink] case object InMemoryCache {
+private[scio] case object InMemoryCache {
   // TODO: thread-safety / atomicity
   // Current implementation isn't fully thread-safe (ArrayBuffer)
   // Does it really matter? How many threads computes `input.map`?

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.context
+package org.mkuthan.streamprocessing.shared.test.gcp
 
 import scala.reflect.runtime.universe.TypeTag
 
@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 trait BigQueryContext {
   this: Suite =>
 
-  import org.mkuthan.streamprocessing.shared.it.client.BigQueryClient._
+  import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
 
   def withDataset(fn: String => Any): Any = {
     val datasetName = generateDatasetName()

@@ -6,18 +6,16 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.it.client.PubSubClient._
-import org.mkuthan.streamprocessing.shared.it.common.IntegrationTestPatience
-import org.mkuthan.streamprocessing.shared.it.context.ItScioContext
-import org.mkuthan.streamprocessing.shared.it.context.PubsubContext
+import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
+import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.shared.test.gcp.PubsubContext
+import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 
-class SCollectionSyntaxTest extends AnyFlatSpec
-    with Matchers
-    with Eventually
-    with IntegrationTestPatience
-    with ItScioContext
+class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+    with Eventually with GcpTestPatience
+    with IntegrationTestScioContext
     with PubsubContext {
 
   import IntegrationTestFixtures._

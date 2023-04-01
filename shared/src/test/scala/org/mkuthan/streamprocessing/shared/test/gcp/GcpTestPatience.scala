@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.it.common
+package org.mkuthan.streamprocessing.shared.test.gcp
 
 import org.scalatest.concurrent.AbstractPatienceConfiguration
 import org.scalatest.concurrent.PatienceConfiguration
@@ -6,7 +6,7 @@ import org.scalatest.time.Millis
 import org.scalatest.time.Seconds
 import org.scalatest.time.Span
 
-trait IntegrationTestPatience extends AbstractPatienceConfiguration { this: PatienceConfiguration =>
+trait GcpTestPatience extends AbstractPatienceConfiguration { this: PatienceConfiguration =>
 
   private val defaultPatienceConfig: PatienceConfig =
     PatienceConfig(

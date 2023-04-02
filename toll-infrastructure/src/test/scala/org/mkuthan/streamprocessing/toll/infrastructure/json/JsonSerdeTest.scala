@@ -42,6 +42,9 @@ final class JsonSerdeTest extends AnyFlatSpec
   import JsonSerde._
   import JsonSerdeTest._
 
+  override implicit val generatorDrivenConfig =
+    PropertyCheckConfiguration(minSuccessful = 1000)
+
   behavior of "JsonSerde"
 
   it should "serialize and deserialize" in {

@@ -1,12 +1,8 @@
 package org.mkuthan.streamprocessing.toll.application
 
-import com.spotify.scio.bigquery.BigQueryType
-import com.spotify.scio.bigquery.BigQueryTyped
-import com.spotify.scio.bigquery.Table
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.io.CustomIO
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.JobTest
+import com.spotify.scio.testing._
 
 import com.google.api.services.bigquery.model.TableRow
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
@@ -15,22 +11,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio._
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
-import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
-    with TollBoothEntryFixture
-    with TollBoothExitFixture
-    with TollBoothEntryStatsFixture
-    with VehicleRegistrationFixture
-    with TotalCarTimeFixture {
+    with TollApplicationFixtures {
 
   // TODO: move somewhere
   implicit def messageCoder: Coder[PubsubMessage] =
@@ -55,8 +40,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         testStreamOf[PubsubMessage]
           .addElementsAtTime(
             anyTollBoothEntryRaw.entry_time,
-            new PubsubMessage(writeJsonAsBytes(anyTollBoothEntryRaw), null),
-            new PubsubMessage(writeJsonAsBytes(tollBoothEntryRawInvalid), null)
+            new PubsubMessage(anyTollBoothEntryRawJson, null),
+            new PubsubMessage(tollBoothEntryRawInvalidJson, null)
           )
           .advanceWatermarkToInfinity()
       )
@@ -68,22 +53,14 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         testStreamOf[PubsubMessage]
           .addElementsAtTime(
             anyTollBoothExitRaw.exit_time,
-            new PubsubMessage(writeJsonAsBytes(anyTollBoothExitRaw), null),
-            new PubsubMessage(writeJsonAsBytes(tollBoothExitRawInvalid), null)
+            new PubsubMessage(anyTollBoothExitRawJson, null),
+            new PubsubMessage(tollBoothExitRawInvalidJson, null)
           ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>
         results should containSingleValue(writeJsonAsString(tollBoothExitDecodingError))
       }
-      .input(
-        BigQueryTyped.Storage[VehicleRegistration.Raw](
-          Table.Spec("toll.vehicle_registration"),
-          // TODO: hide this complexity
-          BigQueryType[VehicleRegistration.Raw].selectedFields.get,
-          BigQueryType[VehicleRegistration.Raw].rowRestriction
-        ),
-        Seq(anyVehicleRegistrationRaw)
-      )
+      .input(CustomIO[TableRow]("toll.vehicle_registration"), Seq(anyVehicleRegistrationRawTableRow))
       .output(CustomIO[String]("gs://vehicle_registration_dlq")) { results =>
         results should beEmpty
       }

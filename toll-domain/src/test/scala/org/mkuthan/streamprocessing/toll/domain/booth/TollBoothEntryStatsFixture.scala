@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
-import com.spotify.scio.bigquery.types.BigQueryType
-
 import org.joda.time.Instant
 
 trait TollBoothEntryStatsFixture {
@@ -22,7 +20,4 @@ trait TollBoothEntryStatsFixture {
     first_entry_time = Instant.parse("2014-09-10T12:01:00.000Z"),
     last_entry_time = Instant.parse("2014-09-10T12:01:00.000Z")
   )
-
-  private val bigQueryType = BigQueryType[TollBoothEntryStats.Raw]
-  val anyTollBoothEntryStatsRawTableRow = bigQueryType.toTableRow(anyTollBoothEntryStatsRaw)
 }

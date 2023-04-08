@@ -3,9 +3,12 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
+import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
+
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 
 import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
@@ -13,10 +16,17 @@ private[bigquery] final class SCollectionOps[T <: HasAnnotation: Coder: ClassTag
     private val self: SCollection[T]
 ) {
 
-  import com.spotify.scio.bigquery._
+  private val bigQueryType = BigQueryType[T]
 
   def saveToBigQuery(table: BigQueryTable[T]): Unit = {
-    val _ = self.saveAsTypedBigQueryTable(table.spec)
+    val io = BigQueryIO
+      .writeTableRows()
+      .withSchema(bigQueryType.schema)
+      .to(table.id)
+
+    val _ = self
+      .map(bigQueryType.toTableRow)
+      .saveAsCustomOutput(table.id, io)
   }
 }
 

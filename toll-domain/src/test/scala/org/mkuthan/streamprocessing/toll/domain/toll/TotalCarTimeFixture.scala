@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.toll.domain.toll
 
+import com.spotify.scio.bigquery.types.BigQueryType
+
 import org.joda.time.Duration
 import org.joda.time.Instant
 
@@ -23,4 +25,7 @@ trait TotalCarTimeFixture {
     exit_time = Instant.parse("2014-09-10T12:03:00.000Z"),
     duration_seconds = 120L
   )
+
+  private val bigQueryType = BigQueryType[TotalCarTime.Raw]
+  val anyTotalCarTimeRawTableRow = bigQueryType.toTableRow(anyTotalCarTimeRaw)
 }

@@ -8,6 +8,7 @@ import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.JobTest
 
+import com.google.api.services.bigquery.model.TableRow
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder
 import org.scalatest.flatspec.AnyFlatSpec
@@ -15,13 +16,10 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsString
@@ -89,16 +87,16 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String]("gs://vehicle_registration_dlq")) { results =>
         results should beEmpty
       }
-      .output(BigQueryTyped.Table[TollBoothEntryStats.Raw](Table.Spec("toll.entry_stats"))) { results =>
-        results should containSingleValue(anyTollBoothEntryStatsRaw)
+      .output(CustomIO[TableRow]("toll.entry_stats")) { results =>
+        results should containSingleValue(anyTollBoothEntryStatsRawTableRow)
       }
-      .output(BigQueryTyped.Table[TotalCarTime.Raw](Table.Spec("toll.car_total_time"))) { results =>
-        results should containSingleValue(anyTotalCarTimeRaw)
+      .output(CustomIO[TableRow]("toll.car_total_time")) { results =>
+        results should containSingleValue(anyTotalCarTimeRawTableRow)
       }
       .output(CustomIO[String]("vehicles-with-expired-registration")) { results =>
         results should beEmpty
       }
-      .output(BigQueryTyped.Table[Diagnostic.Raw](Table.Spec("toll.diagnostic"))) { results =>
+      .output(CustomIO[TableRow]("toll.diagnostic")) { results =>
         results should beEmpty
       }
       .run()

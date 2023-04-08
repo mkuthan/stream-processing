@@ -1,3 +1,3 @@
 package org.mkuthan.streamprocessing.shared.configuration
 
-final case class PubSubTopic[T](id: String) extends AnyVal
+final case class PubSubTopic[T](id: String)

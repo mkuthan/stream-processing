@@ -1,0 +1,87 @@
+package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
+
+import scala.jdk.CollectionConverters._
+
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
+
+sealed trait StorageReadParam {
+  def configure[T](read: TypedRead[T]): TypedRead[T]
+}
+
+sealed trait StorageWriteParam {
+  def configure[T](write: Write[T]): Write[T]
+}
+
+sealed trait RowRestriction extends StorageReadParam
+
+object RowRestriction {
+  case object NoRowRestriction extends RowRestriction {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] = read
+  }
+
+  case class SqlRowRestriction(sql: String) extends RowRestriction {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] =
+      read.withRowRestriction(sql)
+  }
+}
+
+sealed trait SelectedFields extends StorageReadParam
+
+object SelectedFields {
+  case object NoSelectedFields extends SelectedFields {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] = read
+  }
+
+  case class NamedSelectedFields(fields: List[String]) extends SelectedFields {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] =
+      read.withSelectedFields(fields.asJava)
+  }
+}
+
+sealed trait StorageWriteMethod extends StorageWriteParam
+
+object StorageWriteMethod {
+  case object ExactlyOnce extends StorageWriteMethod {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withMethod(Write.Method.STORAGE_WRITE_API)
+  }
+
+  case object AtLeastOnce extends StorageWriteMethod {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withMethod(Write.Method.STORAGE_API_AT_LEAST_ONCE)
+  }
+}
+
+sealed trait WriteDisposition extends StorageWriteParam
+
+object WriteDisposition {
+  case object WriteAppend extends WriteDisposition {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withWriteDisposition(Write.WriteDisposition.WRITE_APPEND)
+  }
+
+  case object WriteEmpty extends WriteDisposition {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withWriteDisposition(Write.WriteDisposition.WRITE_EMPTY)
+  }
+
+  case object WriteTruncate extends WriteDisposition {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withWriteDisposition(Write.WriteDisposition.WRITE_TRUNCATE)
+  }
+}
+
+sealed trait CreateDisposition extends StorageWriteParam
+
+object CreateDisposition {
+  case object CreateNever extends CreateDisposition {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withCreateDisposition(Write.CreateDisposition.CREATE_NEVER)
+  }
+
+  case object CreateIfNeeded extends CreateDisposition {
+    override def configure[T](write: Write[T]): Write[T] =
+      write.withCreateDisposition(Write.CreateDisposition.CREATE_IF_NEEDED)
+  }
+}

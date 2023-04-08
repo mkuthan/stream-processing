@@ -9,7 +9,7 @@ import org.scalatest.Suite
 
 import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
-trait BigQueryContext {
+trait BigQueryContext extends GcpProjectId {
   this: Suite =>
 
   import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryClient._
@@ -27,7 +27,7 @@ trait BigQueryContext {
     val tableName = generateTableName()
     createTable(datasetName, tableName, BigQueryType[T].schema)
     try
-      fn(BigQueryTable[T](s"$datasetName.$tableName"))
+      fn(BigQueryTable[T](s"$projectId:$datasetName.$tableName"))
     finally
       deleteTable(datasetName, tableName)
   }

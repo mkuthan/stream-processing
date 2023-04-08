@@ -1,23 +1,28 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.bigquery
 
 import scala.language.implicitConversions
-import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
+import scala.util.chaining._
 
+import com.spotify.scio.ScioContext
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.ScioContext
-
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
 
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
   def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      table: BigQueryTable[T]
+      table: BigQueryTable[T],
+      readConfiguration: StorageReadConfiguration = StorageReadConfiguration()
   ): SCollection[T] = {
-    val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+    val io = BigQueryIO
       .readTableRows()
+      .withMethod(TypedRead.Method.DIRECT_READ)
+      .pipe(read => readConfiguration.configure(read))
       .from(table.id)
 
     val bigQueryType = BigQueryType[T]

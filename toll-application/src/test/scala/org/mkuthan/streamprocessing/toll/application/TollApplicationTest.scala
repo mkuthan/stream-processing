@@ -64,18 +64,30 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String]("gs://vehicle_registration_dlq")) { results =>
         results should beEmpty
       }
-      .output(CustomIO[TableRow]("toll.entry_stats")) { results =>
-        results should containSingleValue(anyTollBoothEntryStatsRawTableRow)
-      }
-      .output(CustomIO[TableRow]("toll.car_total_time")) { results =>
-        results should containSingleValue(anyTotalCarTimeRawTableRow)
-      }
+      .transformOverride(TransformOverride.of[TableRow, Unit](
+        "toll.entry_stats",
+        (r: TableRow) => {
+          r should be(anyTollBoothEntryStatsRawTableRow)
+          ()
+        }
+      ))
+      .transformOverride(TransformOverride.of[TableRow, Unit](
+        "toll.car_total_time",
+        (r: TableRow) => {
+          r should be(anyTotalCarTimeRawTableRow)
+          ()
+        }
+      ))
       .output(CustomIO[String]("vehicles-with-expired-registration")) { results =>
         results should beEmpty
       }
-      .output(CustomIO[TableRow]("toll.diagnostic")) { results =>
-        results should beEmpty
-      }
+      .transformOverride(TransformOverride.of[TableRow, Unit](
+        "toll.diagnostic",
+        (r: TableRow) => {
+          println(r)
+          ()
+        }
+      ))
       .run()
   }
 

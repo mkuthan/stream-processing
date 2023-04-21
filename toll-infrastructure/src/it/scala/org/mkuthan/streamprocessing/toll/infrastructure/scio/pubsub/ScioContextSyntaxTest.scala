@@ -13,13 +13,14 @@ import org.mkuthan.streamprocessing.shared.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.shared.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.IntegrationTestFixtures.SampleClass
 
 class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
+    with IntegrationTestFixtures
     with PubsubContext {
-
-  import IntegrationTestFixtures._
 
   behavior of "Pubsub ScioContext syntax"
 
@@ -34,7 +35,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           (SampleJson2, SampleMap2)
         )
 
-        val (messages, _) = sc.subscribeJsonFromPubsub(subscription)
+        val (messages, _) = sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), subscription)
 
         val sink = InMemorySink(messages)
 
@@ -59,7 +60,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
       withSubscription[SampleClass](topic.id) { subscription =>
         publishMessages(topic.id, (InvalidJson, SampleMap1))
 
-        val (_, dlq) = sc.subscribeJsonFromPubsub(subscription)
+        val (_, dlq) = sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), subscription)
 
         val sink = InMemorySink(dlq)
 
@@ -88,6 +89,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         publishMessages(topic.id, Seq.fill(10)(messagePrototype): _*)
 
         val (messages, _) = sc.subscribeJsonFromPubsub(
+          IoIdentifier("any-id"),
           subscription = subscription,
           readConfiguration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
         )
@@ -116,6 +118,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         publishMessages(topic.id, (SampleJson1, attributes))
 
         val (messages, _) = sc.subscribeJsonFromPubsub(
+          IoIdentifier("any-id"),
           subscription = subscription,
           readConfiguration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
         )

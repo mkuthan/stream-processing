@@ -24,7 +24,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubsubMessag
  * See:
  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
  */
-object TollApplication {
+object TollApplication extends TollApplicationIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
@@ -34,12 +34,12 @@ object TollApplication {
     val config = TollApplicationConfig.parse(args)
 
     // TODO: handle deserialization errors
-    val (boothEntriesRaw, _) = sc.subscribeJsonFromPubsub(config.entrySubscription)
+    val (boothEntriesRaw, _) = sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload)
     boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
 
     // TODO: handle deserialization errors
-    val (boothExitsRaw, _) = sc.subscribeJsonFromPubsub(config.exitSubscription)
+    val (boothExitsRaw, _) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload)
     boothExistsDlq.saveToStorageAsJson(config.exitDlq)
 
@@ -63,7 +63,7 @@ object TollApplication {
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
       .map(PubsubMessage(_, Map.empty)) // TODO: encapsulate somewhere
-      .publishJsonToPubSub(config.vehiclesWithExpiredRegistrationTopic)
+      .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
     val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)

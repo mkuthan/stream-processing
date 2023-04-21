@@ -10,12 +10,14 @@ import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.shared.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
 
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
+    with IntegrationTestFixtures
     with PubsubContext {
 
   import IntegrationTestFixtures._
@@ -30,7 +32,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             PubsubMessage(SampleObject1, SampleMap1),
             PubsubMessage(SampleObject2, SampleMap2)
           ))
-          .publishJsonToPubSub(topic)
+          .publishJsonToPubSub(IoIdentifier("any-id"), topic)
 
         sc.run().waitUntilDone()
 
@@ -38,7 +40,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         eventually {
           results ++= pullMessages(subscription.id)
             .map { case (payload, attributes) =>
-              (readJsonFromBytes[SampleClass](payload).get, attributes)
+              (JsonSerde.readJsonFromBytes[SampleClass](payload).get, attributes)
             }
 
           results should contain.only(

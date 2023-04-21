@@ -10,7 +10,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.writeJsonAsBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 trait TollApplicationFixtures
     extends TollBoothEntryFixture
@@ -19,14 +19,17 @@ trait TollApplicationFixtures
     with TotalCarTimeFixture
     with VehicleRegistrationFixture {
 
-  val anyTollBoothEntryRawJson = writeJsonAsBytes(anyTollBoothEntryRaw)
-  val tollBoothEntryRawInvalidJson = writeJsonAsBytes(tollBoothEntryRawInvalid)
+  val anyTollBoothEntryRawJson = JsonSerde.writeJsonAsBytes(anyTollBoothEntryRaw)
+  val tollBoothEntryRawInvalidJson = JsonSerde.writeJsonAsBytes(tollBoothEntryRawInvalid)
 
-  val anyTollBoothExitRawJson = writeJsonAsBytes(anyTollBoothExitRaw)
-  val tollBoothExitRawInvalidJson = writeJsonAsBytes(tollBoothExitRawInvalid)
+  val anyTollBoothExitRawJson = JsonSerde.writeJsonAsBytes(anyTollBoothExitRaw)
+  val tollBoothExitRawInvalidJson = JsonSerde.writeJsonAsBytes(tollBoothExitRawInvalid)
 
   val anyTollBoothEntryStatsRawTableRow = BigQueryType[TollBoothEntryStats.Raw].toTableRow(anyTollBoothEntryStatsRaw)
   val anyTotalCarTimeRawTableRow = BigQueryType[TotalCarTime.Raw].toTableRow(anyTotalCarTimeRaw)
 
   val anyVehicleRegistrationRawTableRow = BigQueryType[VehicleRegistration.Raw].toTableRow(anyVehicleRegistrationRaw)
+
+  val tollBoothEntryDecodingErrorString = JsonSerde.writeJsonAsString(tollBoothEntryDecodingError)
+  val tollBoothExitDecodingErrorString = JsonSerde.writeJsonAsString(tollBoothExitDecodingError)
 }

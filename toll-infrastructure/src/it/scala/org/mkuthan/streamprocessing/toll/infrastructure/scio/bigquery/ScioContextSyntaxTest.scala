@@ -14,6 +14,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
+    with IntegrationTestFixtures
     with BigQueryContext {
 
   import IntegrationTestFixtures._

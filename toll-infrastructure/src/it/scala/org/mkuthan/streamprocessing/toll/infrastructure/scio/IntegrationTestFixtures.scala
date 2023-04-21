@@ -31,18 +31,6 @@ trait IntegrationTestFixtures extends JodaTimeArbitrary {
       localDate
     )
   }
-}
-
-object IntegrationTestFixtures {
-  @BigQueryType.toTable
-  final case class SampleClass(
-      stringField: String,
-      optionalStringField: Option[String],
-      intField: Int,
-      bigDecimalField: BigDecimal,
-      instantField: Instant,
-      localDateField: LocalDate
-  )
 
   val SampleClassBigQueryType = BigQueryType[SampleClass]
   val SampleClassBigQuerySchema = SampleClassBigQueryType.schema
@@ -73,4 +61,16 @@ object IntegrationTestFixtures {
 
   val SampleMap1 = Map("key1" -> "value1")
   val SampleMap2 = Map("key2" -> "value2")
+}
+
+object IntegrationTestFixtures {
+  @BigQueryType.toTable
+  final case class SampleClass(
+      stringField: String,
+      optionalStringField: Option[String],
+      intField: Int,
+      bigDecimalField: BigDecimal,
+      instantField: Instant,
+      localDateField: LocalDate
+  )
 }

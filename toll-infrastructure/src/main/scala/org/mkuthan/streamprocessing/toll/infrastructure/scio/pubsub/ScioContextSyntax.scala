@@ -1,8 +1,6 @@
 package org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub
 
-import java.util.{Map => JMap}
-
-import scala.jdk.CollectionConverters._
+import scala.reflect.ClassTag
 import scala.util.chaining._
 import scala.util.Failure
 import scala.util.Success
@@ -14,12 +12,15 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromBytes
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
 
-private[pubsub] final class ScioContextOps(private val self: ScioContext) extends AnyVal {
+private[pubsub] final class ScioContextOps(private val self: ScioContext) {
+
   import ScioContextOps._
 
-  def subscribeJsonFromPubsub[T <: AnyRef: Coder: Manifest](
+  def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
+      ioIdentifier: IoIdentifier,
       subscription: PubSubSubscription[T],
       readConfiguration: JsonReadConfiguration = JsonReadConfiguration()
   ): (SCollection[PubsubMessage[T]], SCollection[PubsubDeadLetter[T]]) = {
@@ -29,30 +30,26 @@ private[pubsub] final class ScioContextOps(private val self: ScioContext) extend
       .fromSubscription(subscription.id)
 
     val messagesOrDeserializationErrors = self
-      .customInput(subscription.id, io)
-      .map { msg =>
+      .customInput(ioIdentifier.id, io)
+      .withName(s"$ioIdentifier/Decode").map { msg =>
         val payload = msg.getPayload
         val attributes = readAttributes(msg.getAttributeMap)
 
-        readJsonFromBytes[T](msg.getPayload) match {
+        JsonSerde.readJsonFromBytes[T](msg.getPayload) match {
           case Success(deserialized) =>
             Right(PubsubMessage(deserialized, attributes))
           case Failure(ex) =>
             Left(PubsubDeadLetter[T](payload, attributes, ex.getMessage))
         }
       }
-    messagesOrDeserializationErrors.unzip
+
+    messagesOrDeserializationErrors
+      .withName(s"$ioIdentifier/Handle errors")
+      .unzip
   }
 }
 
-private[pubsub] object ScioContextOps {
-  private def readAttributes(attributes: JMap[String, String]): Map[String, String] =
-    if (attributes == null) {
-      Map.empty[String, String]
-    } else {
-      attributes.asScala.toMap
-    }
-}
+private[pubsub] final object ScioContextOps extends Utils with PubsubCoders
 
 trait ScioContextSyntax {
   import scala.language.implicitConversions

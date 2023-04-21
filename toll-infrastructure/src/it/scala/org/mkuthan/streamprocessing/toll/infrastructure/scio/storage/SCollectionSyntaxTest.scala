@@ -9,15 +9,15 @@ import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.shared.test.gcp.StorageContext
 import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde.readJsonFromString
+import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.IntegrationTestFixtures.SampleClass
 
 final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
+    with IntegrationTestFixtures
     with StorageContext {
-
-  import IntegrationTestFixtures._
 
   behavior of "Storage SCollection syntax"
 
@@ -32,7 +32,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       eventually {
         val results =
           readObjectLines(bucket.name, "GlobalWindow-pane-0-last-00000-of-00001.json")
-            .map(readJsonFromString[SampleClass])
+            .map(JsonSerde.readJsonFromString[SampleClass])
             .flatMap(_.toOption)
 
         results should contain.only(SampleObject1, SampleObject2)
@@ -60,7 +60,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       eventually {
         val results =
           readObjectLines(bucket.name, s"$windowStart-$windowEnd-pane-0-last-00000-of-00001.json")
-            .map(readJsonFromString[SampleClass])
+            .map(JsonSerde.readJsonFromString[SampleClass])
             .flatMap(_.toOption)
 
         results should contain.only(SampleObject1, SampleObject2)

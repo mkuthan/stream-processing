@@ -5,4 +5,5 @@ package object scio extends bigquery.ScioContextSyntax
     with core.SCollectionSyntax
     with pubsub.ScioContextSyntax
     with pubsub.SCollectionSyntax
+    with pubsub.PubsubCoders
     with storage.SCollectionSyntax

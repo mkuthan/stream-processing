@@ -9,13 +9,13 @@ import org.mkuthan.streamprocessing.shared.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.shared.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.IntegrationTestFixtures.SampleClass
 
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
+    with IntegrationTestFixtures
     with BigQueryContext {
-
-  import IntegrationTestFixtures._
 
   behavior of "BigQuery SCollection syntax"
 

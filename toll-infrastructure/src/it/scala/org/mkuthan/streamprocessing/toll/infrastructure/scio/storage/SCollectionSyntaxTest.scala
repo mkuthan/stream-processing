@@ -11,6 +11,7 @@ import org.mkuthan.streamprocessing.shared.test.gcp.StorageContext
 import org.mkuthan.streamprocessing.shared.test.scio.IntegrationTestScioContext
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.toll.infrastructure.scio.IntegrationTestFixtures.SampleClass
 
 final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
@@ -25,7 +26,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withBucket[SampleClass] { bucket =>
       sc
         .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-        .saveToStorageAsJson(bucket)
+        .saveToStorageAsJson(IoIdentifier("any-id"), bucket)
 
       sc.run().waitUntilDone()
 
@@ -50,7 +51,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
           )
         )
         .withFixedWindows(Duration.standardSeconds(10))
-        .saveToStorageAsJson(bucket)
+        .saveToStorageAsJson(IoIdentifier("any-id"), bucket)
 
       sc.run().waitUntilDone()
 

@@ -40,7 +40,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           )
           .advanceWatermarkToInfinity()
       )
-      .output(CustomIO[String]("gs://entry_dlq")) { results =>
+      .output(CustomIO[String](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingErrorString)
       }
       .inputStream(
@@ -52,11 +52,11 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             invalidTollBoothExitPubsubMessage
           ).advanceWatermarkToInfinity()
       )
-      .output(CustomIO[String]("gs://exit_dlq")) { results =>
+      .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }
       .input(CustomIO[TableRow]("toll.vehicle_registration"), Seq(anyVehicleRegistrationRawTableRow))
-      .output(CustomIO[String]("gs://vehicle_registration_dlq")) { results =>
+      .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
         results should beEmpty
       }
       .output(CustomIO[TableRow]("toll.entry_stats")) { results =>

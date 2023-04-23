@@ -10,9 +10,11 @@ import org.apache.beam.sdk.io.TextIO
 
 import org.mkuthan.streamprocessing.shared.configuration.StorageBucket
 import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
+import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
 
 private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
+      ioIdentifier: IoIdentifier,
       location: StorageBucket[T],
       writeConfiguration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
@@ -21,20 +23,10 @@ private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self
       .pipe(write => writeConfiguration.configure(write))
 
     val _ = self
+      .withName(s"$ioIdentifier/Serialize")
       .map(JsonSerde.writeJsonAsString)
-      .saveAsCustomOutput(location.id, io)
+      .saveAsCustomOutput(ioIdentifier.id, io)
   }
-
-//  def saveToStorageAsAvro(
-//      location: StorageBucket[T],
-//      writeConfiguration: AvroWriteConfiguration = AvroWriteConfiguration()
-//  ): Unit = {
-//    val io = AvroIO.write()
-//      .to(location.id)
-//      .pipe(write => writeConfiguration.configure(write))
-//
-//    val _ = self.saveAsCustomOutput(io)
-//  }
 }
 
 trait SCollectionSyntax {

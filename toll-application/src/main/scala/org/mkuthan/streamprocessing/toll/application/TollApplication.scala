@@ -36,16 +36,16 @@ object TollApplication extends TollApplicationIo {
     // TODO: handle deserialization errors
     val (boothEntriesRaw, _) = sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload)
-    boothEntriesDlq.saveToStorageAsJson(config.entryDlq)
+    boothEntriesDlq.saveToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     // TODO: handle deserialization errors
     val (boothExitsRaw, _) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload)
-    boothExistsDlq.saveToStorageAsJson(config.exitDlq)
+    boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
       .decode(sc.loadFromBigQuery(config.vehicleRegistrationTable))
-    vehicleRegistrationsDlq.saveToStorageAsJson(config.vehicleRegistrationDlq)
+    vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
     TollBoothEntryStats

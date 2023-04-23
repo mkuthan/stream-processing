@@ -34,9 +34,9 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubMessage](EntrySubscriptionIoId.id),
         testStreamOf[PubsubMessage]
           .addElementsAtTime(
-            anyTollBoothEntryRaw.entry_time,
-            new PubsubMessage(anyTollBoothEntryRawJson, null),
-            new PubsubMessage(tollBoothEntryRawInvalidJson, null)
+            tollBoothEntryTime,
+            tollBoothEntryPubsubMessage,
+            invalidTollBoothEntryPubsubMessage
           )
           .advanceWatermarkToInfinity()
       )
@@ -47,9 +47,9 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubMessage](ExitSubscriptionIoId.id),
         testStreamOf[PubsubMessage]
           .addElementsAtTime(
-            anyTollBoothExitRaw.exit_time,
-            new PubsubMessage(anyTollBoothExitRawJson, null),
-            new PubsubMessage(tollBoothExitRawInvalidJson, null)
+            tollBoothExitTime,
+            tollBoothExitPubsubMessage,
+            invalidTollBoothExitPubsubMessage
           ).advanceWatermarkToInfinity()
       )
       .output(CustomIO[String]("gs://exit_dlq")) { results =>

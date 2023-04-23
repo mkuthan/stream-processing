@@ -2,6 +2,8 @@ package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.bigquery.BigQueryType
 
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
@@ -19,11 +21,13 @@ trait TollApplicationFixtures
     with TotalCarTimeFixture
     with VehicleRegistrationFixture {
 
-  val anyTollBoothEntryRawJson = JsonSerde.writeJsonAsBytes(anyTollBoothEntryRaw)
-  val tollBoothEntryRawInvalidJson = JsonSerde.writeJsonAsBytes(tollBoothEntryRawInvalid)
+  val tollBoothEntryTime = anyTollBoothEntry.entryTime
+  val tollBoothEntryPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(anyTollBoothEntryRaw), null)
+  val invalidTollBoothEntryPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(tollBoothEntryRawInvalid), null)
 
-  val anyTollBoothExitRawJson = JsonSerde.writeJsonAsBytes(anyTollBoothExitRaw)
-  val tollBoothExitRawInvalidJson = JsonSerde.writeJsonAsBytes(tollBoothExitRawInvalid)
+  val tollBoothExitTime = anyTollBoothExit.exitTime
+  val tollBoothExitPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(anyTollBoothExitRaw), null)
+  val invalidTollBoothExitPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(tollBoothExitRawInvalid), null)
 
   val anyTollBoothEntryStatsRawTableRow = BigQueryType[TollBoothEntryStats.Raw].toTableRow(anyTollBoothEntryStatsRaw)
   val anyTotalCarTimeRawTableRow = BigQueryType[TotalCarTime.Raw].toTableRow(anyTotalCarTimeRaw)

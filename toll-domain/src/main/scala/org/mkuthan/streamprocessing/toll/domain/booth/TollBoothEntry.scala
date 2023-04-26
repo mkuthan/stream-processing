@@ -56,11 +56,20 @@ object TollBoothEntry {
     (results, sideOutputs(dlq))
   }
 
-  private def fromRaw(raw: Raw): TollBoothEntry =
-    TollBoothEntry(
-      id = TollBoothId(raw.id),
-      entryTime = Instant.parse(raw.entry_time),
-      licensePlate = LicensePlate(raw.license_plate),
-      toll = BigDecimal(raw.toll)
-    )
+  private def fromRaw(raw: Raw): TollBoothEntry = {
+    import io.scalaland.chimney.dsl._
+
+    raw.into[TollBoothEntry]
+      .withFieldComputed(_.entryTime, r => Instant.parse(r.entry_time))
+      .withFieldRenamed(_.license_plate, _.licensePlate)
+      .withFieldComputed(_.toll, r => BigDecimal(r.toll))
+      .transform
+
+//    TollBoothEntry(
+//      id = TollBoothId(raw.id),
+//      entryTime = Instant.parse(raw.entry_time),
+//      licensePlate = LicensePlate(raw.license_plate),
+//      toll = BigDecimal(raw.toll)
+//    )
+  }
 }

@@ -23,7 +23,15 @@ private[core] final class SCollectionEitherOps[L: Coder, R: Coder](private val s
   }
 }
 
+private[core] final class SCollectionOps[T: Coder](private val self: SCollection[T]) {
+  def metrics(counter: Counter[T]): SCollection[T] =
+    self.tap(_ => counter.inc())
+}
+
 trait SCollectionSyntax {
+  implicit def coreSCollectionOps[T: Coder](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sc)
+
   implicit def coreSCollectionEitherOps[L: Coder, R: Coder](sc: SCollection[Either[L, R]]): SCollectionEitherOps[L, R] =
     new SCollectionEitherOps(sc)
 }

@@ -21,6 +21,8 @@ trait TollApplicationFixtures
     with TotalCarTimeFixture
     with VehicleRegistrationFixture {
 
+  val corruptedJsonPubsubMessage = new PubsubMessage("corrupted".getBytes, null)
+
   val tollBoothEntryTime = anyTollBoothEntry.entryTime
   val tollBoothEntryPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(anyTollBoothEntryRaw), null)
   val invalidTollBoothEntryPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(tollBoothEntryRawInvalid), null)

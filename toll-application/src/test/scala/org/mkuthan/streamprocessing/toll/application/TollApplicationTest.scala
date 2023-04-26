@@ -14,6 +14,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.scio._
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollApplicationIo
+    with TollApplicationMetrics
     with TollApplicationFixtures {
 
   "Toll application" should "run" in {
@@ -36,10 +37,14 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           .addElementsAtTime(
             tollBoothEntryTime,
             tollBoothEntryPubsubMessage,
-            invalidTollBoothEntryPubsubMessage
+            invalidTollBoothEntryPubsubMessage,
+            corruptedJsonPubsubMessage
           )
           .advanceWatermarkToInfinity()
       )
+      .counter(TollBoothEntryRawInvalidRows.counter) { value =>
+        value should be(1)
+      }
       .output(CustomIO[String](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingErrorString)
       }
@@ -49,9 +54,13 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           .addElementsAtTime(
             tollBoothExitTime,
             tollBoothExitPubsubMessage,
-            invalidTollBoothExitPubsubMessage
+            invalidTollBoothExitPubsubMessage,
+            corruptedJsonPubsubMessage
           ).advanceWatermarkToInfinity()
       )
+      .counter(TollBoothExitRawInvalidRows.counter) { value =>
+        value should be(1)
+      }
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }

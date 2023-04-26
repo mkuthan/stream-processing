@@ -24,7 +24,7 @@ import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubsubMessag
  * See:
  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
  */
-object TollApplication extends TollApplicationIo {
+object TollApplication extends TollApplicationIo with TollApplicationMetrics {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
@@ -33,13 +33,19 @@ object TollApplication extends TollApplicationIo {
 
     val config = TollApplicationConfig.parse(args)
 
-    // TODO: handle deserialization errors
-    val (boothEntriesRaw, _) = sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
+    sc.initCounter(TollBoothEntryRawInvalidRows.counter, TollBoothExitRawInvalidRows.counter)
+    sc.initCounter()
+
+    val (boothEntriesRaw, boothEntriesRawDlq) =
+      sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
+    boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
+
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload)
     boothEntriesDlq.saveToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
-    // TODO: handle deserialization errors
-    val (boothExitsRaw, _) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
+    val (boothExitsRaw, boothExitsRawDlq) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
+    boothExitsRawDlq.metrics(TollBoothExitRawInvalidRows)
+
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload)
     boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 

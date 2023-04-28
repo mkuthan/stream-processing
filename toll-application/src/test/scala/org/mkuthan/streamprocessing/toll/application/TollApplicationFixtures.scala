@@ -4,6 +4,7 @@ import com.spotify.scio.bigquery.BigQueryType
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 
+import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
@@ -12,7 +13,6 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
-import org.mkuthan.streamprocessing.toll.infrastructure.json.JsonSerde
 
 trait TollApplicationFixtures
     extends TollBoothEntryFixture

@@ -36,7 +36,7 @@ object TollBoothEntryStats {
       last_entry_time: Instant
   )
 
-  object TollBoothEntrySemigroup extends Semigroup[TollBoothEntryStats] {
+  private object TollBoothEntrySemigroup extends Semigroup[TollBoothEntryStats] {
     override def plus(x: TollBoothEntryStats, y: TollBoothEntryStats): TollBoothEntryStats = {
       require(x.id == y.id)
 
@@ -70,7 +70,7 @@ object TollBoothEntryStats {
       )
     }
 
-  def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothEntryStats = TollBoothEntryStats(
+  private def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothEntryStats = TollBoothEntryStats(
     id = boothEntry.id,
     count = 1,
     totalToll = boothEntry.toll,

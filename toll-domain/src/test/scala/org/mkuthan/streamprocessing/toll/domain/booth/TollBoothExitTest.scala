@@ -6,7 +6,7 @@ import com.spotify.scio.testing.TestStreamScioContext
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.scio.TestScioContext
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 final class TollBoothExitTest extends AnyFlatSpec with Matchers
     with TestScioContext

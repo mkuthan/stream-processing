@@ -7,50 +7,68 @@ lazy val root = (project in file("."))
   .settings(
     name := "stream-processing",
     commonSettings
-  ).aggregate(shared, wordCount, userSessions, tollApplication, tollDomain, tollInfrastructure)
+  ).aggregate(test, shared, wordCount, userSessions, tollDomain, tollApplication)
 
-lazy val shared = (project in file("shared"))
+lazy val test = (project in file("stream-processing-test"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
-      scioTest % Test,
+      scioTest,
       scalaLogging,
       slf4j,
       slf4jJcl,
       logback,
-      scalaTest % Test,
-      scalaTestPlusScalaCheck % Test,
-      magnolifyScalaCheck % Test,
-      diffx % Test
+      scalaTest,
+      scalaTestPlusScalaCheck,
+      magnolifyScalaCheck,
+      diffx
     )
   )
 
+lazy val shared = (project in file("stream-processing-shared"))
+  .configs(IntegrationTest.extend(Test))
+  .enablePlugins(JacocoItPlugin)
+  .settings(
+    commonSettings,
+    integrationTestSettings,
+    libraryDependencies ++= Seq(
+      scio,
+      scioGcp,
+      scalaLogging,
+      slf4j,
+      slf4jJcl,
+      logback
+    )
+  )
+  .dependsOn(test % Test)
+
 lazy val wordCount = (project in file("word-count"))
   .settings(commonSettings)
-  .dependsOn(shared % "compile->compile;test->test")
+  .dependsOn(
+    shared,
+    test % Test
+  )
 
 lazy val userSessions = (project in file("user-sessions"))
   .settings(commonSettings)
-  .dependsOn(shared % "compile->compile;test->test")
-
-lazy val tollApplication = (project in file("toll-application"))
-  .settings(commonSettings)
   .dependsOn(
-    shared % "compile->compile;test->test",
-    tollDomain % "compile->compile;test->test",
-    tollInfrastructure % "compile->compile;test->test"
+    shared,
+    test % Test
   )
 
 lazy val tollDomain = (project in file("toll-domain"))
   .settings(commonSettings)
-  .dependsOn(shared % "compile->compile;test->test")
+  .dependsOn(
+    shared,
+    test % Test
+  )
 
-lazy val tollInfrastructure = (project in file("toll-infrastructure"))
-  .configs(IntegrationTest)
-  .enablePlugins(JacocoItPlugin)
-  .settings(
-    commonSettings,
-    integrationTestSettings
-  ).dependsOn(shared % "compile->compile;test->test;it->test")
+lazy val tollApplication = (project in file("toll-application"))
+  .settings(commonSettings)
+  .dependsOn(
+    shared,
+    test % Test,
+    tollDomain % "compile->compile;test->test"
+  )

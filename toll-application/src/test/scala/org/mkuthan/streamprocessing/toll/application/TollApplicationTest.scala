@@ -8,8 +8,8 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.test.scio._
-import org.mkuthan.streamprocessing.toll.infrastructure.scio._
+import org.mkuthan.streamprocessing.shared.scio._
+import org.mkuthan.streamprocessing.test.scio._
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext

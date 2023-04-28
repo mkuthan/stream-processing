@@ -17,7 +17,7 @@ private[scio] case object InMemoryCache {
   // Does it really matter? How many threads computes `input.map`?
   private val cache = TrieMap.empty[String, ArrayBuffer[Any]]
 
-  def put[T](id: String, input: SCollection[T])(implicit @unused c: Coder[T]): Unit = {
+  def put[T: Coder](id: String, input: SCollection[T]): Unit = {
     cache += id -> ArrayBuffer.empty
     val _ = input.tap { element =>
       cache(id) += element

@@ -29,8 +29,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
   it should "subscribe JSON" in withScioContext { implicit sc =>
     options.setBlockOnRun(false)
 
-    withTopic[SampleClass] { topic =>
-      withSubscription[SampleClass](topic) { subscription =>
+    withTopic { topic =>
+      withSubscription(topic) { subscription =>
         publishMessages(
           topic,
           (SampleJson1, SampleMap1),
@@ -59,8 +59,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
   it should "subscribe invalid JSON and put into DLQ" in withScioContext { implicit sc =>
     options.setBlockOnRun(false)
 
-    withTopic[SampleClass] { topic =>
-      withSubscription[SampleClass](topic) { subscription =>
+    withTopic { topic =>
+      withSubscription(topic) { subscription =>
         publishMessages(topic, (InvalidJson, SampleMap1))
 
         val (_, dlq) = sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), PubSubSubscription[SampleClass](subscription))
@@ -84,8 +84,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
   it should "subscribe JSON with id attribute" in withScioContext { implicit sc =>
     options.setBlockOnRun(false)
 
-    withTopic[SampleClass] { topic =>
-      withSubscription[SampleClass](topic) { subscription =>
+    withTopic { topic =>
+      withSubscription(topic) { subscription =>
         val attributes = SampleMap1 + (NamedIdAttribute.Default.name -> randomString())
         val messagePrototype = (SampleJson1, attributes)
 
@@ -113,8 +113,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
   it should "subscribe JSON with timestamp attribute" in withScioContext { implicit sc =>
     options.setBlockOnRun(false)
 
-    withTopic[SampleClass] { topic =>
-      withSubscription[SampleClass](topic) { subscription =>
+    withTopic { topic =>
+      withSubscription(topic) { subscription =>
         val timestamp = Instant.now()
         val attributes = SampleMap1 + (NamedTimestampAttribute.Default.name -> timestamp.toString)
 

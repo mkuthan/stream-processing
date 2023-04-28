@@ -25,7 +25,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   behavior of "Storage SCollection syntax"
 
   it should "save file on GCS in global window" in withScioContext { sc =>
-    withBucket[SampleClass] { bucket =>
+    withBucket { bucket =>
       sc
         .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
         .saveToStorageAsJson(IoIdentifier("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
@@ -44,7 +44,7 @@ final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   }
 
   it should "save file on GCS in fixed window" in withScioContext { sc =>
-    withBucket[SampleClass] { bucket =>
+    withBucket { bucket =>
       sc
         .parallelizeTimestamped[SampleClass](
           Seq(

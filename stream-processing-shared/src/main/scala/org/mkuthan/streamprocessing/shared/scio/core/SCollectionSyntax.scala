@@ -6,7 +6,7 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 
-private[core] final class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
+private[core] class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
   def unzip: (SCollection[R], SCollection[L]) = {
     val leftOutput = SideOutput[L]()
 
@@ -23,7 +23,7 @@ private[core] final class SCollectionEitherOps[L: Coder, R: Coder](private val s
   }
 }
 
-private[core] final class SCollectionOps[T: Coder](private val self: SCollection[T]) {
+private[core] class SCollectionOps[T: Coder](private val self: SCollection[T]) {
   def metrics(counter: Counter[T]): SCollection[T] =
     self.tap(_ => counter.inc())
 }

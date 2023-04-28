@@ -23,7 +23,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   it should "save into table" in withScioContext { sc =>
     withDataset { datasetName =>
-      withTable[SampleClass](datasetName) { tableName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
           .saveToBigQuery(BigQueryTable[SampleClass](s"$datasetName.$tableName"))

@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
-private[pubsub] final class ScioContextOps(private val self: ScioContext) {
+private[pubsub] class ScioContextOps(private val self: ScioContext) {
 
   import ScioContextOps._
 

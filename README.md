@@ -3,6 +3,10 @@
 [![CI](https://github.com/mkuthan/stream-processing/actions/workflows/ci.yml/badge.svg)](https://github.com/mkuthan/stream-processing/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/mkuthan/stream-processing/branch/main/graph/badge.svg?token=V9HUU6OJGF)](https://codecov.io/gh/mkuthan/stream-processing)
 
-Code and tests samples for the [stream processing](http://mkuthan.github.io/tags/#stream-processing) blog post series.
+Modules:
 
-[Building production-ready data pipelines using Dataflow: Developing and testing data pipelines](https://cloud.google.com/architecture/building-production-ready-data-pipelines-using-dataflow-developing-and-testing#testing_your_pipeline)
+* `stream-processing-test` - shared utilities for testing stateful streaming data pipelines
+* `stream-processing-shared` - shared infrastructure for developing stateful streaming data pipelines
+* `toll-application`, `toll-domain` - sample application for toll data processing
+* `word-count` - fixed window example, see [blog post](http://mkuthan.github.io/blog/2022/01/28/stream-processing-part1/)
+* `session-window` - session window example, see [blog post](http://mkuthan.github.io/blog/2022/03/08/stream-processing-part2/)

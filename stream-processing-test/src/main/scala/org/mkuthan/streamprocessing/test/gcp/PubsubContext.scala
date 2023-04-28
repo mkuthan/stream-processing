@@ -7,7 +7,7 @@ trait PubsubContext {
 
   import PubSubClient._
 
-  def withTopic[T](fn: String => Any): Any = {
+  def withTopic(fn: String => Any): Any = {
     val topicName = generateTopicName()
     try {
       createTopic(topicName)
@@ -16,7 +16,7 @@ trait PubsubContext {
       deleteTopic(topicName)
   }
 
-  def withSubscription[T](
+  def withSubscription(
       topicName: String
   )(fn: String => Any): Any = {
     val subscriptionName = generateSubscriptionName()

@@ -1,10 +1,6 @@
 package org.mkuthan.streamprocessing.test.gcp
 
-import scala.reflect.runtime.universe.TypeTag
-
-import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
-
+import com.google.api.services.bigquery.model.TableSchema
 import org.scalatest.Suite
 
 trait BigQueryContext {
@@ -21,9 +17,9 @@ trait BigQueryContext {
       deleteDataset(datasetName)
   }
 
-  def withTable[T <: HasAnnotation: TypeTag](datasetName: String)(fn: String => Any): Any = {
+  def withTable(datasetName: String, schema: TableSchema)(fn: String => Any): Any = {
     val tableName = generateTableName()
-    createTable(datasetName, tableName, BigQueryType[T].schema)
+    createTable(datasetName, tableName, schema)
     try
       fn(tableName)
     finally

@@ -8,7 +8,7 @@ import org.mkuthan.streamprocessing.test.common.RandomString
 /**
  * Sink for the materialized content of SCollection.
  */
-case class InMemorySink[T](private val input: SCollection[T])(implicit c: Coder[T]) {
+case class InMemorySink[T: Coder](private val input: SCollection[T]) {
   private val id = RandomString.randomString()
   InMemoryCache.put(id, input)
 

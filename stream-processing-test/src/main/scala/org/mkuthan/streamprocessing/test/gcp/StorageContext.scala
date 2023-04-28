@@ -7,7 +7,7 @@ trait StorageContext {
 
   import StorageClient._
 
-  def withBucket[T](fn: String => Any): Any = {
+  def withBucket(fn: String => Any): Any = {
     val bucketName = generateBucketName()
     try {
       createBucket(bucketName)

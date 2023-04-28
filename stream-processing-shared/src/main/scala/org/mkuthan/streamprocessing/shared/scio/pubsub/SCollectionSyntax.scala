@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
-private[pubsub] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubsubMessage[T]]) {
+private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubsubMessage[T]]) {
 
   import SCollectionOps._
 

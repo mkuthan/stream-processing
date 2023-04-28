@@ -27,8 +27,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   behavior of "Pubsub SCollection syntax"
 
   it should "publish JSON" in withScioContext { sc =>
-    withTopic[SampleClass] { topic =>
-      withSubscription[SampleClass](topic) { subscription =>
+    withTopic { topic =>
+      withSubscription(topic) { subscription =>
         sc
           .parallelize[PubsubMessage[SampleClass]](Seq(
             PubsubMessage(SampleObject1, SampleMap1),

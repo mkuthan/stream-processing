@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.configuration.StorageBucket
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
-private[storage] final class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
+private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
       ioIdentifier: IoIdentifier,
       location: StorageBucket[T],

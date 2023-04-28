@@ -26,7 +26,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
   // TODO: implement writeTable to prepare test data
   ignore should "load from table" in withScioContext { sc =>
     withDataset { datasetName =>
-      withTable[SampleClass](datasetName) { tableName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
           datasetName,
           tableName,

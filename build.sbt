@@ -48,11 +48,3 @@ lazy val tollApplication = (project in file("toll-application"))
 lazy val tollDomain = (project in file("toll-domain"))
   .settings(commonSettings)
   .dependsOn(shared % "compile->compile;test->test")
-
-// lazy val tollInfrastructure = (project in file("toll-infrastructure"))
-//  .configs(IntegrationTest)
-//  .enablePlugins(JacocoItPlugin)
-//  .settings(
-//    commonSettings,
-//    integrationTestSettings
-//  ).dependsOn(shared % "compile->compile;test->test;it->test")

@@ -1,6 +1,6 @@
 package org.mkuthan.streamprocessing.toll.application
 
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
 trait TollApplicationIo {
   val EntrySubscriptionIoId = IoIdentifier("entry-subscription-id")

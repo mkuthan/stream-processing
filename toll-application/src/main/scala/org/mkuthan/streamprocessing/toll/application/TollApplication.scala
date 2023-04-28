@@ -4,6 +4,8 @@ import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
 
+import org.mkuthan.streamprocessing.shared.scio._
+import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
@@ -11,8 +13,6 @@ import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.infrastructure.scio._
-import org.mkuthan.streamprocessing.toll.infrastructure.scio.pubsub.PubsubMessage
 
 /**
  * A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world.

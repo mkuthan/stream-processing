@@ -3,11 +3,13 @@ package org.mkuthan.streamprocessing.shared.scio
 import java.nio.charset.StandardCharsets
 
 import com.spotify.scio.bigquery.types.BigQueryType
+
 import org.joda.time.Instant
 import org.joda.time.LocalDate
+import org.scalacheck._
+
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
-import org.scalacheck._
 
 trait IntegrationTestFixtures extends JodaTimeArbitrary {
   import IntegrationTestFixtures._

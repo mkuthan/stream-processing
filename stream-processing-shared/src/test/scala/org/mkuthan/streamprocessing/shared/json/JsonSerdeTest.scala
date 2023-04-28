@@ -8,12 +8,13 @@ import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
-import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
 import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
+import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
 
 object JsonSerdeTest extends JodaTimeArbitrary {
 

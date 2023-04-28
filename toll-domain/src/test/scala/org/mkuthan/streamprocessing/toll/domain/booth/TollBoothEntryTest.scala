@@ -2,11 +2,9 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.TestStreamScioContext
-
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import org.mkuthan.streamprocessing.shared.test.scio.TestScioContext
 
 final class TollBoothEntryTest extends AnyFlatSpec with Matchers
     with TestScioContext

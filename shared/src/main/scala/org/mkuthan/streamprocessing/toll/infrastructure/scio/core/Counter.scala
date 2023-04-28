@@ -3,7 +3,7 @@ package org.mkuthan.streamprocessing.toll.infrastructure.scio.core
 import com.spotify.scio.ScioMetrics
 
 trait Counter[T] {
-  def inc()
+  def inc(): Unit
   def counter: org.apache.beam.sdk.metrics.Counter
 }
 

@@ -6,9 +6,10 @@ import com.spotify.scio.testing.TestStreamScioContext
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
-final class TollBoothExitTest extends AnyFlatSpec with Matchers
+class TollBoothExitTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with TollBoothExitFixture {
 
@@ -17,8 +18,8 @@ final class TollBoothExitTest extends AnyFlatSpec with Matchers
   behavior of "TollBoothExit"
 
   it should "decode valid TollBoothExit into raw" in runWithScioContext { sc =>
-    val inputs = testStreamOf[TollBoothExit.Raw]
-      .addElements(anyTollBoothExitRaw)
+    val inputs = testStreamOf[PubsubMessage[TollBoothExit.Raw]]
+      .addElements(PubsubMessage(anyTollBoothExitRaw))
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decode(sc.testStream(inputs))
@@ -29,8 +30,8 @@ final class TollBoothExitTest extends AnyFlatSpec with Matchers
 
   it should "put invalid TollBoothExit into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = testStreamOf[TollBoothExit.Raw]
-        .addElements(tollBoothExitRawInvalid)
+      val inputs = testStreamOf[PubsubMessage[TollBoothExit.Raw]]
+        .addElements(PubsubMessage(tollBoothExitRawInvalid))
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decode(sc.testStream(inputs))

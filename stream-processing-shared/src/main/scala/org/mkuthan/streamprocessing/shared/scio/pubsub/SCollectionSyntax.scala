@@ -36,9 +36,6 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
 
     val _ = serializedMessages.saveAsCustomOutput(ioIdentifier.id, io)
   }
-
-  def extractPayload: SCollection[T] =
-    self.map(_.payload)
 }
 
 private[pubsub] object SCollectionOps extends Utils with PubsubCoders

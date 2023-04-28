@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
 
-final case class TollApplicationConfig(
+case class TollApplicationConfig(
     entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
     entryDlq: StorageBucket[TollBoothEntry.DeadLetterRaw],
     exitSubscription: PubSubSubscription[TollBoothExit.Raw],

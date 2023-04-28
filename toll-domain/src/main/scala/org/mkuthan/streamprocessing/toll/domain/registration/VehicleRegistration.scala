@@ -12,7 +12,7 @@ import org.apache.beam.sdk.metrics.Counter
 
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-final case class VehicleRegistration(
+case class VehicleRegistration(
     id: VehicleRegistrationId,
     licensePlate: LicensePlate,
     expired: Boolean

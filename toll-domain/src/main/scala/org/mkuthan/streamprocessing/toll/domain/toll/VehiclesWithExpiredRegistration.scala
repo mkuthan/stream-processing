@@ -6,6 +6,7 @@ import com.spotify.scio.values.SCollection
 
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -49,6 +50,6 @@ object VehiclesWithExpiredRegistration {
     (boothEntries.context.empty[VehiclesWithExpiredRegistration](), boothEntries.context.empty[Diagnostic]())
 
   // TODO: implement
-  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Raw] =
-    input.context.empty[Raw]()
+  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[PubsubMessage[Raw]] =
+    input.context.empty[PubsubMessage[Raw]]()
 }

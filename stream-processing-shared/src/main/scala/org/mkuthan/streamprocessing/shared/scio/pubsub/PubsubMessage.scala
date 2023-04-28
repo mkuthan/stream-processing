@@ -1,6 +1,6 @@
 package org.mkuthan.streamprocessing.shared.scio.pubsub
 
-final case class PubsubMessage[T](
+case class PubsubMessage[T](
     payload: T,
-    attributes: Map[String, String]
+    attributes: Map[String, String] = Map.empty
 )

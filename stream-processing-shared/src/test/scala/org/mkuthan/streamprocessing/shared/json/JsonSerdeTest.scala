@@ -35,7 +35,7 @@ object JsonSerdeTest extends JodaTimeArbitrary {
   implicit val sampleClassArbitrary = implicitly[Arbitrary[SampleClass]]
 }
 
-final class JsonSerdeTest extends AnyFlatSpec
+class JsonSerdeTest extends AnyFlatSpec
     with Matchers
     with ScalaCheckPropertyChecks {
 

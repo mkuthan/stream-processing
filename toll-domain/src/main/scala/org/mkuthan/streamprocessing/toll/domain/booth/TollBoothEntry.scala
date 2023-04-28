@@ -3,16 +3,17 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 import scala.util.control.NonFatal
 
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.SideOutput
 import com.spotify.scio.ScioMetrics
 
 import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio._
+import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.toll.domain.common.DeadLetter
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-final case class TollBoothEntry(
+case class TollBoothEntry(
     id: TollBoothId,
     entryTime: Instant,
     licensePlate: LicensePlate,
@@ -38,29 +39,23 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(inputs: SCollection[Raw]): (SCollection[TollBoothEntry], SCollection[DeadLetterRaw]) = {
-    val dlq = SideOutput[DeadLetterRaw]()
-    val (results, sideOutputs) = inputs
-      .withSideOutputs(dlq)
-      .flatMap { case (input, ctx) =>
-        try
-          Some(fromRaw(input))
-        catch {
-          case NonFatal(ex) =>
-            ctx.output(dlq, DeadLetter(input, ex.getMessage))
-            DlqCounter.inc()
-            None
-        }
-      }
+  def decode(input: SCollection[PubsubMessage[Raw]]): (SCollection[TollBoothEntry], SCollection[DeadLetterRaw]) =
+    input
+      .map(element => fromRaw(element.payload))
+      .unzip
 
-    (results, sideOutputs(dlq))
-  }
-
-  private def fromRaw(raw: Raw): TollBoothEntry =
-    TollBoothEntry(
-      id = TollBoothId(raw.id),
-      entryTime = Instant.parse(raw.entry_time),
-      licensePlate = LicensePlate(raw.license_plate),
-      toll = BigDecimal(raw.toll)
-    )
+  private def fromRaw(raw: Raw): Either[DeadLetterRaw, TollBoothEntry] =
+    try {
+      val tollBoothEntry = TollBoothEntry(
+        id = TollBoothId(raw.id),
+        entryTime = Instant.parse(raw.entry_time),
+        licensePlate = LicensePlate(raw.license_plate),
+        toll = BigDecimal(raw.toll)
+      )
+      Right(tollBoothEntry)
+    } catch {
+      case NonFatal(ex) =>
+        DlqCounter.inc()
+        Left(DeadLetter(raw, ex.getMessage))
+    }
 }

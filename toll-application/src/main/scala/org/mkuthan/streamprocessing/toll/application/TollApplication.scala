@@ -5,7 +5,6 @@ import com.spotify.scio.ContextAndArgs
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.shared.scio._
-import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
@@ -40,13 +39,13 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
     boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
 
-    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw.extractPayload)
+    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
     boothEntriesDlq.saveToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
     boothExitsRawDlq.metrics(TollBoothExitRawInvalidRows)
 
-    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw.extractPayload)
+    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
@@ -68,7 +67,6 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
-      .map(PubsubMessage(_, Map.empty)) // TODO: encapsulate somewhere
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)

@@ -16,7 +16,7 @@ import org.mkuthan.streamprocessing.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.test.gcp.StorageContext
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
-final class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

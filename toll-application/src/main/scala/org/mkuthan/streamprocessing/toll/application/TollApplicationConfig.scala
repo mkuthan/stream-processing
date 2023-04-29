@@ -2,10 +2,10 @@ package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.Args
 
-import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
-import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
-import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
-import org.mkuthan.streamprocessing.shared.configuration.StorageBucket
+import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
+import org.mkuthan.streamprocessing.shared.scio.common.PubSubTopic
+import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit

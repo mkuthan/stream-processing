@@ -6,9 +6,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.LoneElement._
 
-import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.common.RandomString._

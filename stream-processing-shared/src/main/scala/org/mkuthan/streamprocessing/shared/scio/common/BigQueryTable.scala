@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.configuration
+package org.mkuthan.streamprocessing.shared.scio.common
 
 import com.spotify.scio.bigquery.Table
 

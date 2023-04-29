@@ -8,9 +8,9 @@ import com.spotify.scio.values.SCollection
 
 import org.apache.beam.sdk.io.TextIO
 
-import org.mkuthan.streamprocessing.shared.configuration.StorageBucket
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 
 private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(

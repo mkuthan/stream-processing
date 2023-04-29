@@ -1,6 +1,5 @@
 package org.mkuthan.streamprocessing.test.scio
 
-import scala.annotation.unused
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ArrayBuffer
 

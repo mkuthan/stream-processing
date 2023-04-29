@@ -8,9 +8,9 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.io.gcp.pubsub.{PubsubMessage => BeamPubsubMessage}
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
-import org.mkuthan.streamprocessing.shared.configuration.PubSubTopic
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.common.PubSubTopic
 
 private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubsubMessage[T]]) {
 

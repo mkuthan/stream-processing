@@ -11,9 +11,9 @@ import com.spotify.scio.ScioContext
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
-import org.mkuthan.streamprocessing.shared.configuration.PubSubSubscription
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
 
 private[pubsub] class ScioContextOps(private val self: ScioContext) {
 

@@ -10,7 +10,7 @@ import com.spotify.scio.values.SCollection
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 
-import org.mkuthan.streamprocessing.shared.configuration.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 
 private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
     private val self: SCollection[T]

@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
 trait IntegrationTestFixtures extends JodaTimeArbitrary {
   import IntegrationTestFixtures._
 
-  implicit val sampleClassArbitrary = Arbitrary[SampleClass] {
+  implicit val sampleClassArbitrary: Arbitrary[SampleClass] = Arbitrary[SampleClass] {
     for {
       string <- Gen.alphaNumStr
       optionString <- Gen.option(Gen.alphaNumStr)

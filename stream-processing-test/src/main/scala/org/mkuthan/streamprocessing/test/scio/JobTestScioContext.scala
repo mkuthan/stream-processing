@@ -5,5 +5,5 @@ import com.spotify.scio.testing.SCollectionMatchers
 
 trait JobTestScioContext extends SCollectionMatchers with TimestampedMatchers {
   // required by com.spotify.scio.testing.JobTest
-  implicit val beamOptions = BeamOptions(List.empty)
+  implicit val beamOptions: BeamOptions = BeamOptions(List.empty)
 }

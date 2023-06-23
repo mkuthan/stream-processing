@@ -5,11 +5,11 @@ import scala.jdk.CollectionConverters._
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 
-sealed trait StorageReadParam {
+sealed trait BigQueryReadParam {
   def configure[T](read: TypedRead[T]): TypedRead[T]
 }
 
-sealed trait StorageWriteParam {
+sealed trait BigQueryWriteParam {
   def configure[T](write: Write[T]): Write[T]
 }
 
@@ -18,7 +18,7 @@ sealed trait ExportParam {
   def configure[T](read: TypedRead[T], tableId: String): TypedRead[T]
 }
 
-sealed trait RowRestriction extends StorageReadParam
+sealed trait RowRestriction extends BigQueryReadParam
 
 object RowRestriction {
   case object NoRowRestriction extends RowRestriction {
@@ -31,7 +31,7 @@ object RowRestriction {
   }
 }
 
-sealed trait SelectedFields extends StorageReadParam
+sealed trait SelectedFields extends BigQueryReadParam
 
 object SelectedFields {
   case object NoSelectedFields extends SelectedFields {
@@ -44,7 +44,7 @@ object SelectedFields {
   }
 }
 
-sealed trait StorageWriteMethod extends StorageWriteParam
+sealed trait StorageWriteMethod extends BigQueryWriteParam
 
 object StorageWriteMethod {
   case object ExactlyOnce extends StorageWriteMethod {
@@ -58,7 +58,7 @@ object StorageWriteMethod {
   }
 }
 
-sealed trait WriteDisposition extends StorageWriteParam
+sealed trait WriteDisposition extends BigQueryWriteParam
 
 object WriteDisposition {
   case object WriteAppend extends WriteDisposition {
@@ -77,7 +77,7 @@ object WriteDisposition {
   }
 }
 
-sealed trait CreateDisposition extends StorageWriteParam
+sealed trait CreateDisposition extends BigQueryWriteParam
 
 object CreateDisposition {
   case object CreateNever extends CreateDisposition {

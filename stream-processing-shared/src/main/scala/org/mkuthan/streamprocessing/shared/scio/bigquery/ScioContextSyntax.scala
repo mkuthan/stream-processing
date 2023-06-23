@@ -20,12 +20,12 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
   def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
       ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
-      exportConfiguration: ExportConfiguration = ExportConfiguration()
+      configuration: ExportConfiguration = ExportConfiguration()
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
       .withMethod(TypedRead.Method.EXPORT)
-      .pipe(read => exportConfiguration.configure(read, table.id))
+      .pipe(read => configuration.configure(read, table.id))
 
     val bigQueryType = BigQueryType[T]
 
@@ -37,12 +37,12 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
   def loadFromBigQueryStorage[T <: HasAnnotation: Coder: ClassTag: TypeTag](
       ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
-      readConfiguration: StorageReadConfiguration = StorageReadConfiguration()
+      configuration: StorageReadConfiguration = StorageReadConfiguration()
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
       .withMethod(TypedRead.Method.DIRECT_READ)
-      .pipe(read => readConfiguration.configure(read))
+      .pipe(read => configuration.configure(read))
       .from(table.id)
 
     val bigQueryType = BigQueryType[T]

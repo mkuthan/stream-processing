@@ -16,11 +16,11 @@ private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCol
   def saveToStorageAsJson(
       ioIdentifier: IoIdentifier,
       location: StorageBucket[T],
-      writeConfiguration: JsonWriteConfiguration = JsonWriteConfiguration()
+      configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     val io = TextIO.write()
       .to(location.id)
-      .pipe(write => writeConfiguration.configure(write))
+      .pipe(write => configuration.configure(write))
 
     val _ = self
       .withName(s"$ioIdentifier/Serialize")

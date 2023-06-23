@@ -19,11 +19,11 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
   def publishJsonToPubSub(
       ioIdentifier: IoIdentifier,
       topic: PubSubTopic[T],
-      writeConfiguration: JsonWriteConfiguration = JsonWriteConfiguration()
+      configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     val io = PubsubIO
       .writeMessages()
-      .pipe(write => writeConfiguration.configure(write))
+      .pipe(write => configuration.configure(write))
       .to(topic.id)
 
     val serializedMessages = self

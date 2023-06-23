@@ -61,7 +61,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         val results = sc.loadFromBigQuery(
           ioIdentifier = IoIdentifier("any-id"),
           table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          exportConfiguration = ExportConfiguration()
+          configuration = ExportConfiguration()
             .withQuery(ExportQuery.SqlQuery(s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"))
         )
 
@@ -113,7 +113,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         val results = sc.loadFromBigQueryStorage(
           ioIdentifier = IoIdentifier("any-id"),
           table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          readConfiguration = StorageReadConfiguration()
+          configuration = StorageReadConfiguration()
             .withRowRestriction(RowRestriction.SqlRowRestriction("intField = 1"))
         )
 

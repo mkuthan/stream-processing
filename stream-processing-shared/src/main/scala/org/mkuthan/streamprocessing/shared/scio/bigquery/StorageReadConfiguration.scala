@@ -15,7 +15,7 @@ case class StorageReadConfiguration(
   def configure[T](read: TypedRead[T]): TypedRead[T] =
     ioParams.foldLeft(read)((read, param) => param.configure(read))
 
-  private lazy val ioParams: Set[StorageReadParam] = Set(
+  private lazy val ioParams: Set[BigQueryReadParam] = Set(
     rowRestriction,
     selectedFields
   )

@@ -94,7 +94,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         val (messages, _) = sc.subscribeJsonFromPubsub(
           IoIdentifier("any-id"),
           subscription = PubSubSubscription[SampleClass](subscription),
-          readConfiguration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
+          configuration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
         )
 
         val messagesSink = InMemorySink(messages)
@@ -123,7 +123,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         val (messages, _) = sc.subscribeJsonFromPubsub(
           IoIdentifier("any-id"),
           subscription = PubSubSubscription[SampleClass](subscription),
-          readConfiguration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
+          configuration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
         )
 
         val messagesSink = InMemorySink(messages.withTimestamp)

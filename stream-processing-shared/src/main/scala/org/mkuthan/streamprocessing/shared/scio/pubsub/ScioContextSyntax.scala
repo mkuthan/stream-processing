@@ -22,11 +22,11 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
   def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
       ioIdentifier: IoIdentifier,
       subscription: PubSubSubscription[T],
-      readConfiguration: JsonReadConfiguration = JsonReadConfiguration()
+      configuration: JsonReadConfiguration = JsonReadConfiguration()
   ): (SCollection[PubsubMessage[T]], SCollection[PubsubDeadLetter[T]]) = {
     val io = PubsubIO
       .readMessagesWithAttributes()
-      .pipe(read => readConfiguration.configure(read))
+      .pipe(read => configuration.configure(read))
       .fromSubscription(subscription.id)
 
     val messagesOrDeserializationErrors = self

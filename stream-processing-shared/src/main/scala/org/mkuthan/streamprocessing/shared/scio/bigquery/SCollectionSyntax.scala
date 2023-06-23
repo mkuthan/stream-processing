@@ -37,6 +37,22 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
       .map(bigQueryType.toTableRow)
       .saveAsCustomOutput(ioIdentifier.id, io)
   }
+
+  def saveToBigQueryStorage(
+      ioIdentifier: IoIdentifier,
+      table: BigQueryTable[T],
+      configuration: StorageWriteConfiguration = StorageWriteConfiguration()
+  ): Unit = {
+    val io = BigQueryIO
+      .writeTableRows()
+      .withSchema(bigQueryType.schema)
+      .pipe(write => configuration.configure(write))
+      .to(table.id)
+
+    val _ = self
+      .map(bigQueryType.toTableRow)
+      .saveAsCustomOutput(ioIdentifier.id, io)
+  }
 }
 
 trait SCollectionSyntax {

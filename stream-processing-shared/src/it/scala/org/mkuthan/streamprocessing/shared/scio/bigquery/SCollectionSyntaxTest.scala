@@ -40,4 +40,23 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       }
     }
   }
+
+  it should "save into table storage" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        sc
+          .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
+          .saveToBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          val results = readTable(datasetName, tableName)
+            .map(SampleClassBigQueryType.fromAvro)
+
+          results should contain.only(SampleObject1, SampleObject2)
+        }
+      }
+    }
+  }
 }

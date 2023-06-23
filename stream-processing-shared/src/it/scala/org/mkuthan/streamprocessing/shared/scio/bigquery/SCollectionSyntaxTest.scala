@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
@@ -26,7 +27,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-          .saveToBigQuery(BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .saveToBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
 
         sc.run().waitUntilDone()
 

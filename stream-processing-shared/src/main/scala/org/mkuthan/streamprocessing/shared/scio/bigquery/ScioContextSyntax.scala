@@ -14,9 +14,11 @@ import com.spotify.scio.ScioContext
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
   def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
       exportConfiguration: ExportConfiguration = ExportConfiguration()
   ): SCollection[T] = {
@@ -28,11 +30,12 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
     val bigQueryType = BigQueryType[T]
 
     self
-      .customInput(table.id, io)
+      .customInput(ioIdentifier.id, io)
       .map(bigQueryType.fromTableRow)
   }
 
   def loadFromBigQueryStorage[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
       readConfiguration: StorageReadConfiguration = StorageReadConfiguration()
   ): SCollection[T] = {
@@ -45,7 +48,7 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
     val bigQueryType = BigQueryType[T]
 
     self
-      .customInput(table.id, io)
+      .customInput(ioIdentifier.id, io)
       .map(bigQueryType.fromTableRow)
   }
 }

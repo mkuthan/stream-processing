@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
@@ -33,7 +34,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val results = sc.loadFromBigQuery(BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+        val results =
+          sc.loadFromBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
 
         val resultsSink = InMemorySink(results)
 
@@ -57,6 +59,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val results = sc.loadFromBigQuery(
+          ioIdentifier = IoIdentifier("any-id"),
           table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
           exportConfiguration = ExportConfiguration()
             .withQuery(ExportQuery.SqlQuery(s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"))
@@ -83,7 +86,8 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val results = sc.loadFromBigQueryStorage(BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+        val results =
+          sc.loadFromBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
 
         val resultsSink = InMemorySink(results)
 
@@ -107,6 +111,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val results = sc.loadFromBigQueryStorage(
+          ioIdentifier = IoIdentifier("any-id"),
           table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
           readConfiguration = StorageReadConfiguration()
             .withRowRestriction(RowRestriction.SqlRowRestriction("intField = 1"))

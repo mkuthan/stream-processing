@@ -64,20 +64,20 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }
-      .input(CustomIO[TableRow]("toll.vehicle_registration"), Seq(anyVehicleRegistrationRawTableRow))
+      .input(CustomIO[TableRow](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRawTableRow))
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
         results should beEmpty
       }
-      .output(CustomIO[TableRow]("toll.entry_stats")) { results =>
+      .output(CustomIO[TableRow](EntryStatsTableIoId.id)) { results =>
         results should containSingleValue(anyTollBoothEntryStatsRawTableRow)
       }
-      .output(CustomIO[TableRow]("toll.car_total_time")) { results =>
+      .output(CustomIO[TableRow](CarTotalTimeTableIoId.id)) { results =>
         results should containSingleValue(anyTotalCarTimeRawTableRow)
       }
       .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
         results should beEmpty
       }
-      .output(CustomIO[TableRow]("toll.diagnostic")) { results =>
+      .output(CustomIO[TableRow](DiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       .run()

@@ -11,6 +11,7 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
+import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
 private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
     private val self: SCollection[T]
@@ -18,7 +19,10 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
 
   private val bigQueryType = BigQueryType[T]
 
-  def saveToBigQuery(table: BigQueryTable[T]): Unit = {
+  def saveToBigQuery(
+      ioIdentifier: IoIdentifier,
+      table: BigQueryTable[T]
+  ): Unit = {
     val io = BigQueryIO
       .writeTableRows()
       .withSchema(bigQueryType.schema)
@@ -26,7 +30,7 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
 
     val _ = self
       .map(bigQueryType.toTableRow)
-      .saveAsCustomOutput(table.id, io)
+      .saveAsCustomOutput(ioIdentifier.id, io)
   }
 }
 

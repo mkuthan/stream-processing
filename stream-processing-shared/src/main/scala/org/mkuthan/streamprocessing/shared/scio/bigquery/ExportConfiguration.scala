@@ -8,10 +8,11 @@ case class ExportConfiguration(
   def withQuery(query: ExportQuery): ExportConfiguration =
     copy(query = query)
 
-  def configure[T](read: TypedRead[T], tableId: String): TypedRead[T] =
-    ioParams.foldLeft(read)((read, param) => param.configure(read, tableId))
+  def configure[T](tableId: String, read: TypedRead[T]): TypedRead[T] =
+    ioParams.foldLeft(read)((read, param) => param.configure(tableId, read))
 
-  private lazy val ioParams: Set[ExportParam] = Set(
+  private lazy val ioParams: Set[BigQueryReadParam] = Set(
+    ExportReadMethod,
     query
   )
 }

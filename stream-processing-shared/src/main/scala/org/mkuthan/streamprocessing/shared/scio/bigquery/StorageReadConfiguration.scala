@@ -12,10 +12,12 @@ case class StorageReadConfiguration(
   def withSelectedFields(selectedFields: SelectedFields): StorageReadConfiguration =
     copy(selectedFields = selectedFields)
 
-  def configure[T](read: TypedRead[T]): TypedRead[T] =
-    ioParams.foldLeft(read)((read, param) => param.configure(read))
+  def configure[T](tableId: String, read: TypedRead[T]): TypedRead[T] =
+    ioParams.foldLeft(read)((read, param) => param.configure(tableId, read))
 
   private lazy val ioParams: Set[BigQueryReadParam] = Set(
+    ReadFrom,
+    StorageReadMethod,
     rowRestriction,
     selectedFields
   )

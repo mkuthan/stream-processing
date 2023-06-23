@@ -11,8 +11,6 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
 
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
-
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
@@ -24,8 +22,7 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
-      .withMethod(TypedRead.Method.EXPORT)
-      .pipe(read => configuration.configure(read, table.id))
+      .pipe(read => configuration.configure(table.id, read))
 
     val bigQueryType = BigQueryType[T]
 
@@ -41,9 +38,7 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
-      .withMethod(TypedRead.Method.DIRECT_READ)
-      .pipe(read => configuration.configure(read))
-      .from(table.id)
+      .pipe(read => configuration.configure(table.id, read))
 
     val bigQueryType = BigQueryType[T]
 

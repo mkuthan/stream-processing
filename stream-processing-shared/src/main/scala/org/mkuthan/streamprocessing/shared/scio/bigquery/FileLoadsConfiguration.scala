@@ -12,10 +12,12 @@ case class FileLoadsConfiguration(
   def withWriteDisposition(writeDisposition: WriteDisposition): FileLoadsConfiguration =
     copy(writeDisposition = writeDisposition)
 
-  def configure[T](write: Write[T]): Write[T] =
-    ioParams.foldLeft(write)((write, param) => param.configure(write))
+  def configure[T](tableId: String, write: Write[T]): Write[T] =
+    ioParams.foldLeft(write)((write, param) => param.configure(tableId, write))
 
   private lazy val ioParams: Set[BigQueryWriteParam] = Set(
+    WriteTo,
+    FileLoadsWriteMethod,
     createDisposition,
     writeDisposition
   )

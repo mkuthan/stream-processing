@@ -23,15 +23,14 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
   behavior of "BigQuery ScioContext syntax"
 
-  // TODO: implement writeTable to prepare test data
-  ignore should "load from table" in withScioContext { sc =>
+  it should "load from table" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
           datasetName,
           tableName,
-          SampleClassBigQueryType.toAvro(SampleObject1),
-          SampleClassBigQueryType.toAvro(SampleObject2)
+          SampleClassBigQueryType.toTableRow(SampleObject1),
+          SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
         val results = sc.loadFromBigQuery(BigQueryTable[SampleClass](s"$datasetName.$tableName"))
@@ -42,6 +41,83 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
         eventually {
           resultsSink.toSeq should contain.only(SampleObject1, SampleObject2)
+        }
+      }
+    }
+  }
+
+  it should "load from table using SQL" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        writeTable(
+          datasetName,
+          tableName,
+          SampleClassBigQueryType.toTableRow(SampleObject1),
+          SampleClassBigQueryType.toTableRow(SampleObject2)
+        )
+
+        val results = sc.loadFromBigQuery(
+          table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
+          exportConfiguration = ExportConfiguration()
+            .withQuery(ExportQuery.SqlQuery(s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"))
+        )
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          resultsSink.toSeq should contain.only(SampleObject1)
+        }
+      }
+    }
+  }
+
+  it should "load from table storage" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        writeTable(
+          datasetName,
+          tableName,
+          SampleClassBigQueryType.toTableRow(SampleObject1),
+          SampleClassBigQueryType.toTableRow(SampleObject2)
+        )
+
+        val results = sc.loadFromBigQueryStorage(BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          resultsSink.toSeq should contain.only(SampleObject1, SampleObject2)
+        }
+      }
+    }
+  }
+
+  it should "load from table storage with row restriction" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        writeTable(
+          datasetName,
+          tableName,
+          SampleClassBigQueryType.toTableRow(SampleObject1),
+          SampleClassBigQueryType.toTableRow(SampleObject2)
+        )
+
+        val results = sc.loadFromBigQueryStorage(
+          table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
+          readConfiguration = StorageReadConfiguration()
+            .withRowRestriction(RowRestriction.SqlRowRestriction("intField = 1"))
+        )
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          resultsSink.toSeq should contain.only(SampleObject1)
         }
       }
     }

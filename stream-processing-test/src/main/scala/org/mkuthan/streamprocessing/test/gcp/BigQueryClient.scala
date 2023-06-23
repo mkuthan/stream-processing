@@ -5,6 +5,7 @@ import scala.jdk.CollectionConverters._
 
 import com.google.api.services.bigquery.model.Table
 import com.google.api.services.bigquery.model.TableReference
+import com.google.api.services.bigquery.model.TableRow
 import com.google.api.services.bigquery.model.TableSchema
 import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
 import com.google.cloud.bigquery.storage.v1.DataFormat
@@ -18,7 +19,12 @@ import org.apache.avro.io.DecoderFactory
 import org.apache.avro.Schema
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
+import org.apache.beam.sdk.io.gcp.bigquery.InsertRetryPolicy
 import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow
+import org.apache.beam.sdk.transforms.windowing.GlobalWindow
+import org.apache.beam.sdk.transforms.windowing.PaneInfo
+import org.apache.beam.sdk.values.FailsafeValueInSingleWindow
 
 import org.mkuthan.streamprocessing.test.common.RandomString._
 
@@ -123,8 +129,37 @@ object BigQueryClient extends GcpProjectId with LazyLogging {
     }
   }
 
-  def writeTable(datasetName: String, tableName: String, records: GenericRecord*): Unit = {
-    // TODO
+  def writeTable(datasetName: String, tableName: String, records: TableRow*): Unit = {
+    val tableReference = new TableReference()
+      .setProjectId(projectId)
+      .setDatasetId(datasetName)
+      .setTableId(tableName)
+
+    val rows = records
+      .map(record =>
+        FailsafeValueInSingleWindow.of(
+          record,
+          BoundedWindow.TIMESTAMP_MIN_VALUE,
+          GlobalWindow.INSTANCE,
+          PaneInfo.NO_FIRING,
+          record
+        )
+      )
+      .asJava
+
+    // TODO: use Storage Write API
+    datasetService.insertAll[AnyRef](
+      tableReference,
+      rows,
+      null,
+      InsertRetryPolicy.neverRetry(),
+      null,
+      null,
+      false,
+      false,
+      false,
+      null
+    )
   }
 
 }

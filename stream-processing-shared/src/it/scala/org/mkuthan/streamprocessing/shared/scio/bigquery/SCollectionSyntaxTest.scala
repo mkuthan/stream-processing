@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.shared.scio.bigquery
 
+import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -12,6 +13,7 @@ import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleCl
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
+import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
@@ -55,6 +57,29 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             .map(SampleClassBigQueryType.fromAvro)
 
           results should contain.only(SampleObject1, SampleObject2)
+        }
+      }
+    }
+  }
+
+  it should "not save invalid record into table storage" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
+
+        val results = sc
+          .parallelize[SampleClass](Seq(invalidObject))
+          .saveToBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          val deadLetter = resultsSink.toElement
+          deadLetter.error should include(
+            "Problem converting field root.instantField expected type: TIMESTAMP"
+          )
         }
       }
     }

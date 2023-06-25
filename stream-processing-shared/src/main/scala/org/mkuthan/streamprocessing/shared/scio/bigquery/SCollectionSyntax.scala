@@ -39,15 +39,24 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
       ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
       configuration: StorageWriteConfiguration = StorageWriteConfiguration()
-  ): Unit = {
+  ): SCollection[BigQueryDeadLetter[T]] = {
     val io = BigQueryIO
       .writeTableRows()
       .withSchema(bigQueryType.schema)
       .pipe(write => configuration.configure(table.id, write))
 
-    val _ = self
+    val results = self
       .map(bigQueryType.toTableRow)
-      .saveAsCustomOutput(ioIdentifier.id, io)
+      .internal.apply(ioIdentifier.id, io) // TODO: there is no way to use customOutput here
+
+    val failedRows = self.context.wrap(results.getFailedStorageApiInserts)
+    failedRows.map { failedRow =>
+      // TODO: how to serialize the original row?
+      // val row = bigQueryType.fromTableRow(failedRow.getRow)
+      val error = failedRow.getErrorMessage
+
+      BigQueryDeadLetter(error)
+    }
   }
 }
 

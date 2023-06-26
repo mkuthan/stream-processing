@@ -1,5 +1,8 @@
 package org.mkuthan.streamprocessing.shared.scio.bigquery
 
+import com.spotify.scio.testing._
+
+import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
@@ -29,7 +32,10 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-          .saveToBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .saveToBigQuery(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
 
         sc.run().waitUntilDone()
 
@@ -43,12 +49,74 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
+  it should "save unbounded into table" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val sampleObjects = testStreamOf[SampleClass]
+          .addElements(SampleObject1, SampleObject2)
+          .advanceWatermarkToInfinity()
+
+        val triggering = Triggering.ByDuration(Duration.standardSeconds(1))
+
+        sc
+          .testStream(sampleObjects)
+          .saveToBigQuery(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
+            configuration = FileLoadsConfiguration().withTriggering(triggering)
+          )
+
+        val run = sc.run()
+
+        eventually {
+          val results = readTable(datasetName, tableName)
+            .map(SampleClassBigQueryType.fromAvro)
+
+          results should contain.only(SampleObject1, SampleObject2)
+        }
+
+        run.pipelineResult.cancel()
+      }
+    }
+  }
+
+  // https://partnerissuetracker.corp.google.com/issues/140722087
+  // https://github.com/apache/beam/issues/22986
+  ignore should "not save invalid record into table" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
+
+        val results = sc
+          .parallelize[SampleClass](Seq(invalidObject))
+          .saveToBigQuery(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          val deadLetter = resultsSink.toElement
+
+          deadLetter.row should be(invalidObject)
+          deadLetter.error should include("Unknown error")
+        }
+      }
+    }
+  }
+
   it should "save into table storage" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-          .saveToBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .saveToBigQueryStorage(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
 
         sc.run().waitUntilDone()
 
@@ -58,6 +126,36 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
           results should contain.only(SampleObject1, SampleObject2)
         }
+      }
+    }
+  }
+
+  it should "save unbounded into table storage" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val sampleObjects = testStreamOf[SampleClass]
+          .addElements(SampleObject1, SampleObject2)
+          .advanceWatermarkToInfinity()
+
+        val triggering = Triggering.ByDuration(Duration.standardSeconds(1))
+
+        sc
+          .testStream(sampleObjects)
+          .saveToBigQueryStorage(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
+
+        val run = sc.run()
+
+        eventually {
+          val results = readTable(datasetName, tableName)
+            .map(SampleClassBigQueryType.fromAvro)
+
+          results should contain.only(SampleObject1, SampleObject2)
+        }
+
+        run.pipelineResult.cancel()
       }
     }
   }
@@ -69,7 +167,10 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         val results = sc
           .parallelize[SampleClass](Seq(invalidObject))
-          .saveToBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .saveToBigQueryStorage(
+            ioIdentifier = IoIdentifier("any-id"),
+            table = BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
 
         val resultsSink = InMemorySink(results)
 
@@ -77,9 +178,9 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         eventually {
           val deadLetter = resultsSink.toElement
-          deadLetter.error should include(
-            "Problem converting field root.instantField expected type: TIMESTAMP"
-          )
+
+          deadLetter.row should be(invalidObject)
+          deadLetter.error should include("Problem converting field root.instantField expected type: TIMESTAMP")
         }
       }
     }

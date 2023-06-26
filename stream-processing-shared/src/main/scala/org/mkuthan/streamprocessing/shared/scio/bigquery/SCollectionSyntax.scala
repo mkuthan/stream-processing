@@ -10,6 +10,7 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+import org.apache.beam.sdk.transforms.ParDo
 
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
@@ -24,15 +25,21 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
       ioIdentifier: IoIdentifier,
       table: BigQueryTable[T],
       configuration: FileLoadsConfiguration = FileLoadsConfiguration()
-  ): Unit = {
+  ): SCollection[BigQueryDeadLetter[T]] = {
     val io = BigQueryIO
       .writeTableRows()
       .withSchema(bigQueryType.schema)
       .pipe(write => configuration.configure(table.id, write))
 
-    val _ = self
-      .map(bigQueryType.toTableRow)
-      .saveAsCustomOutput(ioIdentifier.id, io)
+    self.transform(ioIdentifier.id) { in =>
+      val results = in
+        .map(bigQueryType.toTableRow)
+        .internal.apply(io)
+
+      val failedRows = self.context.wrap(results.getFailedInserts)
+        .map(failedRow => (failedRow, "Unknown error"))
+      failedRows.applyTransform(ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]()))
+    }
   }
 
   def saveToBigQueryStorage(
@@ -45,17 +52,15 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
       .withSchema(bigQueryType.schema)
       .pipe(write => configuration.configure(table.id, write))
 
-    val results = self
-      .map(bigQueryType.toTableRow)
-      .internal.apply(ioIdentifier.id, io) // TODO: there is no way to use customOutput here
+    self.transform(ioIdentifier.id) { in =>
+      val results = in
+        .map(bigQueryType.toTableRow)
+        .internal.apply(io)
 
-    val failedRows = self.context.wrap(results.getFailedStorageApiInserts)
-    failedRows.map { failedRow =>
-      // TODO: how to serialize the original row?
-      // val row = bigQueryType.fromTableRow(failedRow.getRow)
-      val error = failedRow.getErrorMessage
+      val failedRows = self.context.wrap(results.getFailedStorageApiInserts)
+        .map(failedRow => (failedRow.getRow, failedRow.getErrorMessage))
 
-      BigQueryDeadLetter(error)
+      failedRows.applyTransform(ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]()))
     }
   }
 }

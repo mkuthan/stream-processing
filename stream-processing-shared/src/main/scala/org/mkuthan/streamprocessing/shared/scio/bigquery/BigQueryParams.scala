@@ -4,6 +4,7 @@ import scala.jdk.CollectionConverters._
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
+import org.joda.time.Duration
 
 sealed trait BigQueryReadParam {
   def configure[T](tableId: String, read: TypedRead[T]): TypedRead[T]
@@ -57,6 +58,19 @@ object CreateDisposition {
   case object CreateIfNeeded extends CreateDisposition {
     override def configure[T](tableId: String, write: Write[T]): Write[T] =
       write.withCreateDisposition(Write.CreateDisposition.CREATE_IF_NEEDED)
+  }
+}
+
+sealed trait Triggering extends BigQueryWriteParam
+
+object Triggering {
+  case object NoTriggering extends Triggering {
+    override def configure[T](tableId: String, write: Write[T]): Write[T] = write
+  }
+
+  case class ByDuration(duration: Duration) extends Triggering {
+    override def configure[T](tableId: String, write: Write[T]): Write[T] =
+      write.withTriggeringFrequency(duration)
   }
 }
 

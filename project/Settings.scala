@@ -1,13 +1,14 @@
-import sbt._
-import sbt.nio.Keys._
-import sbt.Keys._
-
 import com.github.sbt.jacoco.JacocoItPlugin.autoImport.jacocoMergedReportSettings
-import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
+import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
+import sbt.*
+import sbt.Keys.*
+import sbt.nio.Keys.*
 
 object Settings {
+  lazy val IntegrationTest = Configuration.of("IntegrationTest", "it") extend (Test)
+
   val commonSettings = Seq(
     scalaVersion := "2.13.11",
     scalacOptions := Seq(
@@ -36,10 +37,6 @@ object Settings {
     Global / onChangedBuildSource := ReloadOnSourceChanges,
     // experimental feature to speed up the build
     updateOptions := updateOptions.value.withCachedResolution(true),
-    // fork JVM to allow javaOptions
-    fork := true,
-    // don't check scio for updates
-    javaOptions += "-Dscio.ignoreVersionWarning=true",
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
     // enable XML report for codecov

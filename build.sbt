@@ -28,7 +28,7 @@ lazy val test = (project in file("stream-processing-test"))
   )
 
 lazy val shared = (project in file("stream-processing-shared"))
-  .configs(IntegrationTest.extend(Test))
+  .configs(Settings.IntegrationTest)
   .enablePlugins(JacocoItPlugin)
   .settings(
     commonSettings,

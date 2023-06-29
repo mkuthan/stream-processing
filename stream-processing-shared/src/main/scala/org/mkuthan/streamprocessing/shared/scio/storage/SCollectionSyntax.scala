@@ -14,18 +14,18 @@ import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 
 private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
-      ioIdentifier: IoIdentifier,
-      location: StorageBucket[T],
+      id: IoIdentifier,
+      bucket: StorageBucket[T],
       configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     val io = TextIO.write()
-      .to(location.id)
       .pipe(write => configuration.configure(write))
+      .to(bucket.id)
 
     val _ = self
-      .withName(s"$ioIdentifier/Serialize")
+      .withName(s"$id/Serialize")
       .map(JsonSerde.writeJsonAsString)
-      .saveAsCustomOutput(ioIdentifier.id, io)
+      .saveAsCustomOutput(id.id, io)
   }
 }
 

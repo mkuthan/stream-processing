@@ -5,6 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.scio._
+import org.mkuthan.streamprocessing.shared.scio.common.BigQueryQuery
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
@@ -24,7 +25,32 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
   behavior of "BigQuery ScioContext syntax"
 
-  it should "load from table" in withScioContext { sc =>
+  it should "query from table" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        writeTable(
+          datasetName,
+          tableName,
+          SampleClassBigQueryType.toTableRow(SampleObject1),
+          SampleClassBigQueryType.toTableRow(SampleObject2)
+        )
+
+        val sql = s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"
+
+        val results = sc.queryFromBigQuery(IoIdentifier("any-id"), BigQueryQuery[SampleClass](sql))
+
+        val resultsSink = InMemorySink(results)
+
+        sc.run().waitUntilDone()
+
+        eventually {
+          resultsSink.toSeq should contain.only(SampleObject1)
+        }
+      }
+    }
+  }
+
+  it should "read from table" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
@@ -35,7 +61,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val results =
-          sc.loadFromBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          sc.readFromBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
 
         val resultsSink = InMemorySink(results)
 
@@ -48,7 +74,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "load from table using SQL" in withScioContext { sc =>
+  it should "load from table with row restriction" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
@@ -58,11 +84,13 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val results = sc.loadFromBigQuery(
-          ioIdentifier = IoIdentifier("any-id"),
-          table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          configuration = ExportConfiguration()
-            .withQuery(ExportQuery.SqlQuery(s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"))
+        val rowRestriction = RowRestriction.SqlRowRestriction("intField = 1")
+
+        val results = sc.readFromBigQuery(
+          IoIdentifier("any-id"),
+          BigQueryTable[SampleClass](s"$datasetName.$tableName"),
+          StorageReadConfiguration()
+            .withRowRestriction(rowRestriction)
         )
 
         val resultsSink = InMemorySink(results)
@@ -76,7 +104,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "load from table storage" in withScioContext { sc =>
+  it should "load from table with selected fields" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
@@ -86,35 +114,15 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val results =
-          sc.loadFromBigQueryStorage(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
-
-        val resultsSink = InMemorySink(results)
-
-        sc.run().waitUntilDone()
-
-        eventually {
-          resultsSink.toSeq should contain.only(SampleObject1, SampleObject2)
-        }
-      }
-    }
-  }
-
-  it should "load from table storage with row restriction" in withScioContext { sc =>
-    withDataset { datasetName =>
-      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
-        writeTable(
-          datasetName,
-          tableName,
-          SampleClassBigQueryType.toTableRow(SampleObject1),
-          SampleClassBigQueryType.toTableRow(SampleObject2)
+        val selectedFields = SelectedFields.NamedSelectedFields(
+          SampleObject1.productElementNames.filter(_ != "optionalStringField").toList
         )
 
-        val results = sc.loadFromBigQueryStorage(
-          ioIdentifier = IoIdentifier("any-id"),
-          table = BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          configuration = StorageReadConfiguration()
-            .withRowRestriction(RowRestriction.SqlRowRestriction("intField = 1"))
+        val results = sc.readFromBigQuery(
+          IoIdentifier("any-id"),
+          BigQueryTable[SampleClass](s"$datasetName.$tableName"),
+          StorageReadConfiguration()
+            .withSelectedFields(selectedFields)
         )
 
         val resultsSink = InMemorySink(results)
@@ -122,7 +130,10 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         sc.run().waitUntilDone()
 
         eventually {
-          resultsSink.toSeq should contain.only(SampleObject1)
+          resultsSink.toSeq should contain.only(
+            SampleObject1.copy(optionalStringField = None),
+            SampleObject2.copy(optionalStringField = None)
+          )
         }
       }
     }

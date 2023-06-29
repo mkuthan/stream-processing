@@ -3,8 +3,8 @@ package org.mkuthan.streamprocessing.toll.application
 import com.spotify.scio.Args
 
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubTopic
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubSubscription
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubTopic
 import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
@@ -15,29 +15,29 @@ import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
 import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
 
 case class TollApplicationConfig(
-    entrySubscription: PubSubSubscription[TollBoothEntry.Raw],
+    entrySubscription: PubsubSubscription[TollBoothEntry.Raw],
     entryDlq: StorageBucket[TollBoothEntry.DeadLetterRaw],
-    exitSubscription: PubSubSubscription[TollBoothExit.Raw],
+    exitSubscription: PubsubSubscription[TollBoothExit.Raw],
     exitDlq: StorageBucket[TollBoothExit.DeadLetterRaw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
     entryStatsTable: BigQueryTable[TollBoothEntryStats.Raw],
     carTotalTimeTable: BigQueryTable[TotalCarTime.Raw],
-    vehiclesWithExpiredRegistrationTopic: PubSubTopic[VehiclesWithExpiredRegistration.Raw],
+    vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     diagnosticTable: BigQueryTable[Diagnostic.Raw]
 )
 
 object TollApplicationConfig {
   def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
-    entrySubscription = PubSubSubscription(args.required("entrySubscription")),
+    entrySubscription = PubsubSubscription(args.required("entrySubscription")),
     entryDlq = StorageBucket(args.required("entryDlq")),
-    exitSubscription = PubSubSubscription(args.required("exitSubscription")),
+    exitSubscription = PubsubSubscription(args.required("exitSubscription")),
     exitDlq = StorageBucket(args.required("exitDlq")),
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
     vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
     entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
     carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
-    vehiclesWithExpiredRegistrationTopic = PubSubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
+    vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
     diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
   )
 }

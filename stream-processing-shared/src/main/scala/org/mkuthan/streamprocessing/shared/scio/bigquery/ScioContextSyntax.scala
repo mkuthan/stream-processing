@@ -11,39 +11,45 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
 
+import org.mkuthan.streamprocessing.shared.scio.common.BigQueryQuery
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
-  def loadFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      ioIdentifier: IoIdentifier,
-      table: BigQueryTable[T],
+
+  def queryFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      id: IoIdentifier,
+      query: BigQueryQuery[T],
       configuration: ExportConfiguration = ExportConfiguration()
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
-      .pipe(read => configuration.configure(table.id, read))
+      .pipe(read => configuration.configure(read))
+      .fromQuery(query.query)
 
     val bigQueryType = BigQueryType[T]
 
     self
-      .customInput(ioIdentifier.id, io)
+      .customInput(id.id, io)
+      .withName(s"$id/Deserialize")
       .map(bigQueryType.fromTableRow)
   }
 
-  def loadFromBigQueryStorage[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      ioIdentifier: IoIdentifier,
+  def readFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      id: IoIdentifier,
       table: BigQueryTable[T],
       configuration: StorageReadConfiguration = StorageReadConfiguration()
   ): SCollection[T] = {
     val io = org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
       .readTableRows()
-      .pipe(read => configuration.configure(table.id, read))
+      .pipe(read => configuration.configure(read))
+      .from(table.id)
 
     val bigQueryType = BigQueryType[T]
 
     self
-      .customInput(ioIdentifier.id, io)
+      .customInput(id.id, io)
+      .withName(s"$id/Deserialize")
       .map(bigQueryType.fromTableRow)
   }
 }

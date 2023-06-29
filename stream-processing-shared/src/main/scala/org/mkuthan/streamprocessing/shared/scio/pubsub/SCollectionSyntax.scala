@@ -10,15 +10,15 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubTopic
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubTopic
 
 private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[PubsubMessage[T]]) {
 
   import SCollectionOps._
 
   def publishJsonToPubSub(
-      ioIdentifier: IoIdentifier,
-      topic: PubSubTopic[T],
+      id: IoIdentifier,
+      topic: PubsubTopic[T],
       configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {
     val io = PubsubIO
@@ -27,14 +27,14 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
       .to(topic.id)
 
     val serializedMessages = self
-      .withName(s"$ioIdentifier/Serialize")
+      .withName(s"$id/Serialize")
       .map { msg =>
         val payload = JsonSerde.writeJsonAsBytes[T](msg.payload)
         val attributes = writeAttributes(msg.attributes)
         new BeamPubsubMessage(payload, attributes)
       }
 
-    val _ = serializedMessages.saveAsCustomOutput(ioIdentifier.id, io)
+    val _ = serializedMessages.saveAsCustomOutput(id.id, io)
   }
 }
 

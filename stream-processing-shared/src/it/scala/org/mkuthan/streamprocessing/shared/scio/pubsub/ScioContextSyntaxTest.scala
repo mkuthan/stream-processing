@@ -8,7 +8,7 @@ import org.scalatest.LoneElement._
 
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubSubscription
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.common.RandomString._
@@ -38,7 +38,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val (messages, _) =
-          sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), PubSubSubscription[SampleClass](subscription))
+          sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), PubsubSubscription[SampleClass](subscription))
 
         val sink = InMemorySink(messages)
 
@@ -63,7 +63,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
       withSubscription(topic) { subscription =>
         publishMessages(topic, (InvalidJson, SampleMap1))
 
-        val (_, dlq) = sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), PubSubSubscription[SampleClass](subscription))
+        val (_, dlq) = sc.subscribeJsonFromPubsub(IoIdentifier("any-id"), PubsubSubscription[SampleClass](subscription))
 
         val sink = InMemorySink(dlq)
 
@@ -93,7 +93,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
         val (messages, _) = sc.subscribeJsonFromPubsub(
           IoIdentifier("any-id"),
-          subscription = PubSubSubscription[SampleClass](subscription),
+          subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
         )
 
@@ -122,7 +122,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
         val (messages, _) = sc.subscribeJsonFromPubsub(
           IoIdentifier("any-id"),
-          subscription = PubSubSubscription[SampleClass](subscription),
+          subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
         )
 

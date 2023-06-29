@@ -49,19 +49,19 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
-      .decode(sc.loadFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable))
+      .decode(sc.readFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable))
     vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
     TollBoothEntryStats
       .encode(boothEntryStats)
-      .saveToBigQueryStorage(EntryStatsTableIoId, config.entryStatsTable)
+      .writeToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
     val (tollTotalCarTimes, totalCarTimesDiagnostic) =
       TotalCarTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
     TotalCarTime
       .encode(tollTotalCarTimes)
-      .saveToBigQueryStorage(CarTotalTimeTableIoId, config.carTotalTimeTable)
+      .writeToBigQuery(CarTotalTimeTableIoId, config.carTotalTimeTable)
 
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
@@ -73,7 +73,7 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)
     Diagnostic
       .encode(diagnosticsAggregated)
-      .saveToBigQueryStorage(DiagnosticTableIoId, config.diagnosticTable)
+      .writeToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

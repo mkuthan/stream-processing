@@ -1,5 +1,5 @@
 package org.mkuthan.streamprocessing.shared.scio.common
 
-case class StorageBucket[T](id: String) extends AnyVal {
-  def name: String = id.stripPrefix("gs://")
+case class StorageBucket[T](id: String) {
+  lazy val name: String = id.stripPrefix("gs://")
 }

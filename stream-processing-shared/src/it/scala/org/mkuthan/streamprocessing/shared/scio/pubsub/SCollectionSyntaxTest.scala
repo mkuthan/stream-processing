@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubTopic
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubTopic
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.test.gcp.PubsubContext
@@ -33,7 +33,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             PubsubMessage(SampleObject1, SampleMap1),
             PubsubMessage(SampleObject2, SampleMap2)
           ))
-          .publishJsonToPubSub(IoIdentifier("any-id"), PubSubTopic[SampleClass](topic))
+          .publishJsonToPubSub(IoIdentifier("any-id"), PubsubTopic[SampleClass](topic))
 
         sc.run().waitUntilDone()
 

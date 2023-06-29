@@ -13,15 +13,15 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.scio.common.PubSubSubscription
+import org.mkuthan.streamprocessing.shared.scio.common.PubsubSubscription
 
 private[pubsub] class ScioContextOps(private val self: ScioContext) {
 
   import ScioContextOps._
 
   def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
-      ioIdentifier: IoIdentifier,
-      subscription: PubSubSubscription[T],
+      id: IoIdentifier,
+      subscription: PubsubSubscription[T],
       configuration: JsonReadConfiguration = JsonReadConfiguration()
   ): (SCollection[PubsubMessage[T]], SCollection[PubsubDeadLetter[T]]) = {
     val io = PubsubIO
@@ -30,8 +30,8 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
       .fromSubscription(subscription.id)
 
     val messagesOrDeserializationErrors = self
-      .customInput(ioIdentifier.id, io)
-      .withName(s"$ioIdentifier/Decode").map { msg =>
+      .customInput(id.id, io)
+      .withName(s"$id/Decode").map { msg =>
         val payload = msg.getPayload
         val attributes = readAttributes(msg.getAttributeMap)
 
@@ -44,7 +44,7 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
       }
 
     messagesOrDeserializationErrors
-      .withName(s"$ioIdentifier/Handle errors")
+      .withName(s"$id/Handle errors")
       .unzip
   }
 }

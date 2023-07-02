@@ -1,10 +1,11 @@
-import com.github.sbt.jacoco.JacocoItPlugin.autoImport.jacocoMergedReportSettings
-import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
-import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
-import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 import sbt.*
-import sbt.Keys.*
 import sbt.nio.Keys.*
+import sbt.Keys.*
+
+import com.github.sbt.jacoco.JacocoItPlugin.autoImport.jacocoMergedReportSettings
+import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
+import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
+import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 
 object Settings {
   lazy val IntegrationTest = Configuration.of("IntegrationTest", "it") extend (Test)

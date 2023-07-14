@@ -24,7 +24,7 @@ private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder:
 
   import BigQueryDeadLetterEncoderDoFn._
 
-  // not serializable, use lazy val
+  @transient
   private lazy val bigQueryType = BigQueryType[T]
 
   @ProcessElement

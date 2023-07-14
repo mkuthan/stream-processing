@@ -3,12 +3,8 @@ package org.mkuthan.streamprocessing.shared.scio.bigquery
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 
 case class StorageWriteConfiguration(
-    createDisposition: CreateDisposition = CreateDisposition.CreateNever,
-    writeDisposition: WriteDisposition = WriteDisposition.WriteEmpty
+    writeDisposition: WriteDisposition = WriteDisposition.Empty
 ) {
-  def withCreateDisposition(createDisposition: CreateDisposition): StorageWriteConfiguration =
-    copy(createDisposition = createDisposition)
-
   def withWriteDisposition(writeDisposition: WriteDisposition): StorageWriteConfiguration =
     copy(writeDisposition = writeDisposition)
 
@@ -16,7 +12,6 @@ case class StorageWriteConfiguration(
     ioParams.foldLeft(write)((write, param) => param.configure(write))
 
   private lazy val ioParams: Set[BigQueryWriteParam] = Set(
-    createDisposition,
     writeDisposition
   )
 }

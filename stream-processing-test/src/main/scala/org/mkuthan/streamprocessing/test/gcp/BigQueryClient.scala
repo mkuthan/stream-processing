@@ -7,6 +7,7 @@ import com.google.api.services.bigquery.model.Table
 import com.google.api.services.bigquery.model.TableReference
 import com.google.api.services.bigquery.model.TableRow
 import com.google.api.services.bigquery.model.TableSchema
+import com.google.api.services.bigquery.model.TimePartitioning
 import com.google.cloud.bigquery.storage.v1.CreateReadSessionRequest
 import com.google.cloud.bigquery.storage.v1.DataFormat
 import com.google.cloud.bigquery.storage.v1.ReadRowsRequest
@@ -60,6 +61,35 @@ object BigQueryClient extends GcpProjectId with LazyLogging {
 
     val table = new Table()
       .setTableReference(tableReference)
+      .setSchema(schema)
+
+    datasetService.createTable(table)
+  }
+
+  def createPartitionedTable(
+      datasetName: String,
+      tableName: String,
+      partitionType: String,
+      schema: TableSchema
+  ): Unit = {
+    logger.debug(
+      "Create partitioned by '{}' bigquery table: '{}.{}'",
+      partitionType,
+      datasetName,
+      tableName
+    )
+
+    val tableReference = new TableReference()
+      .setProjectId(projectId)
+      .setDatasetId(datasetName)
+      .setTableId(tableName)
+
+    val timePartitioning = new TimePartitioning()
+      .setType(partitionType)
+
+    val table = new Table()
+      .setTableReference(tableReference)
+      .setTimePartitioning(timePartitioning)
       .setSchema(schema)
 
     datasetService.createTable(table)
@@ -130,6 +160,7 @@ object BigQueryClient extends GcpProjectId with LazyLogging {
   }
 
   def writeTable(datasetName: String, tableName: String, records: TableRow*): Unit = {
+    logger.debug("Write {} records to BigQuery table {}.{}", records.size, datasetName, tableName)
     val tableReference = new TableReference()
       .setProjectId(projectId)
       .setDatasetId(datasetName)

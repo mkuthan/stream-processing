@@ -3,8 +3,8 @@ package org.mkuthan.streamprocessing.shared.scio.bigquery
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 
 case class StorageReadConfiguration(
-    rowRestriction: RowRestriction = RowRestriction.NoRowRestriction,
-    selectedFields: SelectedFields = SelectedFields.NoSelectedFields
+    rowRestriction: RowRestriction = RowRestriction.NoRestriction,
+    selectedFields: SelectedFields = SelectedFields.NoFields
 ) {
   def withRowRestriction(rowRestriction: RowRestriction): StorageReadConfiguration =
     copy(rowRestriction = rowRestriction)

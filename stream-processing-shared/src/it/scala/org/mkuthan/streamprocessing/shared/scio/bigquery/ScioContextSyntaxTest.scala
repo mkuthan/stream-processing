@@ -74,7 +74,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "load from table with row restriction" in withScioContext { sc =>
+  it should "read from table with row restriction" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
@@ -84,13 +84,12 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val rowRestriction = RowRestriction.SqlRowRestriction("intField = 1")
+        val rowRestriction = RowRestriction.SqlRestriction("intField = 1")
 
         val results = sc.readFromBigQuery(
           IoIdentifier("any-id"),
           BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          StorageReadConfiguration()
-            .withRowRestriction(rowRestriction)
+          StorageReadConfiguration().withRowRestriction(rowRestriction)
         )
 
         val resultsSink = InMemorySink(results)
@@ -104,7 +103,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "load from table with selected fields" in withScioContext { sc =>
+  it should "read from table with selected fields" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         writeTable(
@@ -114,15 +113,14 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
           SampleClassBigQueryType.toTableRow(SampleObject2)
         )
 
-        val selectedFields = SelectedFields.NamedSelectedFields(
+        val selectedFields = SelectedFields.NamedFields(
           SampleObject1.productElementNames.filter(_ != "optionalStringField").toList
         )
 
         val results = sc.readFromBigQuery(
           IoIdentifier("any-id"),
           BigQueryTable[SampleClass](s"$datasetName.$tableName"),
-          StorageReadConfiguration()
-            .withSelectedFields(selectedFields)
+          StorageReadConfiguration().withSelectedFields(selectedFields)
         )
 
         val resultsSink = InMemorySink(results)

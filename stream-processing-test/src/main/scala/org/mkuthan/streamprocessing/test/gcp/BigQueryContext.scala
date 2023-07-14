@@ -25,4 +25,13 @@ trait BigQueryContext {
     finally
       deleteTable(datasetName, tableName)
   }
+
+  def withPartitionedTable(datasetName: String, partitionType: String, schema: TableSchema)(fn: String => Any): Any = {
+    val tableName = generateTableName()
+    createPartitionedTable(datasetName, tableName, partitionType, schema)
+    try
+      fn(tableName)
+    finally
+      deleteTable(datasetName, tableName)
+  }
 }

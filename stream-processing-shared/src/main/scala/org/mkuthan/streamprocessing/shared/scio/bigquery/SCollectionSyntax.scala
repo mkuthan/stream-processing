@@ -1,19 +1,16 @@
 package org.mkuthan.streamprocessing.shared.scio.bigquery
 
-import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 import scala.util.chaining.scalaUtilChainingOps
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 import org.apache.beam.sdk.transforms.ParDo
-import org.apache.beam.sdk.values.PCollection.IsBounded
-
+import org.mkuthan.streamprocessing.shared.scio.common.BigQueryPartition
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
@@ -23,7 +20,7 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
 
   private val bigQueryType = BigQueryType[T]
 
-  def writeToBigQuery(
+  def writeUnboundedToBigQuery(
       id: IoIdentifier,
       table: BigQueryTable[T],
       configuration: StorageWriteConfiguration = StorageWriteConfiguration()
@@ -31,7 +28,6 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
     val io = BigQueryIO
       .writeTableRows()
       .pipe(write => configuration.configure(write))
-      .pipe(write => configureWriteMethod(write))
       .withSchema(bigQueryType.schema)
       .to(table.id)
 
@@ -49,14 +45,23 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
     }
   }
 
-  private def configureWriteMethod[U](write: Write[U]): Write[U] = {
-    val method = if (self.internal.isBounded == IsBounded.BOUNDED) {
-      Write.Method.STORAGE_WRITE_API
-    } else {
-      Write.Method.STORAGE_API_AT_LEAST_ONCE
-    }
-    write.withMethod(method)
+  def writeBoundedToBigQuery(
+      id: IoIdentifier,
+      partition: BigQueryPartition[T],
+      configuration: FileLoadsConfiguration = FileLoadsConfiguration()
+  ): Unit = {
+    val io = BigQueryIO
+      .writeTableRows()
+      .pipe(write => configuration.configure(write))
+      .withSchema(bigQueryType.schema)
+      .to(partition.id)
+
+    self
+      .withName(s"$id/Serialize")
+      .map(bigQueryType.toTableRow)
+      .saveAsCustomOutput(id.id, io)
   }
+
 }
 
 trait SCollectionSyntax {

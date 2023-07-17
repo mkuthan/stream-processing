@@ -67,3 +67,13 @@ case object ExportReadMethod extends BigQueryReadParam {
   override def configure[T](read: TypedRead[T]): TypedRead[T] =
     read.withMethod(TypedRead.Method.EXPORT)
 }
+
+case object StorageWriteAtLeastOnceMethod extends BigQueryWriteParam {
+  override def configure[T](write: Write[T]): Write[T] =
+    write.withMethod(Write.Method.STORAGE_API_AT_LEAST_ONCE)
+}
+
+case object FileLoadsWriteMethod extends BigQueryWriteParam {
+  override def configure[T](write: Write[T]): Write[T] =
+    write.withMethod(Write.Method.FILE_LOADS)
+}

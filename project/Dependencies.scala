@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.13.0"
+  val scio = "com.spotify" %% "scio-core" % "0.14.0-dev1"
   val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.13.0"
   val scioTest = "com.spotify" %% "scio-test" % "0.13.0"
 

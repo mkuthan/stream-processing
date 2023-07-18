@@ -1,23 +1,25 @@
 package org.mkuthan.streamprocessing.shared.scio.bigquery
 
 import com.spotify.scio.testing._
+
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
-import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
-import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
+import org.scalatest.concurrent.Eventually
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryPartition
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
+import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
-import org.scalatest.concurrent.Eventually
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience

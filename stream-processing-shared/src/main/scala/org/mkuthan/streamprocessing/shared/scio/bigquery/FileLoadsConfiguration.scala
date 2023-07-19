@@ -13,6 +13,7 @@ case class FileLoadsConfiguration(
 
   private lazy val ioParams: Set[BigQueryWriteParam] = Set(
     FileLoadsWriteMethod,
+    CreateDispositionNever,
     writeDisposition
   )
 }

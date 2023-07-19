@@ -13,6 +13,7 @@ case class StorageWriteConfiguration(
 
   private lazy val ioParams: Set[BigQueryWriteParam] = Set(
     StorageWriteAtLeastOnceMethod,
+    CreateDispositionNever,
     writeDisposition
   )
 }

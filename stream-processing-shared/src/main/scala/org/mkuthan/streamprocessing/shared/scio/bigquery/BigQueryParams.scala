@@ -32,6 +32,11 @@ object WriteDisposition {
   }
 }
 
+case object CreateDispositionNever extends BigQueryWriteParam {
+  override def configure[T](write: Write[T]): Write[T] =
+    write.withCreateDisposition(Write.CreateDisposition.CREATE_NEVER)
+}
+
 sealed trait RowRestriction extends BigQueryReadParam
 
 object RowRestriction {

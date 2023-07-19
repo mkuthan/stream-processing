@@ -139,7 +139,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         val resultsSink = InMemorySink(results)
 
-        sc.run().waitUntilDone()
+        val run = sc.run()
 
         eventually {
           val deadLetter = resultsSink.toElement
@@ -147,6 +147,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
           deadLetter.row should be(invalidObject)
           deadLetter.error should include("Problem converting field root.instantField expected type: TIMESTAMP")
         }
+
+        run.pipelineResult.cancel()
       }
     }
   }

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.domain.toll
+package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder
@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
-final case class TotalCarTime(
+final case class TotalVehicleTime(
     licensePlate: LicensePlate,
     tollBoothId: TollBoothId,
     entryTime: Instant,
@@ -23,10 +23,10 @@ final case class TotalCarTime(
     duration: Duration
 )
 
-object TotalCarTime {
+object TotalVehicleTime {
 
-  implicit val CoderCache: Coder[TotalCarTime] = Coder.gen
-  implicit val CoderCacheRaw: Coder[TotalCarTime.Raw] = Coder.gen
+  implicit val CoderCache: Coder[TotalVehicleTime] = Coder.gen
+  implicit val CoderCacheRaw: Coder[TotalVehicleTime.Raw] = Coder.gen
 
   @BigQueryType.toTable
   final case class Raw(
@@ -42,7 +42,7 @@ object TotalCarTime {
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalCarTime], SCollection[Diagnostic]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[Diagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -57,7 +57,7 @@ object TotalCarTime {
       .withSideOutputs(diagnostic)
       .flatMap {
         case ((boothEntry, Some(boothExit)), _) =>
-          Some(totalCarTime(boothEntry, boothExit))
+          Some(totalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
           ctx.output(diagnostic, toDiagnostic(boothEntry))
           None
@@ -65,7 +65,7 @@ object TotalCarTime {
     (results, sideOutputs(diagnostic))
   }
 
-  def encode(input: SCollection[TotalCarTime]): SCollection[Raw] =
+  def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =
     input.withTimestamp.map { case (r, t) =>
       Raw(
         record_timestamp = t,
@@ -77,9 +77,9 @@ object TotalCarTime {
       )
     }
 
-  private def totalCarTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalCarTime = {
+  private def totalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis
-    TotalCarTime(
+    TotalVehicleTime(
       licensePlate = boothEntry.licensePlate,
       tollBoothId = boothEntry.id,
       entryTime = boothEntry.entryTime,

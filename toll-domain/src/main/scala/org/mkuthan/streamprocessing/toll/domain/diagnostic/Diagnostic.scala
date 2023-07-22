@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 // TODO: How to define dictionary for diagnostic to make it generic?
 sealed trait Reason { def name: String }
-case object MissingTollBoothExit extends Reason { val name = "Missing TollBoothExit to calculate TotalCarTime" }
+case object MissingTollBoothExit extends Reason { val name = "Missing TollBoothExit to calculate TotalVehicleTime" }
 
 final case class Diagnostic(
     boothId: TollBoothId,

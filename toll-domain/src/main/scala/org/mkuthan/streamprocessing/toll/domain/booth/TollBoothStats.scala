@@ -8,23 +8,23 @@ import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
 
-final case class TollBoothEntryStats(
+final case class TollBoothStats(
     id: TollBoothId,
     count: Int,
     totalToll: BigDecimal,
     firstEntryTime: Instant,
     lastEntryTime: Instant
 ) {
-  def before(other: TollBoothEntryStats): Boolean =
+  def before(other: TollBoothStats): Boolean =
     firstEntryTime.isBefore(other.firstEntryTime)
-  def after(other: TollBoothEntryStats): Boolean =
+  def after(other: TollBoothStats): Boolean =
     lastEntryTime.isAfter(other.lastEntryTime)
 }
 
-object TollBoothEntryStats {
+object TollBoothStats {
 
-  implicit val CoderCache: Coder[TollBoothEntryStats] = Coder.gen
-  implicit val CoderCacheRaw: Coder[TollBoothEntryStats.Raw] = Coder.gen
+  implicit val CoderCache: Coder[TollBoothStats] = Coder.gen
+  implicit val CoderCacheRaw: Coder[TollBoothStats.Raw] = Coder.gen
 
   @BigQueryType.toTable
   final case class Raw(
@@ -36,11 +36,11 @@ object TollBoothEntryStats {
       last_entry_time: Instant
   )
 
-  private object TollBoothEntrySemigroup extends Semigroup[TollBoothEntryStats] {
-    override def plus(x: TollBoothEntryStats, y: TollBoothEntryStats): TollBoothEntryStats = {
+  private object TollBoothStatsSemigroup extends Semigroup[TollBoothStats] {
+    override def plus(x: TollBoothStats, y: TollBoothStats): TollBoothStats = {
       require(x.id == y.id)
 
-      TollBoothEntryStats(
+      TollBoothStats(
         id = x.id,
         count = x.count + y.count,
         totalToll = x.totalToll + y.totalToll,
@@ -50,15 +50,15 @@ object TollBoothEntryStats {
     }
   }
 
-  def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothEntryStats] =
+  def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothStats] =
     input
       .keyBy(_.id)
       .mapValues(fromBoothEntry)
       .withFixedWindows(duration)
-      .sumByKey(TollBoothEntrySemigroup)
+      .sumByKey(TollBoothStatsSemigroup)
       .values
 
-  def encode(input: SCollection[TollBoothEntryStats]): SCollection[Raw] =
+  def encode(input: SCollection[TollBoothStats]): SCollection[Raw] =
     input.withTimestamp.map { case (r, t) =>
       Raw(
         record_timestamp = t,
@@ -70,7 +70,7 @@ object TollBoothEntryStats {
       )
     }
 
-  private def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothEntryStats = TollBoothEntryStats(
+  private def fromBoothEntry(boothEntry: TollBoothEntry): TollBoothStats = TollBoothStats(
     id = boothEntry.id,
     count = 1,
     totalToll = boothEntry.toll,

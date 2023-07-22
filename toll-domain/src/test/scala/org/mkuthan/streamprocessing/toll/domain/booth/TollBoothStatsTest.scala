@@ -10,18 +10,18 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio._
 
-class TollBoothEntryStatsTest extends AnyFlatSpec with Matchers
+class TollBoothStatsTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with TollBoothEntryFixture
-    with TollBoothEntryStatsFixture {
+    with TollBoothStatsFixture {
 
-  import TollBoothEntryStats._
+  import TollBoothStats._
 
   private val FiveMinutes = Duration.standardMinutes(5)
 
-  behavior of "TollBoothEntryStats"
+  behavior of "TollBoothStats"
 
-  it should "calculate TollBoothEntryStats in fixed window" in runWithScioContext { sc =>
+  it should "calculate statistics in fixed window" in runWithScioContext { sc =>
     val tollBoothId1 = TollBoothId("1")
     val tollBoothId2 = TollBoothId("2")
 
@@ -58,14 +58,14 @@ class TollBoothEntryStatsTest extends AnyFlatSpec with Matchers
       containInAnyOrderAtTime(
         "2014-09-10T12:04:59.999Z",
         Seq(
-          anyTollBoothEntryStats.copy(
+          anyTollBoothStats.copy(
             id = tollBoothId1,
             count = 2,
             totalToll = BigDecimal(2 + 1),
             firstEntryTime = tollBoothEntry1Time,
             lastEntryTime = tollBoothEntry2Time
           ),
-          anyTollBoothEntryStats.copy(
+          anyTollBoothStats.copy(
             id = tollBoothId2,
             count = 1,
             totalToll = BigDecimal(3),
@@ -77,13 +77,13 @@ class TollBoothEntryStatsTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode TollBoothEntryStats to raw" in runWithScioContext { sc =>
+  it should "encode TollBoothStats to raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
-    val inputs = testStreamOf[TollBoothEntryStats]
-      .addElementsAtTime(recordTimestamp, anyTollBoothEntryStats)
+    val inputs = testStreamOf[TollBoothStats]
+      .addElementsAtTime(recordTimestamp, anyTollBoothStats)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testStream(inputs))
-    results should containSingleValue(anyTollBoothEntryStatsRaw.copy(record_timestamp = recordTimestamp))
+    results should containSingleValue(anyTollBoothStatsRaw.copy(record_timestamp = recordTimestamp))
   }
 }

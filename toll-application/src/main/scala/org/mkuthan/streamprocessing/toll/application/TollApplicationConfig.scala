@@ -7,12 +7,12 @@ import org.mkuthan.streamprocessing.shared.scio.common.PubsubSubscription
 import org.mkuthan.streamprocessing.shared.scio.common.PubsubTopic
 import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
-import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
 case class TollApplicationConfig(
     entrySubscription: PubsubSubscription[TollBoothEntry.Raw],
@@ -22,8 +22,8 @@ case class TollApplicationConfig(
     vehicleRegistrationSubscription: PubsubSubscription[VehicleRegistration.Raw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
-    entryStatsTable: BigQueryTable[TollBoothEntryStats.Raw],
-    carTotalTimeTable: BigQueryTable[TotalCarTime.Raw],
+    entryStatsTable: BigQueryTable[TollBoothStats.Raw],
+    carTotalTimeTable: BigQueryTable[TotalVehicleTime.Raw],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     diagnosticTable: BigQueryTable[Diagnostic.Raw]
 )

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.domain.toll
+package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder

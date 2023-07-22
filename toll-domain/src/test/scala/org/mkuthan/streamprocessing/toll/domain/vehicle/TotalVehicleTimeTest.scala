@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.domain.toll
+package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.testing.testStreamOf
 import com.spotify.scio.testing.TestStreamScioContext
@@ -18,19 +18,19 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
-class TotalCarTimeTest extends AnyFlatSpec with Matchers
+class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with TollBoothEntryFixture
     with TollBoothExitFixture
-    with TotalCarTimeFixture {
+    with TotalVehicleTimeFixture {
 
-  import TotalCarTime._
+  import TotalVehicleTime._
 
   private val FiveMinutes = Duration.standardMinutes(5)
 
-  behavior of "TotalCarTime"
+  behavior of "TotalVehicleTime"
 
-  it should "calculate TotalCarTime in session window" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTime in session window" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -53,7 +53,7 @@ class TotalCarTimeTest extends AnyFlatSpec with Matchers
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
         "2014-09-10T12:09:02.999Z",
-        anyTotalCarTime.copy(
+        anyTotalVehicleTime.copy(
           tollBoothId = tollBoothId,
           licensePlate = licensePlate,
           entryTime = entryTime,
@@ -96,14 +96,14 @@ class TotalCarTimeTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode TollBoothExit into raw" in runWithScioContext { sc =>
+  it should "encode TotalVehicleTime into raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
-    val inputs = testStreamOf[TotalCarTime]
-      .addElementsAtTime(recordTimestamp, anyTotalCarTime)
+    val inputs = testStreamOf[TotalVehicleTime]
+      .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testStream(inputs))
-    results should containSingleValue(anyTotalCarTimeRaw.copy(record_timestamp = recordTimestamp))
+    results should containSingleValue(anyTotalVehicleTimeRaw.copy(record_timestamp = recordTimestamp))
 
   }
 }

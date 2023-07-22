@@ -6,19 +6,19 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStatsFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStatsFixture
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTimeFixture
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeFixture
 
 trait TollApplicationFixtures
     extends TollBoothEntryFixture
     with TollBoothExitFixture
-    with TollBoothEntryStatsFixture
-    with TotalCarTimeFixture
+    with TollBoothStatsFixture
+    with TotalVehicleTimeFixture
     with VehicleRegistrationFixture {
 
   val corruptedJsonPubsubMessage = new PubsubMessage("corrupted".getBytes, null)
@@ -31,8 +31,8 @@ trait TollApplicationFixtures
   val tollBoothExitPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(anyTollBoothExitRaw), null)
   val invalidTollBoothExitPubsubMessage = new PubsubMessage(JsonSerde.writeJsonAsBytes(tollBoothExitRawInvalid), null)
 
-  val anyTollBoothEntryStatsRawTableRow = BigQueryType[TollBoothEntryStats.Raw].toTableRow(anyTollBoothEntryStatsRaw)
-  val anyTotalCarTimeRawTableRow = BigQueryType[TotalCarTime.Raw].toTableRow(anyTotalCarTimeRaw)
+  val anyTollBoothStatsRawTableRow = BigQueryType[TollBoothStats.Raw].toTableRow(anyTollBoothStatsRaw)
+  val anyTotalVehicleTimeRawTableRow = BigQueryType[TotalVehicleTime.Raw].toTableRow(anyTotalVehicleTimeRaw)
 
   val anyVehicleRegistrationRawPubsubMessage =
     new PubsubMessage(JsonSerde.writeJsonAsBytes(anyVehicleRegistrationRaw), null)

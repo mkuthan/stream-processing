@@ -6,12 +6,12 @@ import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
-import org.mkuthan.streamprocessing.toll.domain.toll.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
 /**
  * A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world.
@@ -38,6 +38,7 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       VehicleRegistrationRawInvalidRows.counter
     )
 
+    // receive toll booth entries and exists
     val (boothEntriesRaw, boothEntriesRawDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
     boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
@@ -51,17 +52,13 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
-    val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
-    TollBoothEntryStats
-      .encode(boothEntryStats)
+    // calculate tool booth stats
+    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
+    TollBoothStats
+      .encode(boothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
-    val (tollTotalCarTimes, totalCarTimesDiagnostic) =
-      TotalCarTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
-    TotalCarTime
-      .encode(tollTotalCarTimes)
-      .writeUnboundedToBigQuery(CarTotalTimeTableIoId, config.carTotalTimeTable)
-
+    // receive vehicle registrations
     val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
       sc.subscribeJsonFromPubsub(VehicleRegistrationSubscriptionIoId, config.vehicleRegistrationSubscription)
     vehicleRegistrationsRawUpdatesDlq.metrics(VehicleRegistrationRawInvalidRows)
@@ -76,13 +73,23 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       VehicleRegistration.decode(vehicleRegistrationsRaw)
     vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
+    // calculate total vehicle times
+    val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
+      TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
+    TotalVehicleTime
+      .encode(totalVehicleTimes)
+      .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.carTotalTimeTable)
+
+    // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    val diagnostics = Diagnostic.unionInGlobalWindow(totalCarTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
+    // pipeline diagnostic
+    val diagnostics =
+      Diagnostic.unionInGlobalWindow(totalVehicleTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
     val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)
     Diagnostic
       .encode(diagnosticsAggregated)

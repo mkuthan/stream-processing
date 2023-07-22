@@ -18,7 +18,7 @@ trait TollApplicationIo {
 
   val EntryStatsTableIoId = IoIdentifier("toll.entry_stats")
 
-  val CarTotalTimeTableIoId = IoIdentifier("toll.car_total_time")
+  val TotalVehicleTimeTableIoId = IoIdentifier("toll.total_vehicle_time")
 
   val DiagnosticTableIoId = IoIdentifier("toll.diagnostic")
 }

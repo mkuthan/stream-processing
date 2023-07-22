@@ -11,9 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.test.scio._
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryStats
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
-import org.mkuthan.streamprocessing.toll.domain.toll.TotalCarTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
@@ -79,19 +79,19 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
         results should beEmpty
       }
-      .transformOverride(TransformOverride.ofIter[TollBoothEntryStats.Raw, BigQueryDeadLetter[TollBoothEntryStats.Raw]](
+      .transformOverride(TransformOverride.ofIter[TollBoothStats.Raw, BigQueryDeadLetter[TollBoothStats.Raw]](
         EntryStatsTableIoId.id,
-        (r: TollBoothEntryStats.Raw) =>
+        (r: TollBoothStats.Raw) =>
           // TODO: assert that diagnostic table contains expected rows
-          // r should be(anyTollBoothEntryStatsRawTableRow)
-          Option.empty[BigQueryDeadLetter[TollBoothEntryStats.Raw]].toList
+          // r should be(anyTollBoothEntryRawTableRow)
+          Option.empty[BigQueryDeadLetter[TollBoothStats.Raw]].toList
       ))
-      .transformOverride(TransformOverride.ofIter[TotalCarTime.Raw, BigQueryDeadLetter[TotalCarTime.Raw]](
-        CarTotalTimeTableIoId.id,
-        (r: TotalCarTime.Raw) =>
+      .transformOverride(TransformOverride.ofIter[TotalVehicleTime.Raw, BigQueryDeadLetter[TotalVehicleTime.Raw]](
+        TotalVehicleTimeTableIoId.id,
+        (r: TotalVehicleTime.Raw) =>
           // TODO: assert that diagnostic table contains expected rows
-          // r should be(anyTotalCarTimeRawTableRow)
-          Option.empty[BigQueryDeadLetter[TotalCarTime.Raw]].toList
+          // r should be(anyTotalVehicleTimeRawTableRow)
+          Option.empty[BigQueryDeadLetter[TotalVehicleTime.Raw]].toList
       ))
       .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
         results should beEmpty

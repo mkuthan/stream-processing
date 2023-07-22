@@ -34,6 +34,8 @@ trait TollApplicationFixtures
   val anyTollBoothEntryStatsRawTableRow = BigQueryType[TollBoothEntryStats.Raw].toTableRow(anyTollBoothEntryStatsRaw)
   val anyTotalCarTimeRawTableRow = BigQueryType[TotalCarTime.Raw].toTableRow(anyTotalCarTimeRaw)
 
+  val anyVehicleRegistrationRawPubsubMessage =
+    new PubsubMessage(JsonSerde.writeJsonAsBytes(anyVehicleRegistrationRaw), null)
   val anyVehicleRegistrationRawTableRow = BigQueryType[VehicleRegistration.Raw].toTableRow(anyVehicleRegistrationRaw)
 
   val tollBoothEntryDecodingErrorString = JsonSerde.writeJsonAsString(tollBoothEntryDecodingError)

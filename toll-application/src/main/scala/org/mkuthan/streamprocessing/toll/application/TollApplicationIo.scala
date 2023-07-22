@@ -10,6 +10,8 @@ trait TollApplicationIo {
   val ExitDlqBucketIoId: IoIdentifier = IoIdentifier("exit-dlq-bucket-id")
 
   val VehicleRegistrationTableIoId = IoIdentifier("toll.vehicle_registration")
+  val VehicleRegistrationSubscriptionIoId = IoIdentifier("vehicle-registration-subscription-id")
+
   val VehicleRegistrationDlqBucketIoId: IoIdentifier = IoIdentifier("vehicle-registration-dlq-bucket-id")
 
   val VehiclesWithExpiredRegistrationTopicIoId = IoIdentifier("vehicles-with-expired-registration-topic-id")

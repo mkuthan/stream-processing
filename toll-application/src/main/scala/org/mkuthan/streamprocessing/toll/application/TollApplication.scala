@@ -32,8 +32,11 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
 
     val config = TollApplicationConfig.parse(args)
 
-    sc.initCounter(TollBoothEntryRawInvalidRows.counter, TollBoothExitRawInvalidRows.counter)
-    sc.initCounter()
+    sc.initCounter(
+      TollBoothEntryRawInvalidRows.counter,
+      TollBoothExitRawInvalidRows.counter,
+      VehicleRegistrationRawInvalidRows.counter
+    )
 
     val (boothEntriesRaw, boothEntriesRawDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
@@ -48,10 +51,6 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
-    val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration
-      .decode(sc.readFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable))
-    vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
-
     val boothEntryStats = TollBoothEntryStats.calculateInFixedWindow(boothEntries, TenMinutes)
     TollBoothEntryStats
       .encode(boothEntryStats)
@@ -62,6 +61,20 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     TotalCarTime
       .encode(tollTotalCarTimes)
       .writeUnboundedToBigQuery(CarTotalTimeTableIoId, config.carTotalTimeTable)
+
+    val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
+      sc.subscribeJsonFromPubsub(VehicleRegistrationSubscriptionIoId, config.vehicleRegistrationSubscription)
+    vehicleRegistrationsRawUpdatesDlq.metrics(VehicleRegistrationRawInvalidRows)
+
+    val vehicleRegistrationsRawHistory =
+      sc.readFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable)
+
+    val vehicleRegistrationsRaw =
+      VehicleRegistration.unionHistoryWithUpdates(vehicleRegistrationsRawHistory, vehicleRegistrationsRawUpdates)
+
+    val (vehicleRegistrations, vehicleRegistrationsDlq) =
+      VehicleRegistration.decode(vehicleRegistrationsRaw)
+    vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)

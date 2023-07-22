@@ -4,7 +4,6 @@ import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing._
 
 import com.google.api.services.bigquery.model.TableRow
-import org.apache.beam.sdk.io.gcp.bigquery.WriteResult
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -29,6 +28,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--entryDlq=gs://entry_dlq",
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
         "--exitDlq=gs://exit_dlq",
+        "--vehicleRegistrationSubscription=projects/any-id/subscriptions/vehicle-registration-subscription",
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
@@ -69,6 +69,12 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }
+      .inputStream(
+        CustomIO[PubsubMessage](VehicleRegistrationSubscriptionIoId.id),
+        testStreamOf[PubsubMessage]
+          .addElements(anyVehicleRegistrationRawPubsubMessage)
+          .advanceWatermarkToInfinity()
+      )
       .input(CustomIO[TableRow](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRawTableRow))
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
         results should beEmpty

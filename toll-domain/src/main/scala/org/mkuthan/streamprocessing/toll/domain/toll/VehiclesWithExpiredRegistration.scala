@@ -34,15 +34,7 @@ object VehiclesWithExpiredRegistration {
       entry_time: Instant
   )
 
-  //
-  // TODO: Slowly updating side input using windowing for vehicle registration
-  // https://beam.apache.org/documentation/patterns/side-inputs/#slowly-updating-side-input-using-windowing
-  // Does it work for BigQuery IO?
-  //
-  // val a = sc
-  // .customInput("foo", PeriodicImpulse.create().withInterval(TenMinutes))
-  // .applyTransform(BigQueryIO.readTableRows().from("foo"))
-  //
+  // TODO: https://github.com/mkuthan/stream-processing/issues/82
   def calculate(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistration: SCollection[VehicleRegistration]

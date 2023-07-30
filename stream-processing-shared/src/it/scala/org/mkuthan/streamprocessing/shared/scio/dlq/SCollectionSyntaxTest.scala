@@ -1,6 +1,5 @@
-package org.mkuthan.streamprocessing.shared.scio.storage
+package org.mkuthan.streamprocessing.shared.scio.dlq
 
-import org.joda.time.Duration
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -22,28 +21,9 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with IntegrationTestFixtures
     with StorageContext {
 
-  behavior of "Storage SCollection syntax"
+  behavior of "DLQ SCollection syntax"
 
-  it should "save file on GCS in global window" in withScioContext { sc =>
-    withBucket { bucket =>
-      sc
-        .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-        .saveToStorageAsJson(IoIdentifier[SampleClass]("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
-
-      sc.run().waitUntilDone()
-
-      eventually {
-        val results =
-          readObjectLines(bucket, "GlobalWindow-pane-0-last-00000-of-00001.json")
-            .map(JsonSerde.readJsonFromString[SampleClass])
-            .flatMap(_.toOption)
-
-        results should contain.only(SampleObject1, SampleObject2)
-      }
-    }
-  }
-
-  it should "save file on GCS in fixed window" in withScioContext { sc =>
+  it should "write JSON file on GCS" in withScioContext { sc =>
     withBucket { bucket =>
       sc
         .parallelizeTimestamped[SampleClass](
@@ -52,13 +32,15 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             (SampleObject2, SampleObject2.instantField)
           )
         )
-        .withFixedWindows(Duration.standardSeconds(10))
-        .saveToStorageAsJson(IoIdentifier[SampleClass]("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
+        .writeDeadLetterToStorageAsJson(
+          IoIdentifier[SampleClass]("any-id"),
+          StorageBucket[SampleClass](s"gs://$bucket")
+        )
 
       sc.run().waitUntilDone()
 
-      val windowStart = "2014-09-10T12:03:00.000Z"
-      val windowEnd = "2014-09-10T12:03:10.000Z"
+      val windowStart = "2014-09-10T12:00:00.000Z"
+      val windowEnd = "2014-09-10T12:10:00.000Z"
 
       eventually {
         val results =

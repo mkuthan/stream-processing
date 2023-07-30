@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.scio.storage
+package org.mkuthan.streamprocessing.shared.scio.dlq
 
 import scala.language.implicitConversions
 import scala.util.chaining._
@@ -12,8 +12,8 @@ import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 
-private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
-  def saveToStorageAsJson(
+private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
+  def writeDeadLetterToStorageAsJson(
       id: IoIdentifier[T],
       bucket: StorageBucket[T],
       configuration: JsonWriteConfiguration = JsonWriteConfiguration()
@@ -25,11 +25,13 @@ private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCol
     val _ = self
       .withName(s"$id/Serialize")
       .map(JsonSerde.writeJsonAsString)
+      .withName(s"$id/ApplyFixedWindow")
+      .withFixedWindows(configuration.duration)
       .saveAsCustomOutput(id.id, io)
   }
 }
 
 trait SCollectionSyntax {
-  implicit def storageSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
+  implicit def dlqSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
     new SCollectionOps(sc)
 }

@@ -44,13 +44,13 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
-    boothEntriesDlq.saveToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
+    boothEntriesDlq.writeDeadLetterToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
     boothExitsRawDlq.metrics(TollBoothExitRawInvalidRows)
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
-    boothExistsDlq.saveToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
+    boothExistsDlq.writeDeadLetterToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     // calculate tool booth stats
     val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
@@ -71,7 +71,10 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) =
       VehicleRegistration.decode(vehicleRegistrationsRaw)
-    vehicleRegistrationsDlq.saveToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
+    vehicleRegistrationsDlq.writeDeadLetterToStorageAsJson(
+      VehicleRegistrationDlqBucketIoId,
+      config.vehicleRegistrationDlq
+    )
 
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =

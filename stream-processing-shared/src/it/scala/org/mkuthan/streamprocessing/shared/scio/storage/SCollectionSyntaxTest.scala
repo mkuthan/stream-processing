@@ -28,7 +28,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withBucket { bucket =>
       sc
         .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
-        .saveToStorageAsJson(IoIdentifier("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
+        .saveToStorageAsJson(IoIdentifier[SampleClass]("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
 
       sc.run().waitUntilDone()
 
@@ -53,7 +53,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
           )
         )
         .withFixedWindows(Duration.standardSeconds(10))
-        .saveToStorageAsJson(IoIdentifier("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
+        .saveToStorageAsJson(IoIdentifier[SampleClass]("any-id"), StorageBucket[SampleClass](s"gs://$bucket"))
 
       sc.run().waitUntilDone()
 

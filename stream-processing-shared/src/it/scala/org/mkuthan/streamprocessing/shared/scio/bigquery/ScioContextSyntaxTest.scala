@@ -37,7 +37,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
 
         val sql = s"SELECT * FROM $datasetName.$tableName WHERE intField = 1"
 
-        val results = sc.queryFromBigQuery(IoIdentifier("any-id"), BigQueryQuery[SampleClass](sql))
+        val results = sc.queryFromBigQuery(IoIdentifier[SampleClass]("any-id"), BigQueryQuery[SampleClass](sql))
 
         val resultsSink = InMemorySink(results)
 
@@ -61,7 +61,10 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val results =
-          sc.readFromBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          sc.readFromBigQuery(
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryTable[SampleClass](s"$datasetName.$tableName")
+          )
 
         val resultsSink = InMemorySink(results)
 
@@ -87,7 +90,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         val rowRestriction = RowRestriction.SqlRestriction("intField = 1")
 
         val results = sc.readFromBigQuery(
-          IoIdentifier("any-id"),
+          IoIdentifier[SampleClass]("any-id"),
           BigQueryTable[SampleClass](s"$datasetName.$tableName"),
           StorageReadConfiguration().withRowRestriction(rowRestriction)
         )
@@ -118,7 +121,7 @@ class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
         )
 
         val results = sc.readFromBigQuery(
-          IoIdentifier("any-id"),
+          IoIdentifier[SampleClass]("any-id"),
           BigQueryTable[SampleClass](s"$datasetName.$tableName"),
           StorageReadConfiguration().withSelectedFields(selectedFields)
         )

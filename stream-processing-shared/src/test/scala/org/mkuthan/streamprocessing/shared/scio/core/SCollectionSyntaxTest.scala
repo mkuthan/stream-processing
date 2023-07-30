@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.shared.scio.core
 
+import com.spotify.scio.testing._
 import com.spotify.scio.testing.SCollectionMatchers
 
 import org.scalatest.flatspec.AnyFlatSpec
@@ -22,5 +23,16 @@ class SCollectionSyntaxTest extends AnyFlatSpec
 
     right should containInAnyOrder(Seq("r1", "r2", "r3"))
     left should containInAnyOrder(Seq("l1", "l2"))
+  }
+
+  it should "union in global window" in runWithScioContext { sc =>
+    val boundedCollection = sc.parallelize(Seq("one", "two", "three"))
+
+    val unboundedCollection = testStreamOf[String]
+      .addElements("four", "five")
+      .advanceWatermarkToInfinity()
+
+    val results = boundedCollection.unionInGlobalWindow(sc.testStream(unboundedCollection))
+    results should containInAnyOrder(Seq("one", "two", "three", "four", "five"))
   }
 }

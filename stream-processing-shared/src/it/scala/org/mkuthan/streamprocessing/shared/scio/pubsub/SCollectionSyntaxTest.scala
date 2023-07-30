@@ -33,7 +33,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             PubsubMessage(SampleObject1, SampleMap1),
             PubsubMessage(SampleObject2, SampleMap2)
           ))
-          .publishJsonToPubSub(IoIdentifier("any-id"), PubsubTopic[SampleClass](topic))
+          .publishJsonToPubSub(IoIdentifier[SampleClass]("any-id"), PubsubTopic[SampleClass](topic))
 
         sc.run().waitUntilDone()
 

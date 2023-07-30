@@ -20,7 +20,7 @@ import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
 
   def queryFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       query: BigQueryQuery[T],
       configuration: ExportConfiguration = ExportConfiguration()
   ): SCollection[T] = {
@@ -38,7 +38,7 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
   }
 
   def readFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       table: BigQueryTable[T],
       configuration: StorageReadConfiguration = StorageReadConfiguration()
   ): SCollection[T] = {

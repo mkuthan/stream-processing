@@ -23,14 +23,13 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
   private val bigQueryType = BigQueryType[T]
 
   def writeUnboundedToBigQuery(
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       table: BigQueryTable[T],
       configuration: StorageWriteConfiguration = StorageWriteConfiguration()
   ): SCollection[BigQueryDeadLetter[T]] = {
     val io = BigQueryIO
       .writeTableRows()
       .pipe(write => configuration.configure(write))
-      .withSchema(bigQueryType.schema)
       .to(table.id)
 
     self.transform(id.id) { in =>
@@ -43,19 +42,18 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
         .withName("Extract errors")
         .map(failedRow => (failedRow.getRow, failedRow.getErrorMessage))
 
-      errors.applyTransform("Create dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]()))
+      errors.applyTransform("Create dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
     }
   }
 
   def writeBoundedToBigQuery(
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       partition: BigQueryPartition[T],
       configuration: FileLoadsConfiguration = FileLoadsConfiguration()
   ): Unit = {
     val io = BigQueryIO
       .writeTableRows()
       .pipe(write => configuration.configure(write))
-      .withSchema(bigQueryType.schema)
       .to(partition.id)
 
     self

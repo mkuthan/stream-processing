@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 
 private[storage] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def saveToStorageAsJson(
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       bucket: StorageBucket[T],
       configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {

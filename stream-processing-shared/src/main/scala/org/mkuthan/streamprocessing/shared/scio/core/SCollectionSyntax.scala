@@ -32,7 +32,6 @@ private[core] class SCollectionOps[T: Coder](private val self: SCollection[T]) {
   def metrics(counter: Counter[T]): SCollection[T] =
     self.tap(_ => counter.inc())
 
-  // TODO: tests
   def unionInGlobalWindow(others: SCollection[T]*): SCollection[T] = {
     val commonWindowOptions = WindowOptions(
       trigger = Repeatedly.forever(AfterPane.elementCountAtLeast(1)),

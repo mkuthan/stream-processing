@@ -17,7 +17,7 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
   import SCollectionOps._
 
   def publishJsonToPubSub(
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       topic: PubsubTopic[T],
       configuration: JsonWriteConfiguration = JsonWriteConfiguration()
   ): Unit = {

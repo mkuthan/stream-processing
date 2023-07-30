@@ -35,8 +35,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
           .writeBoundedToBigQuery(
-            IoIdentifier("any-id"),
-            BigQueryPartition.notPartitioned[SampleClass](s"$datasetName.$tableName")
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryPartition.notPartitioned[SampleClass](s"$projectId:$datasetName.$tableName")
           )
 
         sc.run().waitUntilDone()
@@ -59,8 +59,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
           .writeBoundedToBigQuery(
-            IoIdentifier("any-id"),
-            BigQueryPartition.hourly[SampleClass](s"$datasetName.$tableName", localDateTime)
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryPartition.hourly[SampleClass](s"$projectId:$datasetName.$tableName", localDateTime)
           )
 
         sc.run().waitUntilDone()
@@ -83,8 +83,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
           .writeBoundedToBigQuery(
-            IoIdentifier("any-id"),
-            BigQueryPartition.daily[SampleClass](s"$datasetName.$tableName", localDate)
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryPartition.daily[SampleClass](s"$projectId:$datasetName.$tableName", localDate)
           )
 
         sc.run().waitUntilDone()
@@ -108,7 +108,10 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         sc
           .testStream(sampleObjects)
-          .writeUnboundedToBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .writeUnboundedToBigQuery(
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
+          )
 
         val run = sc.run()
 
@@ -135,7 +138,10 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         val results = sc
           .testStream(sampleObjects)
-          .writeUnboundedToBigQuery(IoIdentifier("any-id"), BigQueryTable[SampleClass](s"$datasetName.$tableName"))
+          .writeUnboundedToBigQuery(
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
+          )
 
         val resultsSink = InMemorySink(results)
 

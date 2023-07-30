@@ -20,7 +20,7 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
   import ScioContextOps._
 
   def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
-      id: IoIdentifier,
+      id: IoIdentifier[T],
       subscription: PubsubSubscription[T],
       configuration: JsonReadConfiguration = JsonReadConfiguration()
   ): (SCollection[PubsubMessage[T]], SCollection[PubsubDeadLetter[T]]) = {
@@ -39,7 +39,7 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
           case Success(deserialized) =>
             Right(PubsubMessage(deserialized, attributes))
           case Failure(ex) =>
-            Left(PubsubDeadLetter[T](payload, attributes, ex.getMessage))
+            Left(PubsubDeadLetter[T](id, payload, attributes, ex.getMessage))
         }
       }
 

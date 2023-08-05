@@ -27,7 +27,7 @@ object Diagnostic {
   implicit val CoderCache: Coder[Diagnostic] = Coder.gen
   implicit val CoderCacheRaw: Coder[Diagnostic.Raw] = Coder.gen
 
-  // TODO: finish type
+  // TODO: https://github.com/mkuthan/stream-processing/issues/83
   @BigQueryType.toTable
   final case class Raw(
       reason: String

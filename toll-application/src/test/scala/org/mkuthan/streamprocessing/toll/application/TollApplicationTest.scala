@@ -36,14 +36,15 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--diagnosticTable=toll.diagnostic"
       )
+      // receive toll booth entries and toll booth exists
       .inputStream[PubsubMessage](
         CustomIO[PubsubMessage](EntrySubscriptionIoId.id),
         testStreamOf[PubsubMessage]
           .addElementsAtTime(
             tollBoothEntryTime,
             tollBoothEntryPubsubMessage,
-            invalidTollBoothEntryPubsubMessage,
-            corruptedJsonPubsubMessage
+            corruptedJsonPubsubMessage,
+            invalidTollBoothEntryPubsubMessage
           )
           .advanceWatermarkToInfinity()
       )
@@ -59,8 +60,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           .addElementsAtTime(
             tollBoothExitTime,
             tollBoothExitPubsubMessage,
-            invalidTollBoothExitPubsubMessage,
-            corruptedJsonPubsubMessage
+            corruptedJsonPubsubMessage,
+            invalidTollBoothExitPubsubMessage
           ).advanceWatermarkToInfinity()
       )
       .counter(TollBoothExitRawInvalidRows.counter) { value =>
@@ -69,16 +70,28 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }
+      // receive vehicle registrations
       .inputStream(
         CustomIO[PubsubMessage](VehicleRegistrationSubscriptionIoId.id),
         testStreamOf[PubsubMessage]
+          // TODO: add event time to vehicle registration messages
           .addElements(anyVehicleRegistrationRawPubsubMessage)
+          // TODO: add corrupted json message and check counter
+          // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity()
       )
-      .input(CustomIO[TableRow](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRawTableRow))
+      .input(
+        CustomIO[TableRow](VehicleRegistrationTableIoId.id),
+        Seq(
+          // TODO: define another vehicle registration(s) for reading historical data
+          anyVehicleRegistrationRawTableRow
+        )
+      )
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
+        // TODO: add invalid vehicle registration and check dead letter
         results should beEmpty
       }
+      // calculate tool booth stats
       .transformOverride(TransformOverride.ofIter[TollBoothStats.Raw, BigQueryDeadLetter[TollBoothStats.Raw]](
         EntryStatsTableIoId.id,
         (r: TollBoothStats.Raw) =>
@@ -86,6 +99,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           // r should be(anyTollBoothEntryRawTableRow)
           Option.empty[BigQueryDeadLetter[TollBoothStats.Raw]].toList
       ))
+      // calculate total vehicle times
       .transformOverride(TransformOverride.ofIter[TotalVehicleTime.Raw, BigQueryDeadLetter[TotalVehicleTime.Raw]](
         TotalVehicleTimeTableIoId.id,
         (r: TotalVehicleTime.Raw) =>
@@ -93,9 +107,12 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           // r should be(anyTotalVehicleTimeRawTableRow)
           Option.empty[BigQueryDeadLetter[TotalVehicleTime.Raw]].toList
       ))
+      // calculate vehicles with expired registrations
       .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
+        // TODO: https://github.com/mkuthan/stream-processing/issues/82
         results should beEmpty
       }
+      // pipeline diagnostic
       .transformOverride(TransformOverride.ofIter[Diagnostic.Raw, BigQueryDeadLetter[Diagnostic.Raw]](
         DiagnosticTableIoId.id,
         (r: Diagnostic.Raw) =>
@@ -105,6 +122,5 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       .run()
   }
 
-  // TODO: e2e scenario for diagnostics, e.g toll entry without toll exit
   // TODO: how to reuse setup between test scenarios and modify only relevant inputs/outputs
 }

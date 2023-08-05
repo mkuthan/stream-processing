@@ -38,7 +38,7 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       VehicleRegistrationRawInvalidRows.counter
     )
 
-    // receive toll booth entries and exists
+    // receive toll booth entries and toll booth exists
     val (boothEntriesRaw, boothEntriesRawDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
     boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
@@ -46,17 +46,12 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
     boothEntriesDlq.writeDeadLetterToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
-    val (boothExitsRaw, boothExitsRawDlq) = sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
+    val (boothExitsRaw, boothExitsRawDlq) =
+      sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
     boothExitsRawDlq.metrics(TollBoothExitRawInvalidRows)
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.writeDeadLetterToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
-
-    // calculate tool booth stats
-    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
-    TollBoothStats
-      .encode(boothStats)
-      .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
     // receive vehicle registrations
     val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
@@ -69,12 +64,17 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     val vehicleRegistrationsRaw =
       VehicleRegistration.unionHistoryWithUpdates(vehicleRegistrationsRawHistory, vehicleRegistrationsRawUpdates)
 
-    val (vehicleRegistrations, vehicleRegistrationsDlq) =
-      VehicleRegistration.decode(vehicleRegistrationsRaw)
+    val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration.decode(vehicleRegistrationsRaw)
     vehicleRegistrationsDlq.writeDeadLetterToStorageAsJson(
       VehicleRegistrationDlqBucketIoId,
       config.vehicleRegistrationDlq
     )
+
+    // calculate tool booth stats
+    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
+    TollBoothStats
+      .encode(boothStats)
+      .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =

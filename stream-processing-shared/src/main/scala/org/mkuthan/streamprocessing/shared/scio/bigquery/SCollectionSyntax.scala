@@ -56,7 +56,7 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
       .pipe(write => configuration.configure(write))
       .to(partition.id)
 
-    self
+    val _ = self
       .withName(s"$id/Serialize")
       .map(bigQueryType.toTableRow)
       .saveAsCustomOutput(id.id, io)

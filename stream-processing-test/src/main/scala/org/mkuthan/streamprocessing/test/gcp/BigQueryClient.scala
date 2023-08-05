@@ -179,7 +179,7 @@ object BigQueryClient extends GcpProjectId with LazyLogging {
       .asJava
 
     // TODO: use Storage Write API
-    datasetService.insertAll[AnyRef](
+    val _ = datasetService.insertAll[AnyRef](
       tableReference,
       rows,
       null,

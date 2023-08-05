@@ -8,7 +8,6 @@ import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
@@ -82,6 +81,11 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.carTotalTimeTable)
+    totalVehicleTimesDiagnostic.writeDiagnosticToBigQuery(
+      TotalVehicleTimeDiagnosticTableIoId,
+      config.carTotalTimeDiagnosticTable,
+      TotalVehicleTime.DiagnosticSemigroup
+    )
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
@@ -90,13 +94,11 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    // pipeline diagnostic
-    val diagnostics =
-      Diagnostic.unionInGlobalWindow(totalVehicleTimesDiagnostic, vehiclesWithExpiredRegistrationDiagnostic)
-    val diagnosticsAggregated = Diagnostic.aggregateInFixedWindow(diagnostics, TenMinutes)
-    Diagnostic
-      .encode(diagnosticsAggregated)
-      .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+    vehiclesWithExpiredRegistrationDiagnostic.writeDiagnosticToBigQuery(
+      VehiclesWithExpiredRegistrationDiagnosticTableIoId,
+      config.vehiclesWithExpiredRegistrationDiagnosticTable,
+      VehiclesWithExpiredRegistration.DiagnosticSemigroup
+    )
 
     val _ = sc.run()
   }

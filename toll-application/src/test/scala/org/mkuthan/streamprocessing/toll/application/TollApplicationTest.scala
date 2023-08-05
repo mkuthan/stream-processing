@@ -12,7 +12,6 @@ import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
@@ -33,8 +32,9 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
         "--carTotalTimeTable=toll.car_total_time",
+        "--carTotalTimeDiagnosticTable=toll.car_total_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
-        "--diagnosticTable=toll.diagnostic"
+        "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic"
       )
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubMessage](
@@ -107,18 +107,19 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           // r should be(anyTotalVehicleTimeRawTableRow)
           Option.empty[BigQueryDeadLetter[TotalVehicleTime.Raw]].toList
       ))
+      .output(CustomIO[TableRow](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+        // TODO: add scenario with diagnostic output
+        results should beEmpty
+      }
       // calculate vehicles with expired registrations
       .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
         // TODO: https://github.com/mkuthan/stream-processing/issues/82
         results should beEmpty
       }
-      // pipeline diagnostic
-      .transformOverride(TransformOverride.ofIter[Diagnostic.Raw, BigQueryDeadLetter[Diagnostic.Raw]](
-        DiagnosticTableIoId.id,
-        (r: Diagnostic.Raw) =>
-          // TODO: assert that diagnostic table contains expected rows
-          Option.empty[BigQueryDeadLetter[Diagnostic.Raw]].toList
-      ))
+      .output(CustomIO[TableRow](VehiclesWithExpiredRegistrationDiagnosticTableIoId.id)) { results =>
+        // TODO: add scenario with diagnostic output
+        results should beEmpty
+      }
       .run()
   }
 

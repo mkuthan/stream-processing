@@ -9,7 +9,6 @@ import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
@@ -24,8 +23,9 @@ case class TollApplicationConfig(
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
     entryStatsTable: BigQueryTable[TollBoothStats.Raw],
     carTotalTimeTable: BigQueryTable[TotalVehicleTime.Raw],
+    carTotalTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
-    diagnosticTable: BigQueryTable[Diagnostic.Raw]
+    vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic]
 )
 
 object TollApplicationConfig {
@@ -39,7 +39,9 @@ object TollApplicationConfig {
     vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
     entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
     carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
+    carTotalTimeDiagnosticTable = BigQueryTable(args.required("carTotalTimeDiagnosticTable")),
     vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
-    diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
+    vehiclesWithExpiredRegistrationDiagnosticTable =
+      BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable"))
   )
 }

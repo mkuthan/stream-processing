@@ -83,8 +83,7 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.carTotalTimeTable)
     totalVehicleTimesDiagnostic.writeDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
-      config.carTotalTimeDiagnosticTable,
-      TotalVehicleTime.DiagnosticSemigroup
+      config.carTotalTimeDiagnosticTable
     )
 
     // calculate vehicles with expired registrations
@@ -96,8 +95,7 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
 
     vehiclesWithExpiredRegistrationDiagnostic.writeDiagnosticToBigQuery(
       VehiclesWithExpiredRegistrationDiagnosticTableIoId,
-      config.vehiclesWithExpiredRegistrationDiagnosticTable,
-      VehiclesWithExpiredRegistration.DiagnosticSemigroup
+      config.vehiclesWithExpiredRegistrationDiagnosticTable
     )
 
     val _ = sc.run()

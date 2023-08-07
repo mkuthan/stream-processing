@@ -23,25 +23,27 @@ final case class VehiclesWithExpiredRegistration(
 object VehiclesWithExpiredRegistration {
 
   @BigQueryType.toTable
-  final case class Raw(
+  case class Raw(
       license_plate: String,
       toll_both_id: String,
       vehicle_registration_id: String,
       entry_time: Instant
   )
 
+  type DiagnosticKey = String
+
   @BigQueryType.toTable
-  final case class Diagnostic(
+  case class Diagnostic(
       created_at: Instant,
       reason: String,
       count: Long = 1L
   ) {
-    override def toString: String = reason
+    lazy val key: DiagnosticKey = reason
   }
 
-  final case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
+  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
     override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
-      require(x.toString == y.toString)
+      require(x.key == y.key)
       Diagnostic(x.created_at, x.reason, x.count + y.count)
     }
   }
@@ -50,8 +52,8 @@ object VehiclesWithExpiredRegistration {
   def calculate(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistration: SCollection[VehicleRegistration]
-  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[Diagnostic]) =
-    (boothEntries.context.empty[VehiclesWithExpiredRegistration](), boothEntries.context.empty[Diagnostic]())
+  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[(DiagnosticKey, Diagnostic)]) =
+    (boothEntries.context.empty[VehiclesWithExpiredRegistration](), boothEntries.context.empty[(String, Diagnostic)]())
 
   // TODO: implement
   def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[PubsubMessage[Raw]] =

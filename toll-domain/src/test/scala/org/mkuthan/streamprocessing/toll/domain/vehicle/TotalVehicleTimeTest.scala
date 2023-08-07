@@ -86,7 +86,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
     results should beEmpty
 
-    diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
+    diagnostic.values.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
       containSingleValueAtTime(
         "2014-09-10T12:08:00.999Z",
         Diagnostic(entryTime, tollBoothId.id, "Missing TollBoothExit to calculate TotalVehicleTime", 1)

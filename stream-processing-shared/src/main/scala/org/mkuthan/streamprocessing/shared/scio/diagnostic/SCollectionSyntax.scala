@@ -13,16 +13,15 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 
-private[diagnostic] class SCollectionOps[T <: BigQueryType.HasAnnotation: Coder: TypeTag](
-    private val self: SCollection[T]
+private[diagnostic] class SCollectionOps[K: Coder, V <: BigQueryType.HasAnnotation: Coder: TypeTag: Semigroup](
+    private val self: SCollection[(K, V)]
 ) {
 
-  private val bqType = BigQueryType[T]
+  private val bqType = BigQueryType[V]
 
   def writeDiagnosticToBigQuery(
-      id: IoIdentifier[T],
-      table: BigQueryTable[T],
-      sg: Semigroup[T], // TODO: define as implicit parameter
+      id: IoIdentifier[V],
+      table: BigQueryTable[V],
       configuration: DiagnosticConfiguration = DiagnosticConfiguration()
   ): Unit = {
     val io = BigQueryIO
@@ -34,8 +33,7 @@ private[diagnostic] class SCollectionOps[T <: BigQueryType.HasAnnotation: Coder:
       .transform(s"$id/Aggregate") { in =>
         in
           .withFixedWindows(duration = configuration.windowDuration, options = configuration.windowOptions)
-          .keyBy(_.toString) // TODO: how to make it more generic?
-          .sumByKey(sg)
+          .sumByKey(implicitly[Semigroup[V]])
           .values
       }
       .withName(s"$id/Serialize")
@@ -47,8 +45,8 @@ private[diagnostic] class SCollectionOps[T <: BigQueryType.HasAnnotation: Coder:
 trait SCollectionSyntax {
   import scala.language.implicitConversions
 
-  implicit def diagnosticSCollectionOps[T <: BigQueryType.HasAnnotation: Coder: TypeTag](
-      sc: SCollection[T]
-  ): SCollectionOps[T] =
-    new SCollectionOps[T](sc)
+  implicit def diagnosticSCollectionOps[K: Coder, V <: BigQueryType.HasAnnotation: Coder: TypeTag: Semigroup](
+      sc: SCollection[(K, V)]
+  ): SCollectionOps[K, V] =
+    new SCollectionOps[K, V](sc)
 }

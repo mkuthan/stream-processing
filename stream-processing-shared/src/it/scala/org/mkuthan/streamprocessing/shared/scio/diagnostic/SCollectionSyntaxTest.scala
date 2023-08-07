@@ -42,10 +42,10 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         sc
           .testStream(sampleDiagnostics)
+          .keyBy(_.key)
           .writeDiagnosticToBigQuery(
             IoIdentifier[SampleDiagnostic]("any-id"),
-            BigQueryTable[SampleDiagnostic](s"$projectId:$datasetName.$tableName"),
-            SampleDiagnosticSemigroup
+            BigQueryTable[SampleDiagnostic](s"$projectId:$datasetName.$tableName")
           )
 
         val run = sc.run()
@@ -69,12 +69,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 object SCollectionSyntaxTest {
   @BigQueryType.toTable
   case class SampleDiagnostic(createdAt: Instant, reason: String, count: Long = 1) {
-    override def toString: String = reason
+    lazy val key: String = reason
   }
 
-  case object SampleDiagnosticSemigroup extends Semigroup[SampleDiagnostic] {
+  implicit case object SampleDiagnostic extends Semigroup[SampleDiagnostic] {
     override def plus(x: SampleDiagnostic, y: SampleDiagnostic): SampleDiagnostic = {
-      require(x.toString == y.toString)
+      require(x.key == y.key)
       SampleDiagnostic(x.createdAt, x.reason, x.count + y.count)
     }
   }

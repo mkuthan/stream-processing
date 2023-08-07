@@ -24,7 +24,7 @@ final case class TotalVehicleTime(
 object TotalVehicleTime {
 
   @BigQueryType.toTable
-  final case class Raw(
+  case class Raw(
       record_timestamp: Instant,
       license_plate: String,
       toll_booth_id: String,
@@ -33,26 +33,30 @@ object TotalVehicleTime {
       duration_seconds: Long
   )
 
+  type DiagnosticKey = String
+
   @BigQueryType.toTable
-  final case class Diagnostic(
+  case class Diagnostic(
       created_at: Instant,
       toll_both_id: String,
       reason: String,
       count: Long = 1L
   ) {
-    override def toString: String = toll_both_id + reason
+    lazy val key: String = toll_both_id + reason
   }
 
-  final case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
-    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic =
+  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
+    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
+      require(x.key == y.key)
       Diagnostic(x.created_at, x.toll_both_id, x.reason, x.count + y.count)
+    }
   }
 
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalVehicleTime], SCollection[Diagnostic]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[(DiagnosticKey, Diagnostic)]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -69,10 +73,11 @@ object TotalVehicleTime {
         case ((boothEntry, Some(boothExit)), _) =>
           Some(totalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
-          ctx.output(diagnostic, toDiagnostic(boothEntry, "Missing TollBoothExit to calculate TotalVehicleTime"))
+          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
+          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
           None
       }
-    (results, sideOutputs(diagnostic))
+    (results, sideOutputs(diagnostic).keyBy(_.key))
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =

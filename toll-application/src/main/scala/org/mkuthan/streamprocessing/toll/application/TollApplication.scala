@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.toll.application
 
+import com.spotify.scio.values.SCollection
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
@@ -8,6 +9,7 @@ import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.common.IoDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
@@ -22,7 +24,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegis
  * See:
  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
  */
-object TollApplication extends TollApplicationIo with TollApplicationMetrics {
+object TollApplication extends TollApplicationIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
@@ -31,23 +33,15 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
 
     val config = TollApplicationConfig.parse(args)
 
-    sc.initCounter(
-      TollBoothEntryRawInvalidRows.counter,
-      TollBoothExitRawInvalidRows.counter,
-      VehicleRegistrationRawInvalidRows.counter
-    )
-
     // receive toll booth entries and toll booth exists
     val (boothEntriesRaw, boothEntriesRawDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
-    boothEntriesRawDlq.metrics(TollBoothEntryRawInvalidRows)
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
     boothEntriesDlq.writeDeadLetterToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) =
       sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
-    boothExitsRawDlq.metrics(TollBoothExitRawInvalidRows)
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.writeDeadLetterToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
@@ -55,7 +49,6 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
     // receive vehicle registrations
     val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
       sc.subscribeJsonFromPubsub(VehicleRegistrationSubscriptionIoId, config.vehicleRegistrationSubscription)
-    vehicleRegistrationsRawUpdatesDlq.metrics(VehicleRegistrationRawInvalidRows)
 
     val vehicleRegistrationsRawHistory =
       sc.readFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable)
@@ -97,6 +90,18 @@ object TollApplication extends TollApplicationIo with TollApplicationMetrics {
       VehiclesWithExpiredRegistrationDiagnosticTableIoId,
       config.vehiclesWithExpiredRegistrationDiagnosticTable
     )
+
+    // io diagnostic, TODO: encapsulate and remove code duplication
+    SCollection
+      .unionAll(
+        Seq(
+          boothEntriesRawDlq.map(x => IoDiagnostic(x.id, x.error)),
+          boothExitsRawDlq.map(x => IoDiagnostic(x.id, x.error)),
+          vehicleRegistrationsRawUpdatesDlq.map(x => IoDiagnostic(x.id, x.error))
+        )
+      )
+      .keyBy(_.key)
+      .writeDiagnosticToBigQuery(IoDiagnosticTableIoId, config.ioDiagnosticTable)
 
     val _ = sc.run()
   }

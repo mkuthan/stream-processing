@@ -12,13 +12,11 @@ import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollApplicationIo
-    with TollApplicationMetrics
     with TollApplicationFixtures {
 
   "Toll application" should "run" in {
@@ -32,9 +30,11 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
-        "--carTotalTimeTable=toll.car_total_time",
+        "--totalVehicleTimeTable=toll.total_vehicle_time",
+        "--totalVehicleTimeDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
-        "--diagnosticTable=toll.diagnostic"
+        "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
+        "--ioDiagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubMessage](
@@ -48,9 +48,6 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           )
           .advanceWatermarkToInfinity()
       )
-      .counter(TollBoothEntryRawInvalidRows.counter) { value =>
-        value should be(1)
-      }
       .output(CustomIO[String](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingErrorString)
       }
@@ -64,9 +61,6 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             invalidTollBoothExitPubsubMessage
           ).advanceWatermarkToInfinity()
       )
-      .counter(TollBoothExitRawInvalidRows.counter) { value =>
-        value should be(1)
-      }
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
       }
@@ -107,18 +101,23 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           // r should be(anyTotalVehicleTimeRawTableRow)
           Option.empty[BigQueryDeadLetter[TotalVehicleTime.Raw]].toList
       ))
+      .output(CustomIO[TableRow](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+        // TODO: add scenario with diagnostic output
+        results should beEmpty
+      }
       // calculate vehicles with expired registrations
       .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
         // TODO: https://github.com/mkuthan/stream-processing/issues/82
         results should beEmpty
       }
-      // pipeline diagnostic
-      .transformOverride(TransformOverride.ofIter[Diagnostic.Raw, BigQueryDeadLetter[Diagnostic.Raw]](
-        DiagnosticTableIoId.id,
-        (r: Diagnostic.Raw) =>
-          // TODO: assert that diagnostic table contains expected rows
-          Option.empty[BigQueryDeadLetter[Diagnostic.Raw]].toList
-      ))
+      .output(CustomIO[TableRow](VehiclesWithExpiredRegistrationDiagnosticTableIoId.id)) { results =>
+        // TODO: add scenario with diagnostic output
+        results should beEmpty
+      }
+      // io diagnostic
+      .output(CustomIO[TableRow](IoDiagnosticTableIoId.id)) { results =>
+        results should haveSize(2) // invalid toll booth entry and exit
+      }
       .run()
   }
 

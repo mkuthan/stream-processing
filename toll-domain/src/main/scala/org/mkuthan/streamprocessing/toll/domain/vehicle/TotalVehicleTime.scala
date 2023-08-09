@@ -1,10 +1,10 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 
+import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
 
@@ -12,8 +12,6 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.Diagnostic
-import org.mkuthan.streamprocessing.toll.domain.diagnostic.MissingTollBoothExit
 
 final case class TotalVehicleTime(
     licensePlate: LicensePlate,
@@ -25,11 +23,8 @@ final case class TotalVehicleTime(
 
 object TotalVehicleTime {
 
-  implicit val CoderCache: Coder[TotalVehicleTime] = Coder.gen
-  implicit val CoderCacheRaw: Coder[TotalVehicleTime.Raw] = Coder.gen
-
   @BigQueryType.toTable
-  final case class Raw(
+  case class Raw(
       record_timestamp: Instant,
       license_plate: String,
       toll_booth_id: String,
@@ -38,11 +33,30 @@ object TotalVehicleTime {
       duration_seconds: Long
   )
 
+  type DiagnosticKey = String
+
+  @BigQueryType.toTable
+  case class Diagnostic(
+      created_at: Instant,
+      toll_both_id: String,
+      reason: String,
+      count: Long = 1L
+  ) {
+    lazy val key: String = toll_both_id + reason
+  }
+
+  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
+    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
+      require(x.key == y.key)
+      Diagnostic(x.created_at, x.toll_both_id, x.reason, x.count + y.count)
+    }
+  }
+
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalVehicleTime], SCollection[Diagnostic]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[(DiagnosticKey, Diagnostic)]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -59,10 +73,11 @@ object TotalVehicleTime {
         case ((boothEntry, Some(boothExit)), _) =>
           Some(totalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
-          ctx.output(diagnostic, toDiagnostic(boothEntry))
+          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
+          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
           None
       }
-    (results, sideOutputs(diagnostic))
+    (results, sideOutputs(diagnostic).keyBy(_.key))
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =
@@ -88,9 +103,10 @@ object TotalVehicleTime {
     )
   }
 
-  private def toDiagnostic(boothEntry: TollBoothEntry): Diagnostic =
+  private def toDiagnostic(boothEntry: TollBoothEntry, reason: String): Diagnostic =
     Diagnostic(
-      boothId = boothEntry.id,
-      reason = MissingTollBoothExit
+      created_at = boothEntry.entryTime,
+      toll_both_id = boothEntry.id.id,
+      reason = reason
     )
 }

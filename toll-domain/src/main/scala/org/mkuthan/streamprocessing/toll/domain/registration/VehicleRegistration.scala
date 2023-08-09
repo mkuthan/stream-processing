@@ -3,7 +3,6 @@ package org.mkuthan.streamprocessing.toll.domain.registration
 import scala.util.control.NonFatal
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.ScioMetrics
@@ -21,9 +20,6 @@ case class VehicleRegistration(
 )
 
 object VehicleRegistration {
-
-  implicit val CoderCache: Coder[VehicleRegistration] = Coder.gen
-  implicit val CoderCacheRaw: Coder[VehicleRegistration.Raw] = Coder.gen
 
   val DlqCounter: Counter = ScioMetrics.counter[VehicleRegistration]("dlq")
 

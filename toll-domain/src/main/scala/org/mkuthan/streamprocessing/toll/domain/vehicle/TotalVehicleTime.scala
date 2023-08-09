@@ -71,7 +71,7 @@ object TotalVehicleTime {
       .withSideOutputs(diagnostic)
       .flatMap {
         case ((boothEntry, Some(boothExit)), _) =>
-          Some(totalVehicleTime(boothEntry, boothExit))
+          Some(toTotalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
           val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
           ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
@@ -92,7 +92,7 @@ object TotalVehicleTime {
       )
     }
 
-  private def totalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
+  private def toTotalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis
     TotalVehicleTime(
       licensePlate = boothEntry.licensePlate,

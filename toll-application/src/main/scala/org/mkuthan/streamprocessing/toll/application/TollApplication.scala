@@ -73,10 +73,10 @@ object TollApplication extends TollApplicationIo {
       TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
     TotalVehicleTime
       .encode(totalVehicleTimes)
-      .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.carTotalTimeTable)
+      .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
     totalVehicleTimesDiagnostic.writeDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
-      config.carTotalTimeDiagnosticTable
+      config.totalVehicleTimeDiagnosticTable
     )
 
     // calculate vehicles with expired registrations

@@ -29,7 +29,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   behavior of "DLQ SCollection syntax"
 
-  it should "write on GCS as single JSON file for single window" in withScioContext { sc =>
+  it should "write on GCS as single JSON file" in withScioContext { sc =>
     withBucket { bucket =>
       val sampleObjects = testStreamOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
@@ -59,7 +59,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "write on GCS as two JSON files for single window if max records is reached" in withScioContext { sc =>
+  it should "write on GCS as two JSON files if max records is reached" in withScioContext { sc =>
     withBucket { bucket =>
       val sampleObjects = testStreamOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
@@ -92,7 +92,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  ignore should "write on GCS as two JSON files for each window" in withScioContext { sc =>
+  ignore should "write on GCS as two JSON files if there are two windows" in withScioContext { sc =>
     withBucket { bucket =>
       val sampleObjects = testStreamOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)

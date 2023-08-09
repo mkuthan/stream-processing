@@ -32,7 +32,9 @@ trait TollApplicationIo {
     IoIdentifier[VehiclesWithExpiredRegistration.Raw]("vehicles-with-expired-registration-topic-id")
 
   val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[VehiclesWithExpiredRegistration.Diagnostic] =
-    IoIdentifier[VehiclesWithExpiredRegistration.Diagnostic]("toll.vehicles-with-expired-registration-diagnostic-id")
+    IoIdentifier[VehiclesWithExpiredRegistration.Diagnostic](
+      "toll.vehicles-with-expired-registration-diagnostic-table-id"
+    )
 
   val EntryStatsTableIoId: IoIdentifier[TollBoothStats.Raw] =
     IoIdentifier[TollBoothStats.Raw]("entry-stats-table-id")

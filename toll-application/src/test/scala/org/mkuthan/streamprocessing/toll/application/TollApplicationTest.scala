@@ -30,8 +30,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
-        "--carTotalTimeTable=toll.car_total_time",
-        "--carTotalTimeDiagnosticTable=toll.car_total_time_diagnostic",
+        "--totalVehicleTimeTable=toll.total_vehicle_time",
+        "--totalVehicleTimeDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
         "--ioDiagnosticTable=toll.io_diagnostic"

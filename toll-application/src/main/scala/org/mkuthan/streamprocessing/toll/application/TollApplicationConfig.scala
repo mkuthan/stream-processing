@@ -23,8 +23,8 @@ case class TollApplicationConfig(
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
     entryStatsTable: BigQueryTable[TollBoothStats.Raw],
-    carTotalTimeTable: BigQueryTable[TotalVehicleTime.Raw],
-    carTotalTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
+    totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Raw],
+    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic],
     ioDiagnosticTable: BigQueryTable[IoDiagnostic.Diagnostic]
@@ -40,8 +40,8 @@ object TollApplicationConfig {
     vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
     vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
     entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
-    carTotalTimeTable = BigQueryTable(args.required("carTotalTimeTable")),
-    carTotalTimeDiagnosticTable = BigQueryTable(args.required("carTotalTimeDiagnosticTable")),
+    totalVehicleTimeTable = BigQueryTable(args.required("totalVehicleTimeTable")),
+    totalVehicleTimeDiagnosticTable = BigQueryTable(args.required("totalVehicleTimeDiagnosticTable")),
     vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
     vehiclesWithExpiredRegistrationDiagnosticTable =
       BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),

@@ -4,9 +4,10 @@ import com.spotify.scio.testing._
 
 import org.joda.time.Duration
 import org.joda.time.Instant
-import org.mkuthan.streamprocessing.shared.common.Message
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture

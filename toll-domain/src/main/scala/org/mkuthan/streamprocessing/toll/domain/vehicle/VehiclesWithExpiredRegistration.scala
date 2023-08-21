@@ -11,6 +11,7 @@ import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 import org.joda.time.Instant
+
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId

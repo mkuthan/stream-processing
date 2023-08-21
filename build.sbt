@@ -42,11 +42,8 @@ lazy val shared = (project in file("stream-processing-shared"))
   .dependsOn(test % Test)
 
 lazy val infrastructure = (project in file("stream-processing-infrastructure"))
-  .configs(Settings.IntegrationTest)
-  .enablePlugins(JacocoItPlugin)
   .settings(
     commonSettings,
-    integrationTestSettings,
     libraryDependencies ++= Seq(
       scio,
       scioGcp,

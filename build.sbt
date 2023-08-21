@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "stream-processing",
     commonSettings
-  ).aggregate(test, shared, wordCount, userSessions, tollDomain, tollApplication)
+  ).aggregate(test, shared, infrastructure, wordCount, userSessions, tollDomain, tollApplication)
 
 lazy val test = (project in file("stream-processing-test"))
   .settings(

@@ -21,4 +21,18 @@ trait VehiclesWithExpiredRegistrationFixture {
     vehicle_registration_id = "1",
     entry_time = Instant.parse("2014-09-10T12:01:00.000Z")
   )
+
+  final val vehicleWithNotExpiredRegistrationDiagnostic = VehiclesWithExpiredRegistration.Diagnostic(
+    created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
+    toll_booth_id = "1",
+    reason = "Vehicle registration is not expired",
+    count = 1
+  )
+
+  final val vehicleWithMissingRegistrationDiagnostic = VehiclesWithExpiredRegistration.Diagnostic(
+    created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
+    toll_booth_id = "1",
+    reason = "Missing vehicle registration",
+    count = 1
+  )
 }

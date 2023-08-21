@@ -1,14 +1,13 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
 import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
 
-final case class TollBoothStats(
+case class TollBoothStats(
     id: TollBoothId,
     count: Int,
     totalToll: BigDecimal,
@@ -23,11 +22,8 @@ final case class TollBoothStats(
 
 object TollBoothStats {
 
-  implicit val CoderCache: Coder[TollBoothStats] = Coder.gen
-  implicit val CoderCacheRaw: Coder[TollBoothStats.Raw] = Coder.gen
-
   @BigQueryType.toTable
-  final case class Raw(
+  case class Raw(
       record_timestamp: Instant,
       id: String,
       count: Int,

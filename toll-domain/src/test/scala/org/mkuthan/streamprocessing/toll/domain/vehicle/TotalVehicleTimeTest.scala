@@ -27,7 +27,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
   behavior of "TotalVehicleTime"
 
-  it should "calculate TotalVehicleTime in session window" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTime" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -93,7 +93,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode TotalVehicleTime into Raw" in runWithScioContext { sc =>
+  it should "encode into Raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = testStreamOf[TotalVehicleTime]
       .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)

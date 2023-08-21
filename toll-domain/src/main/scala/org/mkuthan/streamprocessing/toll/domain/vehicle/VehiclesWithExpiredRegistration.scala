@@ -1,10 +1,16 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.schemas.To
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
+import com.spotify.scio.values.WindowOptions
 
 import com.twitter.algebird.Semigroup
+import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -50,30 +56,43 @@ object VehiclesWithExpiredRegistration {
     }
   }
 
-  def calculate(
+  def calculateInFixedWindow(
       boothEntries: SCollection[TollBoothEntry],
-      vehicleRegistration: SCollection[VehicleRegistration]
+      vehicleRegistrations: SCollection[VehicleRegistration],
+      duration: Duration
   ): (SCollection[VehiclesWithExpiredRegistration], SCollection[(DiagnosticKey, Diagnostic)]) = {
-    // TODO: add windowing
-    val boothEntriesByLicensePlate = boothEntries.keyBy(_.licensePlate)
-    val vehicleRegistrationByLicensePlate = vehicleRegistration.keyBy(_.licensePlate)
+    val boothEntriesByLicensePlate = boothEntries
+      .keyBy(_.licensePlate)
+      .withFixedWindows(duration)
+
+    val sideInputWindowOptions = WindowOptions(
+      trigger = Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane()),
+      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
+    )
+
+    val vehicleRegistrationByLicensePlate = vehicleRegistrations
+      .keyBy(_.licensePlate)
+      .withGlobalWindow(sideInputWindowOptions)
 
     val diagnostic = SideOutput[Diagnostic]()
 
     val (results, sideOutputs) = boothEntriesByLicensePlate
       .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
       .values
+      .distinct
       .withSideOutputs(diagnostic)
       .flatMap {
         case ((boothEntry, Some(vehicleRegistration)), _) if vehicleRegistration.expired =>
           Some(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
         case ((boothEntry, Some(vehicleRegistration)), ctx) if !vehicleRegistration.expired =>
+          val createdAt = ctx.context.timestamp()
           val diagnosticReason = "Vehicle registration is not expired"
-          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
+          ctx.output(diagnostic, toDiagnostic(createdAt, boothEntry, diagnosticReason))
           None
         case ((boothEntry, None), ctx) =>
+          val createdAt = ctx.context.timestamp()
           val diagnosticReason = "Missing vehicle registration"
-          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
+          ctx.output(diagnostic, toDiagnostic(createdAt, boothEntry, diagnosticReason))
           None
       }
 
@@ -102,9 +121,9 @@ object VehiclesWithExpiredRegistration {
       vehicleRegistrationId = vehicleRegistration.id
     )
 
-  private def toDiagnostic(boothEntry: TollBoothEntry, reason: String): Diagnostic =
+  private def toDiagnostic(createdAt: Instant, boothEntry: TollBoothEntry, reason: String): Diagnostic =
     Diagnostic(
-      created_at = boothEntry.entryTime,
+      created_at = createdAt,
       toll_booth_id = boothEntry.id.id,
       reason = reason
     )

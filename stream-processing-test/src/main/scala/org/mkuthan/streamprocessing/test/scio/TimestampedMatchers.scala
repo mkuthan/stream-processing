@@ -26,8 +26,25 @@ trait TimestampedMatchers extends InstantSyntax {
   def inFinalPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
     inFinalPane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
 
-  def inWindow[T: ClassTag, B: ClassTag](begin: String, end: String)(matcher: IterableMatcher[T, B]): Matcher[T] =
-    inWindow(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
+  def inOnlyPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] = {
+    val window = new IntervalWindow(begin.toInstant, end.toInstant)
+    matcher match {
+      case value: SingleMatcher[T, _] =>
+        value.matcher(_.inOnlyPane(window))
+      case value: IterableMatcher[T, _] =>
+        value.matcher(_.inOnlyPane(window))
+    }
+  }
+
+  def inWindow[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] = {
+    val window = new IntervalWindow(begin.toInstant, end.toInstant)
+    matcher match {
+      case value: SingleMatcher[T, _] =>
+        value.matcher(_.inWindow(window))
+      case value: IterableMatcher[T, _] =>
+        value.matcher(_.inWindow(window))
+    }
+  }
 
   /**
    * Assert that the SCollection contains the provided element at given time without making assumptions about other

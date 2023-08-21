@@ -5,6 +5,7 @@ import com.spotify.scio.testing._
 
 import com.google.api.services.bigquery.model.TableRow
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+import org.scalactic.Equality
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -18,6 +19,14 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollApplicationIo
     with TollApplicationFixtures {
+
+  implicit val pubsubMessageEquality: Equality[PubsubMessage] =
+    (a: PubsubMessage, b: Any) =>
+      (a, b) match {
+        case (a: PubsubMessage, b: PubsubMessage) =>
+          a.getPayload.sameElements(b.getPayload) && a.getAttributeMap == b.getAttributeMap
+        case _ => false
+      }
 
   "Toll application" should "run" in {
     JobTest[TollApplication.type]
@@ -106,9 +115,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // calculate vehicles with expired registrations
-      .output(CustomIO[String](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
-        // TODO: https://github.com/mkuthan/stream-processing/issues/82
-        results should beEmpty
+      .output(CustomIO[PubsubMessage](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
+        results should containSingleValue(anyVehicleWithExpiredRegistrationRawPubsubMessage)
       }
       .output(CustomIO[TableRow](VehiclesWithExpiredRegistrationDiagnosticTableIoId.id)) { results =>
         // TODO: add scenario with diagnostic output

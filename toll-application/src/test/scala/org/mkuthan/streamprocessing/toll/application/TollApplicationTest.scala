@@ -9,8 +9,8 @@ import org.scalactic.Equality
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.scio._
-import org.mkuthan.streamprocessing.shared.scio.bigquery.BigQueryDeadLetter
+import org.mkuthan.streamprocessing.infrastructure._
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime

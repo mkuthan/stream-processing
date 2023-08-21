@@ -2,10 +2,9 @@ package org.mkuthan.streamprocessing.shared.scio.core
 
 import com.spotify.scio.testing._
 import com.spotify.scio.testing.SCollectionMatchers
-
+import org.mkuthan.streamprocessing.shared.scio.SCollectionSyntax
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 class SCollectionSyntaxTest extends AnyFlatSpec

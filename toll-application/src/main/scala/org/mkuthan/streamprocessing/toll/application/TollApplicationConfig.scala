@@ -2,14 +2,14 @@ package org.mkuthan.streamprocessing.toll.application
 
 import com.spotify.scio.Args
 
-import org.mkuthan.streamprocessing.shared.scio.common.BigQueryTable
-import org.mkuthan.streamprocessing.shared.scio.common.PubsubSubscription
-import org.mkuthan.streamprocessing.shared.scio.common.PubsubTopic
-import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
+import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
+import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
+import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
-import org.mkuthan.streamprocessing.toll.domain.common.IoDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration

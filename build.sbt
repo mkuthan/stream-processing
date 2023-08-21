@@ -28,6 +28,20 @@ lazy val test = (project in file("stream-processing-test"))
   )
 
 lazy val shared = (project in file("stream-processing-shared"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      scio,
+      scioGcp,
+      scalaLogging,
+      slf4j,
+      slf4jJcl,
+      logback
+    )
+  )
+  .dependsOn(test % Test)
+
+lazy val infrastructure = (project in file("stream-processing-infrastructure"))
   .configs(Settings.IntegrationTest)
   .enablePlugins(JacocoItPlugin)
   .settings(
@@ -42,7 +56,10 @@ lazy val shared = (project in file("stream-processing-shared"))
       logback
     )
   )
-  .dependsOn(test % Test)
+  .dependsOn(
+    shared,
+    test % Test
+  )
 
 lazy val wordCount = (project in file("word-count"))
   .settings(commonSettings)
@@ -69,6 +86,7 @@ lazy val tollApplication = (project in file("toll-application"))
   .settings(commonSettings)
   .dependsOn(
     shared,
+    infrastructure,
     test % Test,
     tollDomain % "compile->compile;test->test"
   )

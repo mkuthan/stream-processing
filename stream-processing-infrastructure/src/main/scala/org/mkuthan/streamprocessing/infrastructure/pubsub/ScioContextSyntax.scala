@@ -15,7 +15,6 @@ import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.pubsub
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
-import org.mkuthan.streamprocessing.shared.scio._
 
 private[pubsub] class ScioContextOps(private val self: ScioContext) {
 

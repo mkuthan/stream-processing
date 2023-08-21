@@ -7,7 +7,7 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TotalVehicleTimeFixture {
-  val anyTotalVehicleTime = TotalVehicleTime(
+  final val anyTotalVehicleTime = TotalVehicleTime(
     tollBoothId = TollBoothId("1"),
     licensePlate = LicensePlate("JNB 7001"),
     entryTime = Instant.parse("2014-09-10T12:01:00.000Z"),
@@ -15,7 +15,7 @@ trait TotalVehicleTimeFixture {
     duration = Duration.standardSeconds(120)
   )
 
-  val anyTotalVehicleTimeRaw = TotalVehicleTime.Raw(
+  final val anyTotalVehicleTimeRaw = TotalVehicleTime.Raw(
     record_timestamp = Instant.parse("2014-09-10T12:12:59.999Z"), // end of session window
     toll_booth_id = "1",
     license_plate = "JNB 7001",

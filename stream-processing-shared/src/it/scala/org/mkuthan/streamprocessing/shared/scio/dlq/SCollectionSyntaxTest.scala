@@ -10,6 +10,7 @@ import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.shared.scio._
 import org.mkuthan.streamprocessing.shared.scio.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.scio.common.StorageBucket
+import org.mkuthan.streamprocessing.shared.scio.dlq.DlqConfiguration
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.shared.scio.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
@@ -24,7 +25,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with IntegrationTestFixtures
     with StorageContext {
 
-  private val configuration = DeadLetterConfiguration()
+  private val configuration = DlqConfiguration()
     .withNumShards(NumShards.One) // make tests deterministic
 
   behavior of "DLQ SCollection syntax"

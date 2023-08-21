@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.TestStreamScioContext
+import com.spotify.scio.testing._
 
 import org.joda.time.Duration
 import org.joda.time.Instant
@@ -28,7 +27,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
   behavior of "TotalVehicleTime"
 
-  it should "calculate TotalVehicleTime in session window" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTime" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -94,7 +93,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode TotalVehicleTime into raw" in runWithScioContext { sc =>
+  it should "encode into Raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = testStreamOf[TotalVehicleTime]
       .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
@@ -102,6 +101,5 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
     val results = encode(sc.testStream(inputs))
     results should containSingleValue(anyTotalVehicleTimeRaw.copy(record_timestamp = recordTimestamp))
-
   }
 }

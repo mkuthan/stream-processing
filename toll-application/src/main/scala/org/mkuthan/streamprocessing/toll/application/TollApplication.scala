@@ -6,6 +6,7 @@ import com.spotify.scio.ContextAndArgs
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.shared.scio._
+import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -81,9 +82,10 @@ object TollApplication extends TollApplicationIo {
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
-      VehiclesWithExpiredRegistration.calculate(boothEntries, vehicleRegistrations)
+      VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, TenMinutes)
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
+      .map(p => PubsubMessage(p)) // TODO: move to encode
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     vehiclesWithExpiredRegistrationDiagnostic.writeDiagnosticToBigQuery(

@@ -10,30 +10,30 @@ import org.apache.beam.sdk.transforms.windowing.Window
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
-case class DeadLetterConfiguration(
+case class DlqConfiguration(
     prefix: Prefix = Prefix.Empty,
     numShards: NumShards = NumShards.RunnerSpecific,
     windowDuration: Duration = Duration.standardMinutes(10),
     maxRecords: Int = 1_000_000,
     allowedLateness: Duration = Duration.ZERO
 ) {
-  import DeadLetterConfiguration._
+  import DlqConfiguration._
 
   lazy val windowOptions: WindowOptions = createWindowOptions(allowedLateness, maxRecords)
 
-  def withPrefix(prefix: Prefix): DeadLetterConfiguration =
+  def withPrefix(prefix: Prefix): DlqConfiguration =
     copy(prefix = prefix)
 
-  def withNumShards(numShards: NumShards): DeadLetterConfiguration =
+  def withNumShards(numShards: NumShards): DlqConfiguration =
     copy(numShards = numShards)
 
-  def withWindowDuration(duration: Duration): DeadLetterConfiguration =
+  def withWindowDuration(duration: Duration): DlqConfiguration =
     copy(windowDuration = duration)
 
-  def withMaxRecords(maxRecords: Int): DeadLetterConfiguration =
+  def withMaxRecords(maxRecords: Int): DlqConfiguration =
     copy(maxRecords = maxRecords)
 
-  def withAllowedLateness(duration: Duration): DeadLetterConfiguration =
+  def withAllowedLateness(duration: Duration): DlqConfiguration =
     copy(allowedLateness = duration)
 
   def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
@@ -46,7 +46,7 @@ case class DeadLetterConfiguration(
   )
 }
 
-object DeadLetterConfiguration {
+object DlqConfiguration {
   private def createWindowOptions(allowedLateness: Duration, elementCount: Int): WindowOptions =
     WindowOptions(
       trigger = Repeatedly.forever(

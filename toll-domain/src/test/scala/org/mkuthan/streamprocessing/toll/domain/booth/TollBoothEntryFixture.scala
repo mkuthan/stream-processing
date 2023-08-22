@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.toll.domain.common.DeadLetter
+import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothEntryFixture {

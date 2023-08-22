@@ -1,3 +1,3 @@
-package org.mkuthan.streamprocessing.toll.domain.common
+package org.mkuthan.streamprocessing.shared.common
 
 final case class DeadLetter[T](data: T, error: String)

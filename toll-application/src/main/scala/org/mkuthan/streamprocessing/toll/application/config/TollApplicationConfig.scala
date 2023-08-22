@@ -3,10 +3,10 @@ package org.mkuthan.streamprocessing.toll.application.config
 import com.spotify.scio.Args
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -27,7 +27,7 @@ case class TollApplicationConfig(
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic],
-    ioDiagnosticTable: BigQueryTable[IoDiagnostic.Diagnostic]
+    diagnosticTable: BigQueryTable[Diagnostic.Diagnostic]
 )
 
 object TollApplicationConfig {
@@ -45,6 +45,6 @@ object TollApplicationConfig {
     vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
     vehiclesWithExpiredRegistrationDiagnosticTable =
       BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),
-    ioDiagnosticTable = BigQueryTable(args.required("ioDiagnosticTable"))
+    diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
   )
 }

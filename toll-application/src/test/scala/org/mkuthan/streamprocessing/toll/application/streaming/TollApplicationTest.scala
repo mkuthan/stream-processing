@@ -43,7 +43,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--totalVehicleTimeDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
-        "--ioDiagnosticTable=toll.io_diagnostic"
+        "--diagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubMessage](
@@ -123,8 +123,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // io diagnostic
-      .output(CustomIO[TableRow](IoDiagnosticTableIoId.id)) { results =>
-        results should haveSize(2) // invalid toll booth entry and exit
+      .output(CustomIO[TableRow](DiagnosticTableIoId.id)) { results =>
+        results should haveSize(2) // invalid toll booth entry and toll booth exit
       }
       .run()
   }

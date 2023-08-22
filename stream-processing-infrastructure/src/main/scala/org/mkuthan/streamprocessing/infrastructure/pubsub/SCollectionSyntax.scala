@@ -9,6 +9,8 @@ import org.apache.beam.sdk.io.gcp.pubsub.{PubsubMessage => BeamPubsubMessage}
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.common
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
@@ -40,9 +42,19 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
 
 private[pubsub] object SCollectionOps extends Utils with PubsubCoders
 
+private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val self: SCollection[PubsubDeadLetter[T]]) {
+  def toDiagnostic(): SCollection[Diagnostic.Diagnostic] =
+    self.map(deadLetter => common.Diagnostic(deadLetter.id.id, deadLetter.error))
+}
+
 trait SCollectionSyntax {
+
   import scala.language.implicitConversions
 
   implicit def pubsubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[Message[T]]): SCollectionOps[T] =
     new SCollectionOps(sc)
+
+  implicit def pubsubSCollectionDeadLetterOps[T <: AnyRef: Coder](sc: SCollection[PubsubDeadLetter[T]])
+      : SCollectionDeadLetterOps[T] =
+    new SCollectionDeadLetterOps(sc)
 }

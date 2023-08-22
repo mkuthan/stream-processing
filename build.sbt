@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "stream-processing",
     commonSettings
-  ).aggregate(test, shared, wordCount, userSessions, tollDomain, tollApplication)
+  ).aggregate(test, shared, infrastructure, wordCount, userSessions, tollDomain, tollApplication)
 
 lazy val test = (project in file("stream-processing-test"))
   .settings(
@@ -28,11 +28,8 @@ lazy val test = (project in file("stream-processing-test"))
   )
 
 lazy val shared = (project in file("stream-processing-shared"))
-  .configs(Settings.IntegrationTest)
-  .enablePlugins(JacocoItPlugin)
   .settings(
     commonSettings,
-    integrationTestSettings,
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
@@ -43,6 +40,23 @@ lazy val shared = (project in file("stream-processing-shared"))
     )
   )
   .dependsOn(test % Test)
+
+lazy val infrastructure = (project in file("stream-processing-infrastructure"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      scio,
+      scioGcp,
+      scalaLogging,
+      slf4j,
+      slf4jJcl,
+      logback
+    )
+  )
+  .dependsOn(
+    shared,
+    test % Test
+  )
 
 lazy val wordCount = (project in file("word-count"))
   .settings(commonSettings)
@@ -69,6 +83,7 @@ lazy val tollApplication = (project in file("toll-application"))
   .settings(commonSettings)
   .dependsOn(
     shared,
+    infrastructure,
     test % Test,
     tollDomain % "compile->compile;test->test"
   )

@@ -9,8 +9,8 @@ import com.spotify.scio.ScioMetrics
 
 import org.apache.beam.sdk.metrics.Counter
 
-import org.mkuthan.streamprocessing.shared.scio._
-import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
+import org.mkuthan.streamprocessing.shared._
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 case class VehicleRegistration(
@@ -31,7 +31,7 @@ object VehicleRegistration {
   )
 
   // TODO: test
-  def unionHistoryWithUpdates(history: SCollection[Raw], updates: SCollection[PubsubMessage[Raw]]): SCollection[Raw] =
+  def unionHistoryWithUpdates(history: SCollection[Raw], updates: SCollection[Message[Raw]]): SCollection[Raw] =
     history.unionInGlobalWindow(updates.map(_.payload))
 
   def decode(inputs: SCollection[Raw]): (SCollection[VehicleRegistration], SCollection[Raw]) = {

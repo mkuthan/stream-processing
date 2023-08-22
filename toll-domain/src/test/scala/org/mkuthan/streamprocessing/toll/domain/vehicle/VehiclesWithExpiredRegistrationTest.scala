@@ -7,6 +7,7 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
@@ -114,6 +115,6 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testStream(inputs))
-    results should containSingleValue(anyVehicleWithExpiredRegistrationRaw)
+    results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
   }
 }

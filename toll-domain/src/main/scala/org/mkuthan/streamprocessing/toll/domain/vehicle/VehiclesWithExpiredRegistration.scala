@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.schemas.To
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
@@ -13,6 +12,7 @@ import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -99,15 +99,16 @@ object VehiclesWithExpiredRegistration {
     (results, sideOutputs(diagnostic).keyBy(_.key))
   }
 
-  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Raw] =
+  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Raw]] =
     input.withTimestamp.map { case (r, t) =>
-      Raw(
+      val payload = Raw(
         created_at = t,
         toll_booth_id = r.tollBoothId.id,
         entry_time = r.entryTime,
         license_plate = r.licensePlate.number,
         vehicle_registration_id = r.vehicleRegistrationId.id
       )
+      Message(payload)
     }
 
   private def toVehiclesWithExpiredRegistration(

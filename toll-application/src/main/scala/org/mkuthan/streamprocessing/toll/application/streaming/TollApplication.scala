@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application
+package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ContextAndArgs
@@ -7,6 +7,8 @@ import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
+import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
+import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -14,17 +16,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
-/**
- * A toll station is a common phenomenon. You encounter them on many expressways, bridges, and tunnels across the world.
- * Each toll station has multiple toll booths. At manual booths, you stop to pay the toll to an attendant. At automated
- * booths, a sensor on top of each booth scans an RFID card that's affixed to the windshield of your vehicle as you pass
- * the toll booth. It is easy to visualize the passage of vehicles through these toll stations as an event stream over
- * which interesting operations can be performed.
- *
- * See:
- * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
- */
-object TollApplication extends TollApplicationIo {
+object TollApplication {
 
   private val TenMinutes = Duration.standardMinutes(10)
 

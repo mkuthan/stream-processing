@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application
+package org.mkuthan.streamprocessing.toll.application.streaming
 
 import java.{util => ju}
 

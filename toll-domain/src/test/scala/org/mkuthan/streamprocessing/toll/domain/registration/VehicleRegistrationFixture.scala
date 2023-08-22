@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.toll.domain.registration
 
+import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait VehicleRegistrationFixture {
@@ -11,6 +12,11 @@ trait VehicleRegistrationFixture {
   )
 
   final val vehicleRegistrationRawInvalid = anyVehicleRegistrationRaw.copy(expired = -1)
+
+  final val vehicleRegistrationDecodingError = DeadLetter[VehicleRegistration.Raw](
+    data = vehicleRegistrationRawInvalid,
+    error = "requirement failed: Field 'expired' must be positive but was '-1'"
+  )
 
   final val anyVehicleRegistration = VehicleRegistration(
     id = VehicleRegistrationId("1"),

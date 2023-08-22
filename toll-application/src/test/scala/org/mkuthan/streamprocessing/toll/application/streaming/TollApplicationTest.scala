@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application
+package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing._
@@ -12,12 +12,12 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
-    with TollApplicationIo
     with TollApplicationFixtures {
 
   implicit val pubsubMessageEquality: Equality[PubsubMessage] =

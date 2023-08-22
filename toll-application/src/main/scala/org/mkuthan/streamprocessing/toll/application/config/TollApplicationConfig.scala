@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application
+package org.mkuthan.streamprocessing.toll.application.config
 
 import com.spotify.scio.Args
 
@@ -21,7 +21,7 @@ case class TollApplicationConfig(
     exitDlq: StorageBucket[TollBoothExit.DeadLetterRaw],
     vehicleRegistrationSubscription: PubsubSubscription[VehicleRegistration.Raw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
-    vehicleRegistrationDlq: StorageBucket[VehicleRegistration.Raw],
+    vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterRaw],
     entryStatsTable: BigQueryTable[TollBoothStats.Raw],
     totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Raw],
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],

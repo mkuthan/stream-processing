@@ -1,12 +1,11 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
-import com.spotify.scio.values.SCollection
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -83,17 +82,14 @@ object TollApplication {
       config.vehiclesWithExpiredRegistrationDiagnosticTable
     )
 
-    // io diagnostic, TODO: encapsulate and remove code duplication
-    SCollection
+    // dead letters diagnostic
+    Diagnostic
       .unionAll(
-        Seq(
-          boothEntriesRawDlq.map(x => IoDiagnostic(x.id, x.error)),
-          boothExitsRawDlq.map(x => IoDiagnostic(x.id, x.error)),
-          vehicleRegistrationsRawUpdatesDlq.map(x => IoDiagnostic(x.id, x.error))
-        )
+        boothEntriesRawDlq.toDiagnostic(),
+        boothExitsRawDlq.toDiagnostic(),
+        vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
       )
-      .keyBy(_.key)
-      .writeDiagnosticToBigQuery(IoDiagnosticTableIoId, config.ioDiagnosticTable)
+      .writeDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

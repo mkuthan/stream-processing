@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
@@ -52,5 +52,13 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         }
       }
     }
+  }
+
+  it should "map dead letter into diagnostic" in withScioContext { sc =>
+    val deadLetter = PubsubDeadLetter(IoIdentifier[SampleClass]("id"), SampleJson1, SampleMap1, "error")
+
+    val results = sc.parallelize(Seq(deadLetter)).toDiagnostic()
+
+    results should containSingleValue(Diagnostic("id", "error"))
   }
 }

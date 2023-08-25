@@ -3,7 +3,6 @@ package org.mkuthan.streamprocessing.infrastructure.diagnostic
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.testing._
 
-import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
@@ -13,6 +12,7 @@ import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
+import org.mkuthan.streamprocessing.shared.common.SumByKey
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
@@ -44,7 +44,6 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
         sc
           .testStream(sampleDiagnostics)
-          .keyBy(_.key)
           .writeDiagnosticToBigQuery(
             IoIdentifier[SampleDiagnostic]("any-id"),
             BigQueryTable[SampleDiagnostic](s"$projectId:$datasetName.$tableName"),
@@ -70,14 +69,13 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
 object SCollectionSyntaxTest {
   @BigQueryType.toTable
-  case class SampleDiagnostic(reason: String, count: Long = 1) {
-    lazy val key: String = reason
-  }
+  case class SampleDiagnostic(reason: String, count: Long = 1)
 
-  implicit case object SampleDiagnostic extends Semigroup[SampleDiagnostic] {
-    override def plus(x: SampleDiagnostic, y: SampleDiagnostic): SampleDiagnostic = {
-      require(x.key == y.key)
-      SampleDiagnostic(x.reason, x.count + y.count)
-    }
+  object SampleDiagnostic {
+    implicit val diagnostic: SumByKey[SampleDiagnostic] =
+      SumByKey.create(
+        groupKeyFn = _.reason,
+        plusFn = (x, y) => x.copy(count = x.count + y.count)
+      )
   }
 }

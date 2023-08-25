@@ -2,6 +2,9 @@ package org.mkuthan.streamprocessing.infrastructure.pubsub
 
 import scala.collection.mutable
 
+import com.spotify.scio.testing._
+
+import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -14,7 +17,7 @@ import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.gcp.PubSubClient._
 import org.mkuthan.streamprocessing.test.gcp.PubsubContext
-import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
+import org.mkuthan.streamprocessing.test.scio._
 
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
@@ -54,11 +57,21 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "map dead letter into diagnostic" in withScioContext { sc =>
-    val deadLetter = PubsubDeadLetter(IoIdentifier[SampleClass]("id"), SampleJson1, SampleMap1, "error")
+  it should "map unbounded dead letter into diagnostic" in withScioContext { sc =>
+    val instant = Instant.parse("2014-09-10T12:01:00.000Z")
 
-    val results = sc.parallelize(Seq(deadLetter)).toDiagnostic()
+    val deadLetter1 = PubsubDeadLetter(IoIdentifier[SampleClass]("id 1"), SampleJson1, SampleMap1, "error 1")
+    val deadLetter2 = PubsubDeadLetter(IoIdentifier[SampleClass]("id 2"), SampleJson1, SampleMap1, "error 2")
 
-    results should containSingleValue(Diagnostic("id", "error"))
+    val deadLetters = testStreamOf[PubsubDeadLetter[SampleClass]]
+      .addElementsAtTime(instant.toString, deadLetter1, deadLetter2)
+      .advanceWatermarkToInfinity()
+
+    val results = sc.testStream(deadLetters).toDiagnostic()
+
+    results should containInAnyOrder(Seq(
+      Diagnostic.Raw(instant, "id 1", "error 1"),
+      Diagnostic.Raw(instant, "id 2", "error 2")
+    ))
   }
 }

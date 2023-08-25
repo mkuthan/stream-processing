@@ -5,7 +5,6 @@ import com.spotify.scio.ContextAndArgs
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -83,13 +82,12 @@ object TollApplication {
     )
 
     // dead letters diagnostic
-    Diagnostic
-      .unionAll(
-        boothEntriesRawDlq.toDiagnostic(),
-        boothExitsRawDlq.toDiagnostic(),
-        vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
-      )
-      .writeDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+    val ioDiagnostics = sc.unionAll(Seq(
+      boothEntriesRawDlq.toDiagnostic(),
+      boothExitsRawDlq.toDiagnostic(),
+      vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
+    ))
+    ioDiagnostics.writeDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

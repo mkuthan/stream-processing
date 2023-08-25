@@ -27,7 +27,7 @@ case class TollApplicationConfig(
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic],
-    diagnosticTable: BigQueryTable[Diagnostic.Diagnostic]
+    diagnosticTable: BigQueryTable[Diagnostic.Raw]
 )
 
 object TollApplicationConfig {

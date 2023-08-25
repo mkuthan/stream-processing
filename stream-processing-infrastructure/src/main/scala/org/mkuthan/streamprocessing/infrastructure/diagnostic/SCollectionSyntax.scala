@@ -7,21 +7,21 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
-import com.twitter.algebird.Semigroup
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.common.SumByKey
 
-private[diagnostic] class SCollectionOps[K: Coder, V <: BigQueryType.HasAnnotation: Coder: TypeTag: Semigroup](
-    private val self: SCollection[(K, V)]
+private[diagnostic] class SCollectionOps[T: Coder: TypeTag: SumByKey](
+    private val self: SCollection[T]
 ) {
 
-  private val bqType = BigQueryType[V]
+  private val bqType = BigQueryType[T]
 
   def writeDiagnosticToBigQuery(
-      id: IoIdentifier[V],
-      table: BigQueryTable[V],
+      id: IoIdentifier[T],
+      table: BigQueryTable[T],
       configuration: DiagnosticConfiguration = DiagnosticConfiguration()
   ): Unit = {
     val io = BigQueryIO
@@ -30,10 +30,12 @@ private[diagnostic] class SCollectionOps[K: Coder, V <: BigQueryType.HasAnnotati
       .to(table.id)
 
     val _ = self
+      .withName(s"$id/Key")
+      .keyBy(SumByKey[T].key)
       .transform(s"$id/Aggregate") { in =>
         in
           .withFixedWindows(duration = configuration.windowDuration, options = configuration.windowOptions)
-          .sumByKey(implicitly[Semigroup[V]])
+          .sumByKey(SumByKey[T].semigroup)
           .values
       }
       .withName(s"$id/Serialize")
@@ -43,10 +45,9 @@ private[diagnostic] class SCollectionOps[K: Coder, V <: BigQueryType.HasAnnotati
 }
 
 trait SCollectionSyntax {
+
   import scala.language.implicitConversions
 
-  implicit def diagnosticSCollectionOps[K: Coder, V <: BigQueryType.HasAnnotation: Coder: TypeTag: Semigroup](
-      sc: SCollection[(K, V)]
-  ): SCollectionOps[K, V] =
-    new SCollectionOps[K, V](sc)
+  implicit def diagnosticSCollectionOps[T: Coder: TypeTag: SumByKey](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps[T](sc)
 }

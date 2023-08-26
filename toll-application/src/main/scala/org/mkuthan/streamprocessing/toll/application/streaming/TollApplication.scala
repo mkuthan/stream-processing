@@ -64,7 +64,7 @@ object TollApplication {
     TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
-    totalVehicleTimesDiagnostic.writeDiagnosticToBigQuery(
+    totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
       config.totalVehicleTimeDiagnosticTable
     )
@@ -76,7 +76,7 @@ object TollApplication {
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    vehiclesWithExpiredRegistrationDiagnostic.writeDiagnosticToBigQuery(
+    vehiclesWithExpiredRegistrationDiagnostic.writeUnboundedDiagnosticToBigQuery(
       VehiclesWithExpiredRegistrationDiagnosticTableIoId,
       config.vehiclesWithExpiredRegistrationDiagnosticTable
     )
@@ -87,7 +87,7 @@ object TollApplication {
       boothExitsRawDlq.toDiagnostic(),
       vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
     ))
-    ioDiagnostics.writeDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+    ioDiagnostics.writeUnboundedDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

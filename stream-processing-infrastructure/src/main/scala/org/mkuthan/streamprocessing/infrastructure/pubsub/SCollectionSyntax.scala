@@ -44,7 +44,7 @@ private[pubsub] object SCollectionOps extends Utils with PubsubCoders
 private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val self: SCollection[PubsubDeadLetter[T]]) {
   def toDiagnostic(): SCollection[Diagnostic.Raw] =
     self.withTimestamp.map { case (deadLetter, ts) =>
-      Diagnostic.Raw(ts, deadLetter.id.id, deadLetter.error)
+      Diagnostic(ts, deadLetter.id.id, deadLetter.error)
     }
 }
 

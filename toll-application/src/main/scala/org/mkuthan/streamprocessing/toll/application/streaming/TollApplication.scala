@@ -61,7 +61,7 @@ object TollApplication {
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
       TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
-    TotalVehicleTime
+    val totalVehicleTimesDlq = TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
     totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
@@ -85,7 +85,8 @@ object TollApplication {
     val ioDiagnostics = sc.unionAll(Seq(
       boothEntriesRawDlq.toDiagnostic(),
       boothExitsRawDlq.toDiagnostic(),
-      vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
+      vehicleRegistrationsRawUpdatesDlq.toDiagnostic(),
+      totalVehicleTimesDlq.toDiagnostic()
     ))
     ioDiagnostics.writeUnboundedDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 

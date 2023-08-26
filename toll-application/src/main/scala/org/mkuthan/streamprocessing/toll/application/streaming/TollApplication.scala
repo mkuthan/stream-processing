@@ -54,7 +54,7 @@ object TollApplication {
 
     // calculate tool booth stats
     val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
-    TollBoothStats
+    val tollBoothStatsDlq = TollBoothStats
       .encode(boothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
@@ -64,6 +64,7 @@ object TollApplication {
     val totalVehicleTimesDlq = TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
+   
     totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
       config.totalVehicleTimeDiagnosticTable
@@ -86,6 +87,7 @@ object TollApplication {
       boothEntriesRawDlq.toDiagnostic(),
       boothExitsRawDlq.toDiagnostic(),
       vehicleRegistrationsRawUpdatesDlq.toDiagnostic(),
+      tollBoothStatsDlq.toDiagnostic(),
       totalVehicleTimesDlq.toDiagnostic()
     ))
     ioDiagnostics.writeUnboundedDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)

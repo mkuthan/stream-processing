@@ -1,13 +1,16 @@
-package org.mkuthan.streamprocessing.shared.common
+package org.mkuthan.streamprocessing.infrastructure.diagnostic
 
 import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
 
-object Diagnostic {
+import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.common.SumByKey
 
-  def apply(createdAt: Instant, id: String, reason: String): Raw =
-    Raw(createdAt, id, reason, 1L)
+object IoDiagnostic {
+
+  def apply[T](createdAt: Instant, id: IoIdentifier[T], reason: String): Raw =
+    Raw(createdAt, id.id, reason, 1L)
 
   @BigQueryType.toTable
   case class Raw(created_at: Instant, id: String, reason: String, count: Long) {
@@ -20,7 +23,7 @@ object Diagnostic {
   object Raw {
     implicit val diagnostic: SumByKey[Raw] =
       SumByKey.create(
-        groupKeyFn = _.keyFields.mkString("|@|"),
+        keyFn = _.keyFields.mkString("|@|"),
         plusFn = (x, y) => x.copy(count = x.count + y.count)
       )
   }

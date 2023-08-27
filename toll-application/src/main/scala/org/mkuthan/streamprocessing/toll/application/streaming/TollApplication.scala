@@ -64,7 +64,7 @@ object TollApplication {
     val totalVehicleTimesDlq = TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
-   
+
     totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
       config.totalVehicleTimeDiagnosticTable

@@ -13,7 +13,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 import org.apache.beam.sdk.transforms.ParDo
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 
 private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
     private val self: SCollection[T]
@@ -65,9 +65,9 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
 private[bigquery] class SCollectionDeadLetterOps[T <: AnyRef: Coder](
     private val self: SCollection[BigQueryDeadLetter[T]]
 ) {
-  def toDiagnostic(): SCollection[Diagnostic.Raw] =
+  def toDiagnostic(): SCollection[IoDiagnostic.Raw] =
     self.withTimestamp.map { case (deadLetter, ts) =>
-      Diagnostic(ts, deadLetter.id.id, deadLetter.error)
+      IoDiagnostic(ts, deadLetter.id, deadLetter.error)
     }
 }
 

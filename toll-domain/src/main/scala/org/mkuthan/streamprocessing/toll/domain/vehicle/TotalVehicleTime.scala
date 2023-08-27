@@ -49,7 +49,7 @@ object TotalVehicleTime {
   object Diagnostic {
     implicit val diagnostic: SumByKey[Diagnostic] =
       SumByKey.create(
-        groupKeyFn = _.keyFields.mkString("|@|"),
+        keyFn = _.keyFields.mkString("|@|"),
         plusFn = (x, y) => x.copy(count = x.count + y.count)
       )
   }

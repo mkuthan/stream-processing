@@ -9,7 +9,7 @@ import org.apache.beam.sdk.io.gcp.pubsub.{PubsubMessage => BeamPubsubMessage}
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
@@ -42,9 +42,9 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
 private[pubsub] object SCollectionOps extends Utils with PubsubCoders
 
 private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val self: SCollection[PubsubDeadLetter[T]]) {
-  def toDiagnostic(): SCollection[Diagnostic.Raw] =
+  def toDiagnostic(): SCollection[IoDiagnostic.Raw] =
     self.withTimestamp.map { case (deadLetter, ts) =>
-      Diagnostic(ts, deadLetter.id.id, deadLetter.error)
+      IoDiagnostic(ts, deadLetter.id, deadLetter.error)
     }
 }
 

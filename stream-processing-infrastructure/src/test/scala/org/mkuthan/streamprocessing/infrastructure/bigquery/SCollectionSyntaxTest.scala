@@ -11,9 +11,9 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
@@ -159,9 +159,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   it should "map unbounded dead letter into diagnostic" in withScioContext { sc =>
     val instant = Instant.parse("2014-09-10T12:01:00.000Z")
+    val id1 = IoIdentifier[SampleClass]("id 1")
+    val id2 = IoIdentifier[SampleClass]("id 2")
+    val error = "any error"
 
-    val deadLetter1 = BigQueryDeadLetter(IoIdentifier[SampleClass]("id 1"), SampleObject1, "error 1")
-    val deadLetter2 = BigQueryDeadLetter(IoIdentifier[SampleClass]("id 2"), SampleObject2, "error 2")
+    val deadLetter1 = BigQueryDeadLetter(id1, SampleObject1, error)
+    val deadLetter2 = BigQueryDeadLetter(id2, SampleObject2, error)
 
     val deadLetters = testStreamOf[BigQueryDeadLetter[SampleClass]]
       .addElementsAtTime(instant.toString, deadLetter1, deadLetter2)
@@ -170,8 +173,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     val results = sc.testStream(deadLetters).toDiagnostic()
 
     results should containInAnyOrder(Seq(
-      Diagnostic(instant, "id 1", "error 1"),
-      Diagnostic(instant, "id 2", "error 2")
+      IoDiagnostic(instant, id1, error),
+      IoDiagnostic(instant, id2, error)
     ))
   }
 }

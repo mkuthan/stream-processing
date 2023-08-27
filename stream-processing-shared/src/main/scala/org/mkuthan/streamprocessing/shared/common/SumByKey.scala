@@ -11,9 +11,9 @@ trait SumByKey[T] extends Serializable {
 object SumByKey {
   def apply[T](implicit d: SumByKey[T]): SumByKey[T] = d
 
-  def create[T](groupKeyFn: T => String, plusFn: (T, T) => T): SumByKey[T] =
+  def create[T](keyFn: T => String, plusFn: (T, T) => T): SumByKey[T] =
     new SumByKey[T] {
-      override def key(input: T): String = groupKeyFn(input)
+      override def key(input: T): String = keyFn(input)
 
       override def semigroup: Semigroup[T] = (x: T, y: T) => {
         require(key(x) == key(y))

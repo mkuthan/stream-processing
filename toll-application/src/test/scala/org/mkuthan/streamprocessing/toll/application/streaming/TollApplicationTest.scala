@@ -32,12 +32,12 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
     JobTest[TollApplication.type]
       .args(
         "--entrySubscription=projects/any-id/subscriptions/entry-subscription",
-        "--entryDlq=gs://entry_dlq",
+        "--entryDlq=entry_dlq",
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
-        "--exitDlq=gs://exit_dlq",
+        "--exitDlq=exit_dlq",
         "--vehicleRegistrationSubscription=projects/any-id/subscriptions/vehicle-registration-subscription",
         "--vehicleRegistrationTable=toll.vehicle_registration",
-        "--vehicleRegistrationDlq=gs://vehicle_registration_dlq",
+        "--vehicleRegistrationDlq=vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
         "--totalVehicleTimeTable=toll.total_vehicle_time",
         "--totalVehicleTimeDiagnosticTable=toll.total_vehicle_time_diagnostic",

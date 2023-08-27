@@ -27,7 +27,7 @@ private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollect
     val io = FileIO.write[String]()
       .via(TextIO.sink())
       .pipe(write => storageConfiguration.configure(write))
-      .to(bucket.id)
+      .to(bucket.url)
 
     val _ = self
       .withName(s"$id/Serialize")

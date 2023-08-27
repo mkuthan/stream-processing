@@ -11,17 +11,23 @@ import org.apache.beam.sdk.io.TextIO
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
+import org.mkuthan.streamprocessing.infrastructure.storage.StorageConfiguration
+import org.mkuthan.streamprocessing.infrastructure.storage.Suffix
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
-
 private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def writeDeadLetterToStorageAsJson(
       id: IoIdentifier[T],
       bucket: StorageBucket[T],
       configuration: DlqConfiguration = DlqConfiguration()
   ): Unit = {
+    val storageConfiguration = StorageConfiguration()
+      .withPrefix(configuration.prefix)
+      .withSuffix(Suffix.Json)
+      .withNumShards(configuration.numShards)
+
     val io = FileIO.write[String]()
       .via(TextIO.sink())
-      .pipe(write => configuration.configure(write))
+      .pipe(write => storageConfiguration.configure(write))
       .to(bucket.id)
 
     val _ = self

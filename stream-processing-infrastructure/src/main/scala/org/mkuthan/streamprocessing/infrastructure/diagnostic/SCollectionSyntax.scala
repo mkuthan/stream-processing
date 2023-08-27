@@ -24,7 +24,6 @@ private[diagnostic] class SCollectionOps[T: Coder: TypeTag: SumByKey](
   private val bqType = BigQueryType[T]
 
   private val bqConfiguration = FileLoadsConfiguration()
-    .withWriteDisposition(WriteDisposition.Truncate)
 
   def writeUnboundedDiagnosticToBigQuery(
       id: IoIdentifier[T],

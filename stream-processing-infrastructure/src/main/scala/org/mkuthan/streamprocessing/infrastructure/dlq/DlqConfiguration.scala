@@ -10,6 +10,9 @@ import org.apache.beam.sdk.transforms.windowing.Window
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
+import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
+import org.mkuthan.streamprocessing.infrastructure.storage.Prefix
+
 case class DlqConfiguration(
     prefix: Prefix = Prefix.Empty,
     numShards: NumShards = NumShards.RunnerSpecific,
@@ -35,15 +38,6 @@ case class DlqConfiguration(
 
   def withAllowedLateness(duration: Duration): DlqConfiguration =
     copy(allowedLateness = duration)
-
-  def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
-    params.foldLeft(write)((write, param) => param.configure(write))
-
-  private lazy val params: Set[StorageWriteParam] = Set(
-    JsonSuffix,
-    prefix,
-    numShards
-  )
 }
 
 object DlqConfiguration {

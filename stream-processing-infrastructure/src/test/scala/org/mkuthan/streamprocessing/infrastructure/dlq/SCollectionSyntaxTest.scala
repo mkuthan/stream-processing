@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass

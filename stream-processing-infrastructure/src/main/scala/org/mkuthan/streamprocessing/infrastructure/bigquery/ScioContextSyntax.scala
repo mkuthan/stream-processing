@@ -1,6 +1,5 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-import scala.language.implicitConversions
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 import scala.util.chaining.scalaUtilChainingOps
@@ -55,5 +54,7 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
 }
 
 trait ScioContextSyntax {
+  import scala.language.implicitConversions
+
   implicit def bigQueryScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
 }

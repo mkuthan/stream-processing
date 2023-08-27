@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.shared.scio
 
-import scala.language.implicitConversions
-
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
@@ -45,6 +43,8 @@ private[scio] class SCollectionOps[T: Coder](private val self: SCollection[T]) {
 }
 
 trait SCollectionSyntax {
+  import scala.language.implicitConversions
+
   implicit def coreSCollectionOps[T: Coder](sc: SCollection[T]): SCollectionOps[T] =
     new SCollectionOps(sc)
 

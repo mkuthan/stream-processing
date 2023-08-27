@@ -24,7 +24,6 @@ private[diagnostic] class SCollectionOps[T: Coder: TypeTag: SumByKey](
   private val bqType = BigQueryType[T]
 
   private val bqConfiguration = FileLoadsConfiguration()
-    .withWriteDisposition(WriteDisposition.Truncate)
 
   def writeUnboundedDiagnosticToBigQuery(
       id: IoIdentifier[T],
@@ -74,7 +73,6 @@ private[diagnostic] class SCollectionOps[T: Coder: TypeTag: SumByKey](
 }
 
 trait SCollectionSyntax {
-
   import scala.language.implicitConversions
 
   implicit def diagnosticSCollectionOps[T: Coder: TypeTag: SumByKey](sc: SCollection[T]): SCollectionOps[T] =

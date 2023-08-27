@@ -8,7 +8,6 @@ import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
-import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
@@ -31,8 +30,6 @@ object JsonSerdeTest extends JodaTimeArbitrary {
       localDate: LocalDate,
       localTime: LocalTime
   )
-
-  implicit val sampleClassArbitrary = implicitly[Arbitrary[SampleClass]]
 }
 
 class JsonSerdeTest extends AnyFlatSpec

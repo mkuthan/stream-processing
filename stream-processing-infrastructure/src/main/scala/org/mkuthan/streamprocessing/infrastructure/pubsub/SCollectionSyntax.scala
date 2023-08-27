@@ -49,7 +49,6 @@ private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val s
 }
 
 trait SCollectionSyntax {
-
   import scala.language.implicitConversions
 
   implicit def pubsubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[Message[T]]): SCollectionOps[T] =

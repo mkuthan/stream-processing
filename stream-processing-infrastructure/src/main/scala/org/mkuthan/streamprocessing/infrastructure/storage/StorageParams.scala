@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.dlq
+package org.mkuthan.streamprocessing.infrastructure.storage
 
 import org.apache.beam.sdk.io.FileIO
 
@@ -43,7 +43,22 @@ object Prefix {
   }
 }
 
-case object JsonSuffix extends StorageWriteParam {
-  override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
-    write.withSuffix(".json")
+sealed trait Suffix extends StorageWriteParam
+
+object Suffix {
+  object Empty extends Suffix {
+    override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
+      write.withSuffix("")
+  }
+
+  case class Explicit(value: String) extends Suffix {
+    require(value.nonEmpty)
+    override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
+      write.withSuffix(value)
+  }
+
+  case object Json extends Suffix {
+    override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
+      write.withSuffix(".json")
+  }
 }

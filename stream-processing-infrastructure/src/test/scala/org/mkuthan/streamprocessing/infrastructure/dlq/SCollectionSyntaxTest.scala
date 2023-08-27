@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
@@ -40,7 +41,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .testStream(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
-          StorageBucket[SampleClass](s"gs://$bucket"),
+          StorageBucket[SampleClass](bucket),
           configuration
         )
 
@@ -48,10 +49,9 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
       val windowStart = "2014-09-10T12:00:00.000Z"
       val windowEnd = "2014-09-10T12:10:00.000Z"
-      val shard = "00000-of-00001"
 
       eventually {
-        val results = readObjectLines(bucket, fileName(windowStart, windowEnd, shard))
+        val results = readObjectLines(bucket, fileName(windowStart, windowEnd))
           .map(JsonSerde.readJsonFromString[SampleClass](_).get)
 
         results should contain.only(SampleObject1, SampleObject2)
@@ -59,7 +59,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "write on GCS as two JSON files if max records is reached" in withScioContext { sc =>
+  it should "write on GCS as two JSON files if dead letters overflows" in withScioContext { sc =>
     withBucket { bucket =>
       val sampleObjects = testStreamOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
@@ -70,7 +70,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .testStream(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
-          StorageBucket[SampleClass](s"gs://$bucket"),
+          StorageBucket[SampleClass](bucket),
           configuration.withMaxRecords(1)
         )
 
@@ -78,21 +78,20 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
       val windowStart = "2014-09-10T12:00:00.000Z"
       val windowEnd = "2014-09-10T12:10:00.000Z"
-      val shard = "00000-of-00001"
 
       eventually {
-        val first = readObjectLines(bucket, fileName(windowStart, windowEnd, shard, pane = "0"))
+        val first = readObjectLines(bucket, fileName(windowStart, windowEnd, pane = Some(0)))
           .map(JsonSerde.readJsonFromString[SampleClass](_).get)
-        val second = readObjectLines(bucket, fileName(windowStart, windowEnd, shard, pane = "1"))
+        val second = readObjectLines(bucket, fileName(windowStart, windowEnd, pane = Some(1)))
           .map(JsonSerde.readJsonFromString[SampleClass](_).get)
 
-        first should contain.only(SampleObject1)
-        second should contain.only(SampleObject2)
+        first should contain only SampleObject1
+        second should contain only SampleObject2
       }
     }
   }
 
-  ignore should "write on GCS as two JSON files if there are two windows" in withScioContext { sc =>
+  it should "write on GCS two JSON files if there are two windows" in withScioContext { sc =>
     withBucket { bucket =>
       val sampleObjects = testStreamOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
@@ -103,7 +102,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .testStream(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
-          StorageBucket[SampleClass](s"gs://$bucket")
+          StorageBucket[SampleClass](bucket),
+          configuration
         )
 
       sc.run().waitUntilDone()
@@ -112,23 +112,30 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       val firstWindowEnd = "2014-09-10T12:10:00.000Z"
       val secondWindowStart = "2014-09-10T12:10:00.000Z"
       val secondWindowEnd = "2014-09-10T12:20:00.000Z"
-      val shard = "00000-of-00001" // shard magic, the reason why the test is ignored
 
       eventually {
-        val first = readObjectLines(bucket, fileName(firstWindowStart, firstWindowEnd, shard))
+        val first = readObjectLines(bucket, fileName(firstWindowStart, firstWindowEnd))
           .map(JsonSerde.readJsonFromString[SampleClass](_).get)
-        val second = readObjectLines(bucket, fileName(secondWindowStart, secondWindowEnd, shard))
+        val second = readObjectLines(bucket, fileName(secondWindowStart, secondWindowEnd))
           .map(JsonSerde.readJsonFromString[SampleClass](_).get)
 
-        first should contain.only(SampleObject1)
-        second should contain.only(SampleObject2)
+        first should contain only SampleObject1
+        second should contain only SampleObject2
       }
     }
   }
 
-  def fileName(windowStart: String, windowEnd: String, shard: String): String =
-    s"$windowStart-$windowEnd-$shard.json"
-
-  def fileName(windowStart: String, windowEnd: String, shard: String, pane: String): String =
-    s"$windowStart-$windowEnd-$pane-$shard.json"
+  def fileName(
+      windowStart: String,
+      windowEnd: String,
+      shard: Int = 0,
+      numShards: Int = 1,
+      pane: Option[Int] = None
+  ): String = {
+    val shardFragment = "%05d-of-%05d".formatted(shard, numShards)
+    pane match {
+      case Some(paneFragment) => s"$windowStart-$windowEnd-$paneFragment-$shardFragment.json"
+      case None               => s"$windowStart-$windowEnd-$shardFragment.json"
+    }
+  }
 }

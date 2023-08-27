@@ -73,7 +73,6 @@ private[diagnostic] class SCollectionOps[T: Coder: TypeTag: SumByKey](
 }
 
 trait SCollectionSyntax {
-
   import scala.language.implicitConversions
 
   implicit def diagnosticSCollectionOps[T: Coder: TypeTag: SumByKey](sc: SCollection[T]): SCollectionOps[T] =

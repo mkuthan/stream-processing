@@ -1,6 +1,5 @@
 package org.mkuthan.streamprocessing.infrastructure.dlq
 
-import scala.language.implicitConversions
 import scala.util.chaining._
 
 import com.spotify.scio.coders.Coder
@@ -40,6 +39,8 @@ private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollect
 }
 
 trait SCollectionSyntax {
+  import scala.language.implicitConversions
+
   implicit def dlqSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
     new SCollectionOps(sc)
 }

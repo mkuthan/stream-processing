@@ -75,7 +75,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
 
     results should beEmpty
 
-    diagnostics.values.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    diagnostics.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
         "2014-09-10T12:04:59.999Z",
         vehicleWithNotExpiredRegistrationDiagnostic.copy(created_at = Instant.parse("2014-09-10T12:04:59.999Z"))
@@ -101,7 +101,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
 
     results should beEmpty
 
-    diagnostics.values.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    diagnostics.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
         "2014-09-10T12:04:59.999Z",
         vehicleWithMissingRegistrationDiagnostic.copy(created_at = Instant.parse("2014-09-10T12:04:59.999Z"))

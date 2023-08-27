@@ -5,7 +5,6 @@ import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
 
-import com.twitter.algebird.Semigroup
 import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
 import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
@@ -13,6 +12,7 @@ import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.common.Message
+import org.mkuthan.streamprocessing.shared.common.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -37,8 +37,6 @@ object VehiclesWithExpiredRegistration {
       vehicle_registration_id: String
   )
 
-  type DiagnosticKey = String
-
   @BigQueryType.toTable
   case class Diagnostic(
       created_at: Instant,
@@ -46,21 +44,25 @@ object VehiclesWithExpiredRegistration {
       reason: String,
       count: Long = 1L
   ) {
-    lazy val key: DiagnosticKey = toll_booth_id + reason
+    private lazy val keyFields = this match {
+      case Diagnostic(created_at, toll_booth_id, reason, count @ _) =>
+        Seq(created_at, toll_booth_id, reason)
+    }
   }
 
-  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
-    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
-      require(x.key == y.key)
-      Diagnostic(x.created_at, x.toll_booth_id, x.reason, x.count + y.count)
-    }
+  object Diagnostic {
+    implicit val diagnostic: SumByKey[Diagnostic] =
+      SumByKey.create(
+        keyFn = _.keyFields.mkString("|@|"),
+        plusFn = (x, y) => x.copy(count = x.count + y.count)
+      )
   }
 
   def calculateInFixedWindow(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistrations: SCollection[VehicleRegistration],
       duration: Duration
-  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[(DiagnosticKey, Diagnostic)]) = {
+  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[Diagnostic]) = {
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
       .withFixedWindows(duration)
@@ -96,7 +98,7 @@ object VehiclesWithExpiredRegistration {
           None
       }
 
-    (results, sideOutputs(diagnostic).keyBy(_.key))
+    (results, sideOutputs(diagnostic))
   }
 
   def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Raw]] =

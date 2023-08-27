@@ -4,10 +4,10 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 
-import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.common.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -33,8 +33,6 @@ object TotalVehicleTime {
       duration_seconds: Long
   )
 
-  type DiagnosticKey = String
-
   @BigQueryType.toTable
   case class Diagnostic(
       created_at: Instant,
@@ -42,21 +40,25 @@ object TotalVehicleTime {
       reason: String,
       count: Long = 1L
   ) {
-    lazy val key: String = toll_both_id + reason
+    private lazy val keyFields = this match {
+      case Diagnostic(created_at, toll_booth_id, reason, count @ _) =>
+        Seq(created_at, toll_booth_id, reason)
+    }
   }
 
-  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
-    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
-      require(x.key == y.key)
-      Diagnostic(x.created_at, x.toll_both_id, x.reason, x.count + y.count)
-    }
+  object Diagnostic {
+    implicit val diagnostic: SumByKey[Diagnostic] =
+      SumByKey.create(
+        keyFn = _.keyFields.mkString("|@|"),
+        plusFn = (x, y) => x.copy(count = x.count + y.count)
+      )
   }
 
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalVehicleTime], SCollection[(DiagnosticKey, Diagnostic)]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[Diagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -77,7 +79,7 @@ object TotalVehicleTime {
           ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
           None
       }
-    (results, sideOutputs(diagnostic).keyBy(_.key))
+    (results, sideOutputs(diagnostic))
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =

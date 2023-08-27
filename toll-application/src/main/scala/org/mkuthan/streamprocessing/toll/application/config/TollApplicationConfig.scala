@@ -3,10 +3,10 @@ package org.mkuthan.streamprocessing.toll.application.config
 import com.spotify.scio.Args
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -27,7 +27,7 @@ case class TollApplicationConfig(
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic],
-    diagnosticTable: BigQueryTable[Diagnostic.Diagnostic]
+    diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
 )
 
 object TollApplicationConfig {

@@ -2,7 +2,6 @@ package org.mkuthan.streamprocessing.infrastructure.diagnostic
 
 import com.spotify.scio.values.WindowOptions
 
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 import org.apache.beam.sdk.transforms.windowing.AfterFirst
 import org.apache.beam.sdk.transforms.windowing.AfterPane
 import org.apache.beam.sdk.transforms.windowing.AfterWatermark
@@ -28,15 +27,6 @@ case class DiagnosticConfiguration(
 
   def withAllowedLateness(allowedLateness: Duration): DiagnosticConfiguration =
     copy(allowedLateness = allowedLateness)
-
-  def configure[T](write: Write[T]): Write[T] =
-    ioParams.foldLeft(write)((write, param) => param.configure(write))
-
-  private lazy val ioParams: Set[BigQueryWriteParam] = Set(
-    StorageWriteAtLeastOnceMethod,
-    CreateDispositionNever,
-    WriteDispositionAppend
-  )
 }
 
 object DiagnosticConfiguration {

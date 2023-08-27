@@ -5,7 +5,6 @@ import com.spotify.scio.ContextAndArgs
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
-import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -55,17 +54,18 @@ object TollApplication {
 
     // calculate tool booth stats
     val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
-    TollBoothStats
+    val tollBoothStatsDlq = TollBoothStats
       .encode(boothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
       TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
-    TotalVehicleTime
+    val totalVehicleTimesDlq = TotalVehicleTime
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
-    totalVehicleTimesDiagnostic.writeDiagnosticToBigQuery(
+
+    totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
       config.totalVehicleTimeDiagnosticTable
     )
@@ -77,19 +77,20 @@ object TollApplication {
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    vehiclesWithExpiredRegistrationDiagnostic.writeDiagnosticToBigQuery(
+    vehiclesWithExpiredRegistrationDiagnostic.writeUnboundedDiagnosticToBigQuery(
       VehiclesWithExpiredRegistrationDiagnosticTableIoId,
       config.vehiclesWithExpiredRegistrationDiagnosticTable
     )
 
     // dead letters diagnostic
-    Diagnostic
-      .unionAll(
-        boothEntriesRawDlq.toDiagnostic(),
-        boothExitsRawDlq.toDiagnostic(),
-        vehicleRegistrationsRawUpdatesDlq.toDiagnostic()
-      )
-      .writeDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+    val ioDiagnostics = sc.unionAll(Seq(
+      boothEntriesRawDlq.toDiagnostic(),
+      boothExitsRawDlq.toDiagnostic(),
+      vehicleRegistrationsRawUpdatesDlq.toDiagnostic(),
+      tollBoothStatsDlq.toDiagnostic(),
+      totalVehicleTimesDlq.toDiagnostic()
+    ))
+    ioDiagnostics.writeUnboundedDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

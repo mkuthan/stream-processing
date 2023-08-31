@@ -7,29 +7,20 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
-class SCollectionSyntaxTest extends AnyFlatSpec
+class SContextSyntaxTest extends AnyFlatSpec
     with Matchers
     with TestScioContext
     with SCollectionMatchers
-    with SCollectionSyntax {
+    with ScioContextSyntax {
 
-  behavior of "SCollection syntax"
-
-  it should "unzip Either" in runWithScioContext { sc =>
-    val (right, left) = sc
-      .parallelize[Either[String, String]](Seq(Right("r1"), Left("l1"), Right("r2"), Left("l2"), Right("r3")))
-      .unzip
-
-    right should containInAnyOrder(Seq("r1", "r2", "r3"))
-    left should containInAnyOrder(Seq("l1", "l2"))
-  }
+  behavior of "SContext syntax"
 
   it should "union in global window" in runWithScioContext { sc =>
     val collection1 = sc.parallelize(Seq("one")).withGlobalWindow()
     val collection2 = sc.parallelize(Seq("two", "three")).windowByDays(1)
     val collection3 = sc.parallelize(Seq[String]()).windowByMonths(1)
 
-    val results = collection1.unionInGlobalWindow(collection2, collection3)
+    val results = sc.unionInGlobalWindow(collection1, collection2, collection3)
     results should containInAnyOrder(Seq("one", "two", "three"))
   }
 }

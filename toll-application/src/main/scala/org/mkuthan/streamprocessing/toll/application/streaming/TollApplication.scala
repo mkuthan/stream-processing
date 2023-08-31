@@ -1,11 +1,10 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.ContextAndArgs
-
 import org.joda.time.Duration
-
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
+import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -88,13 +87,13 @@ object TollApplication {
     )
 
     // dead letters diagnostic
-    val ioDiagnostics = sc.unionAll(Seq(
+    val ioDiagnostics = sc.unionInGlobalWindow(
       boothEntriesRawDlq.toDiagnostic(),
       boothExitsRawDlq.toDiagnostic(),
       vehicleRegistrationsRawUpdatesDlq.toDiagnostic(),
       tollBoothStatsDlq.toDiagnostic(),
       totalVehicleTimesDlq.toDiagnostic()
-    ))
+    )
 
     ioDiagnostics.writeUnboundedDiagnosticToBigQuery(
       DiagnosticTableIoId,

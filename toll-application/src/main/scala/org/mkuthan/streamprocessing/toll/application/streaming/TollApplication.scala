@@ -1,7 +1,9 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.ContextAndArgs
+
 import org.joda.time.Duration
+
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.shared._

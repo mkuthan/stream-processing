@@ -5,6 +5,7 @@ import com.spotify.scio.ContextAndArgs
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -12,7 +13,9 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 object TollApplication {
 
@@ -67,7 +70,8 @@ object TollApplication {
 
     totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
       TotalVehicleTimeDiagnosticTableIoId,
-      config.totalVehicleTimeDiagnosticTable
+      config.totalVehicleTimeDiagnosticTable,
+      TotalVehicleTimeDiagnostic.toRaw
     )
 
     // calculate vehicles with expired registrations
@@ -79,7 +83,8 @@ object TollApplication {
 
     vehiclesWithExpiredRegistrationDiagnostic.writeUnboundedDiagnosticToBigQuery(
       VehiclesWithExpiredRegistrationDiagnosticTableIoId,
-      config.vehiclesWithExpiredRegistrationDiagnosticTable
+      config.vehiclesWithExpiredRegistrationDiagnosticTable,
+      VehiclesWithExpiredRegistrationDiagnostic.toRaw
     )
 
     // dead letters diagnostic
@@ -90,7 +95,12 @@ object TollApplication {
       tollBoothStatsDlq.toDiagnostic(),
       totalVehicleTimesDlq.toDiagnostic()
     ))
-    ioDiagnostics.writeUnboundedDiagnosticToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+
+    ioDiagnostics.writeUnboundedDiagnosticToBigQuery(
+      DiagnosticTableIoId,
+      config.diagnosticTable,
+      IoDiagnostic.toRaw
+    )
 
     val _ = sc.run()
   }

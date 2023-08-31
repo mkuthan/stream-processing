@@ -27,8 +27,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   val sampleDiagnosticType = BigQueryType[IoDiagnostic.Raw]
 
   val anyDiagnostic = IoDiagnostic(
-    createdAt = Instant.parse("2014-09-10T12:03:01Z"),
-    id = IoIdentifier[IoDiagnostic.Raw]("any-id"),
+    id = "any-id",
     reason = "any reason"
   )
 
@@ -40,15 +39,16 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   it should "write unbounded into BigQuery" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, sampleDiagnosticType.schema) { tableName =>
-        val sampleDiagnostics = testStreamOf[IoDiagnostic.Raw]
+        val sampleDiagnostics = testStreamOf[IoDiagnostic]
           .addElements(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2)
           .advanceWatermarkToInfinity()
 
         sc
           .testStream(sampleDiagnostics)
           .writeUnboundedDiagnosticToBigQuery(
-            IoIdentifier[IoDiagnostic.Raw]("any-id"),
-            BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName")
+            IoIdentifier[IoDiagnostic]("any-id"),
+            BigQueryTable[IoDiagnostic](s"$projectId:$datasetName.$tableName"),
+            IoDiagnostic.toRaw
           )
 
         val run = sc.run()
@@ -75,8 +75,9 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .parallelize(Seq(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2))
           .writeBoundedDiagnosticToBigQuery(
-            IoIdentifier[IoDiagnostic.Raw]("any-id"),
-            BigQueryPartition.hourly[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName", localDateTime)
+            IoIdentifier[IoDiagnostic]("any-id"),
+            BigQueryPartition.hourly[IoDiagnostic](s"$projectId:$datasetName.$tableName", localDateTime),
+            IoDiagnostic.toRaw
           )
 
         val run = sc.run()

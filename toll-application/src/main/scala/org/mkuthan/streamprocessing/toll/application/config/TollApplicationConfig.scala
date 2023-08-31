@@ -12,7 +12,9 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 case class TollApplicationConfig(
     entrySubscription: PubsubSubscription[TollBoothEntry.Raw],
@@ -24,10 +26,10 @@ case class TollApplicationConfig(
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterRaw],
     entryStatsTable: BigQueryTable[TollBoothStats.Raw],
     totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Raw],
-    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTime.Diagnostic],
+    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
-    vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistration.Diagnostic],
-    diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
+    vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic],
+    diagnosticTable: BigQueryTable[IoDiagnostic]
 )
 
 object TollApplicationConfig {

@@ -7,7 +7,6 @@ import com.spotify.scio.values.SideOutput
 import org.joda.time.Duration
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.shared.common.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -33,32 +32,11 @@ object TotalVehicleTime {
       duration_seconds: Long
   )
 
-  @BigQueryType.toTable
-  case class Diagnostic(
-      created_at: Instant,
-      toll_both_id: String,
-      reason: String,
-      count: Long = 1L
-  ) {
-    private lazy val keyFields = this match {
-      case Diagnostic(created_at, toll_booth_id, reason, count @ _) =>
-        Seq(created_at, toll_booth_id, reason)
-    }
-  }
-
-  object Diagnostic {
-    implicit val diagnostic: SumByKey[Diagnostic] =
-      SumByKey.create(
-        keyFn = _.keyFields.mkString("|@|"),
-        plusFn = (x, y) => x.copy(count = x.count + y.count)
-      )
-  }
-
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalVehicleTime], SCollection[Diagnostic]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -66,7 +44,7 @@ object TotalVehicleTime {
       .keyBy(exit => (exit.id, exit.licensePlate))
       .withSessionWindows(gapDuration)
 
-    val diagnostic = SideOutput[Diagnostic]()
+    val diagnostic = SideOutput[TotalVehicleTimeDiagnostic]()
     val (results, sideOutputs) = boothEntriesById
       .leftOuterJoin(boothExistsById)
       .values
@@ -76,7 +54,7 @@ object TotalVehicleTime {
           Some(toTotalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
           val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
+          ctx.output(diagnostic, TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
           None
       }
     (results, sideOutputs(diagnostic))
@@ -104,11 +82,4 @@ object TotalVehicleTime {
       duration = Duration.millis(diff)
     )
   }
-
-  private def toDiagnostic(boothEntry: TollBoothEntry, reason: String): Diagnostic =
-    Diagnostic(
-      created_at = boothEntry.entryTime,
-      toll_both_id = boothEntry.id.id,
-      reason = reason
-    )
 }

@@ -65,13 +65,12 @@ private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: Type
 private[bigquery] class SCollectionDeadLetterOps[T <: AnyRef: Coder](
     private val self: SCollection[BigQueryDeadLetter[T]]
 ) {
-  def toDiagnostic(): SCollection[IoDiagnostic.Raw] =
-    self.withTimestamp.map { case (deadLetter, ts) =>
-      IoDiagnostic(ts, deadLetter.id, deadLetter.error)
-    }
+  def toDiagnostic(): SCollection[IoDiagnostic] =
+    self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
 }
 
 trait SCollectionSyntax {
+
   import scala.language.implicitConversions
 
   implicit def bigQuerySCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](

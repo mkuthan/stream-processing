@@ -73,8 +73,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     val results = sc.testStream(deadLetters).toDiagnostic()
 
     results should containInAnyOrder(Seq(
-      IoDiagnostic(instant, id1, error),
-      IoDiagnostic(instant, id2, error)
+      IoDiagnostic(id1.id, error),
+      IoDiagnostic(id2.id, error)
     ))
   }
 }

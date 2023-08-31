@@ -158,7 +158,6 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   }
 
   it should "map unbounded dead letter into diagnostic" in withScioContext { sc =>
-    val instant = Instant.parse("2014-09-10T12:01:00.000Z")
     val id1 = IoIdentifier[SampleClass]("id 1")
     val id2 = IoIdentifier[SampleClass]("id 2")
     val error = "any error"
@@ -167,14 +166,14 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     val deadLetter2 = BigQueryDeadLetter(id2, SampleObject2, error)
 
     val deadLetters = testStreamOf[BigQueryDeadLetter[SampleClass]]
-      .addElementsAtTime(instant.toString, deadLetter1, deadLetter2)
+      .addElements(deadLetter1, deadLetter2)
       .advanceWatermarkToInfinity()
 
     val results = sc.testStream(deadLetters).toDiagnostic()
 
     results should containInAnyOrder(Seq(
-      IoDiagnostic(instant, id1, error),
-      IoDiagnostic(instant, id2, error)
+      IoDiagnostic(id1.id, error),
+      IoDiagnostic(id2.id, error)
     ))
   }
 }

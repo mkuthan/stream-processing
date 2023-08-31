@@ -4,27 +4,30 @@ import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.common.SumByKey
 
+case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
+  private lazy val keyFields = this match {
+    case IoDiagnostic(id, reason, count @ _) =>
+      Seq(id, reason)
+  }
+}
+
 object IoDiagnostic {
-
-  def apply[T](createdAt: Instant, id: IoIdentifier[T], reason: String): Raw =
-    Raw(createdAt, id.id, reason, 1L)
-
   @BigQueryType.toTable
-  case class Raw(created_at: Instant, id: String, reason: String, count: Long) {
-    private lazy val keyFields = this match {
-      case Raw(created_at, id, reason, count @ _) =>
-        Seq(created_at, id, reason)
-    }
-  }
+  case class Raw(created_at: Instant, id: String, reason: String, count: Long)
 
-  object Raw {
-    implicit val diagnostic: SumByKey[Raw] =
-      SumByKey.create(
-        keyFn = _.keyFields.mkString("|@|"),
-        plusFn = (x, y) => x.copy(count = x.count + y.count)
-      )
-  }
+  implicit val sumByKey: SumByKey[IoDiagnostic] =
+    SumByKey.create(
+      keyFn = _.keyFields.mkString("|@|"),
+      plusFn = (x, y) => x.copy(count = x.count + y.count)
+    )
+
+  def toRaw[T](diagnostic: IoDiagnostic, createdAt: Instant): Raw =
+    Raw(
+      created_at = createdAt,
+      id = diagnostic.id,
+      reason = diagnostic.reason,
+      count = diagnostic.count
+    )
 }

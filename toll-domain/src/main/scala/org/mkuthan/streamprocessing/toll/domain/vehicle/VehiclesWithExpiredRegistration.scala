@@ -12,7 +12,6 @@ import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.shared.common.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -37,32 +36,11 @@ object VehiclesWithExpiredRegistration {
       vehicle_registration_id: String
   )
 
-  @BigQueryType.toTable
-  case class Diagnostic(
-      created_at: Instant,
-      toll_booth_id: String,
-      reason: String,
-      count: Long = 1L
-  ) {
-    private lazy val keyFields = this match {
-      case Diagnostic(created_at, toll_booth_id, reason, count @ _) =>
-        Seq(created_at, toll_booth_id, reason)
-    }
-  }
-
-  object Diagnostic {
-    implicit val diagnostic: SumByKey[Diagnostic] =
-      SumByKey.create(
-        keyFn = _.keyFields.mkString("|@|"),
-        plusFn = (x, y) => x.copy(count = x.count + y.count)
-      )
-  }
-
   def calculateInFixedWindow(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistrations: SCollection[VehicleRegistration],
       duration: Duration
-  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[Diagnostic]) = {
+  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[VehiclesWithExpiredRegistrationDiagnostic]) = {
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
       .withFixedWindows(duration)
@@ -76,7 +54,7 @@ object VehiclesWithExpiredRegistration {
       .keyBy(_.licensePlate)
       .withGlobalWindow(sideInputWindowOptions)
 
-    val diagnostic = SideOutput[Diagnostic]()
+    val diagnostic = SideOutput[VehiclesWithExpiredRegistrationDiagnostic]()
 
     val (results, sideOutputs) = boothEntriesByLicensePlate
       .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
@@ -87,14 +65,12 @@ object VehiclesWithExpiredRegistration {
         case ((boothEntry, Some(vehicleRegistration)), _) if vehicleRegistration.expired =>
           Some(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
         case ((boothEntry, Some(vehicleRegistration)), ctx) if !vehicleRegistration.expired =>
-          val createdAt = ctx.context.timestamp()
           val diagnosticReason = "Vehicle registration is not expired"
-          ctx.output(diagnostic, toDiagnostic(createdAt, boothEntry, diagnosticReason))
+          ctx.output(diagnostic, VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
           None
         case ((boothEntry, None), ctx) =>
-          val createdAt = ctx.context.timestamp()
           val diagnosticReason = "Missing vehicle registration"
-          ctx.output(diagnostic, toDiagnostic(createdAt, boothEntry, diagnosticReason))
+          ctx.output(diagnostic, VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
           None
       }
 
@@ -122,12 +98,5 @@ object VehiclesWithExpiredRegistration {
       entryTime = boothEntry.entryTime,
       licensePlate = boothEntry.licensePlate,
       vehicleRegistrationId = vehicleRegistration.id
-    )
-
-  private def toDiagnostic(createdAt: Instant, boothEntry: TollBoothEntry, reason: String): Diagnostic =
-    Diagnostic(
-      created_at = createdAt,
-      toll_booth_id = boothEntry.id.id,
-      reason = reason
     )
 }

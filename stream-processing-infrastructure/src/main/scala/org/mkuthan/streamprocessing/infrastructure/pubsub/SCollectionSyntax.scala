@@ -42,13 +42,12 @@ private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SColl
 private[pubsub] object SCollectionOps extends Utils with PubsubCoders
 
 private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val self: SCollection[PubsubDeadLetter[T]]) {
-  def toDiagnostic(): SCollection[IoDiagnostic.Raw] =
-    self.withTimestamp.map { case (deadLetter, ts) =>
-      IoDiagnostic(ts, deadLetter.id, deadLetter.error)
-    }
+  def toDiagnostic(): SCollection[IoDiagnostic] =
+    self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
 }
 
 trait SCollectionSyntax {
+
   import scala.language.implicitConversions
 
   implicit def pubsubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[Message[T]]): SCollectionOps[T] =

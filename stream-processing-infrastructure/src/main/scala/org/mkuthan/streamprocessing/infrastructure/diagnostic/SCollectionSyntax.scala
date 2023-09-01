@@ -2,21 +2,16 @@ package org.mkuthan.streamprocessing.infrastructure.diagnostic
 
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
-import scala.util.chaining.scalaUtilChainingOps
 
-import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
-import com.google.api.services.bigquery.model.TableRow
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
-import org.mkuthan.streamprocessing.infrastructure.bigquery.FileLoadsConfiguration
-import org.mkuthan.streamprocessing.infrastructure.bigquery.WriteDisposition
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.common.SumByKey
 
@@ -24,46 +19,37 @@ private[diagnostic] class SCollectionOps[D: Coder: SumByKey](
     private val self: SCollection[D]
 ) {
 
-  private val bqConfiguration = FileLoadsConfiguration()
+  import SCollectionOps._
+
+  import org.mkuthan.streamprocessing.infrastructure.bigQuerySCollectionOps
 
   def writeUnboundedDiagnosticToBigQuery[R <: HasAnnotation: Coder: ClassTag: TypeTag](
-      id: IoIdentifier[D],
-      table: BigQueryTable[D],
+      id: IoIdentifier[R],
+      table: BigQueryTable[R],
       toBigQueryTypeFn: (D, Instant) => R,
       configuration: DiagnosticConfiguration = DiagnosticConfiguration()
-  ): Unit = {
-    val io = BigQueryIO
-      .writeTableRows()
-      .withTriggeringFrequency(configuration.windowDuration)
-      .pipe(write => bqConfiguration.withWriteDisposition(WriteDisposition.Append).configure(write))
-      .to(table.id)
-
-    writeDiagnosticToBigQuery(id, toBigQueryTypeFn, configuration, io)
-  }
+  ): SCollection[BigQueryDeadLetter[R]] =
+    prepare(self, id, toBigQueryTypeFn, configuration)
+      .writeUnboundedToBigQuery(id, table)
 
   def writeBoundedDiagnosticToBigQuery[R <: HasAnnotation: Coder: ClassTag: TypeTag](
-      id: IoIdentifier[D],
-      partition: BigQueryPartition[D],
+      id: IoIdentifier[R],
+      partition: BigQueryPartition[R],
       toBigQueryTypeFn: (D, Instant) => R,
       configuration: DiagnosticConfiguration = DiagnosticConfiguration()
-  ): Unit = {
-    val io = BigQueryIO
-      .writeTableRows()
-      .pipe(write => bqConfiguration.withWriteDisposition(WriteDisposition.Truncate).configure(write))
-      .to(partition.id)
+  ): Unit =
+    prepare(self, id, toBigQueryTypeFn, configuration)
+      .writeBoundedToBigQuery(id, partition)
+}
 
-    writeDiagnosticToBigQuery(id, toBigQueryTypeFn, configuration, io)
-  }
-
-  private def writeDiagnosticToBigQuery[R <: HasAnnotation: Coder: ClassTag: TypeTag](
-      id: IoIdentifier[D],
+private[diagnostic] object SCollectionOps {
+  private def prepare[D: Coder: SumByKey, R <: HasAnnotation: Coder: ClassTag: TypeTag](
+      input: SCollection[D],
+      id: IoIdentifier[R],
       toBigQueryTypeFn: (D, Instant) => R,
-      configuration: DiagnosticConfiguration,
-      io: BigQueryIO.Write[TableRow]
-  ): Unit = {
-    val bqType = BigQueryType[R]
-
-    val _ = self
+      configuration: DiagnosticConfiguration
+  ): SCollection[R] =
+    input
       .transform(s"$id/Aggregate") { in =>
         in
           .keyBy(SumByKey[D].key)
@@ -71,14 +57,11 @@ private[diagnostic] class SCollectionOps[D: Coder: SumByKey](
           .sumByKey(SumByKey[D].semigroup)
           .values
       }
-      .transform(s"$id/Serialize") { in =>
+      .transform(s"$id/Convert") { in =>
         in
           .withTimestamp
           .map { case (diagnostic, timestamp) => toBigQueryTypeFn(diagnostic, timestamp) }
-          .map(bqType.toTableRow)
       }
-      .saveAsCustomOutput(id.id, io)
-  }
 }
 
 trait SCollectionSyntax {

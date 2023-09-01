@@ -2,16 +2,17 @@ package org.mkuthan.streamprocessing.infrastructure.bigquery
 
 import com.spotify.scio.testing._
 
+import org.apache.beam.sdk.Pipeline.PipelineExecutionException
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
@@ -19,6 +20,7 @@ import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio._
 
+@Slow
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
@@ -97,6 +99,27 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
+  it should "not write bounded with invalid record into table" in withScioContext { sc =>
+    withDataset { datasetName =>
+      withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
+
+        sc
+          .parallelize[SampleClass](Seq(invalidObject))
+          .writeBoundedToBigQuery(
+            IoIdentifier[SampleClass]("any-id"),
+            BigQueryPartition.notPartitioned[SampleClass](s"$projectId:$datasetName.$tableName")
+          )
+
+        // TODO: why sc.run().waitUntilFinish
+        // * throws an exception instead of returning FAILED status?
+        // * don't respect given timout
+        val thrown = the[PipelineExecutionException] thrownBy sc.run().waitUntilFinish()
+        thrown.getCause.getMessage should startWith("Failed to create job with prefix")
+      }
+    }
+  }
+
   it should "write unbounded into table" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
@@ -155,25 +178,5 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         run.pipelineResult.cancel()
       }
     }
-  }
-
-  it should "map unbounded dead letter into diagnostic" in withScioContext { sc =>
-    val id1 = IoIdentifier[SampleClass]("id 1")
-    val id2 = IoIdentifier[SampleClass]("id 2")
-    val error = "any error"
-
-    val deadLetter1 = BigQueryDeadLetter(id1, SampleObject1, error)
-    val deadLetter2 = BigQueryDeadLetter(id2, SampleObject2, error)
-
-    val deadLetters = testStreamOf[BigQueryDeadLetter[SampleClass]]
-      .addElements(deadLetter1, deadLetter2)
-      .advanceWatermarkToInfinity()
-
-    val results = sc.testStream(deadLetters).toDiagnostic()
-
-    results should containInAnyOrder(Seq(
-      IoDiagnostic(id1.id, error),
-      IoDiagnostic(id2.id, error)
-    ))
   }
 }

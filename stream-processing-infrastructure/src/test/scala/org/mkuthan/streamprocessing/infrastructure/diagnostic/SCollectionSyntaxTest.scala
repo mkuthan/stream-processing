@@ -8,17 +8,18 @@ import org.joda.time.LocalDateTime
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio._
 
+@Slow
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
@@ -48,8 +49,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .testStream(sampleDiagnostics)
           .writeUnboundedDiagnosticToBigQuery(
-            IoIdentifier[IoDiagnostic]("any-id"),
-            BigQueryTable[IoDiagnostic](s"$projectId:$datasetName.$tableName"),
+            IoIdentifier[IoDiagnostic.Raw]("any-id"),
+            BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName"),
             IoDiagnostic.toRaw
           )
 
@@ -80,8 +81,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         sc
           .parallelize(Seq(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2))
           .writeBoundedDiagnosticToBigQuery(
-            IoIdentifier[IoDiagnostic]("any-id"),
-            BigQueryPartition.hourly[IoDiagnostic](s"$projectId:$datasetName.$tableName", localDateTime),
+            IoIdentifier[IoDiagnostic.Raw]("any-id"),
+            BigQueryPartition.hourly[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName", localDateTime),
             IoDiagnostic.toRaw
           )
 

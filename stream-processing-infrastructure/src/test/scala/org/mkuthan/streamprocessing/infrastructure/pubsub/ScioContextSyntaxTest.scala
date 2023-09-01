@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.tags.Slow
 import org.scalatest.LoneElement._
 
 import org.mkuthan.streamprocessing.infrastructure._
@@ -18,6 +19,7 @@ import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
+@Slow
 class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext

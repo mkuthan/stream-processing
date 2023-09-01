@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.infrastructure.bigquery
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
@@ -13,6 +14,7 @@ import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
+@Slow
 class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext

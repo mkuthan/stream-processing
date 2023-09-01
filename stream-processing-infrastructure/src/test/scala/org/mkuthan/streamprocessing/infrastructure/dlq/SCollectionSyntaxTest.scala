@@ -5,6 +5,7 @@ import com.spotify.scio.testing._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
@@ -19,6 +20,7 @@ import org.mkuthan.streamprocessing.test.gcp.StorageContext
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
+@Slow
 class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext

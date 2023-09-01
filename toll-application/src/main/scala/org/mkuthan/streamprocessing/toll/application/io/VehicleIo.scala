@@ -10,14 +10,14 @@ trait VehicleIo {
   val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Raw] =
     IoIdentifier[VehiclesWithExpiredRegistration.Raw]("vehicles-with-expired-registration-topic-id")
 
-  val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic] =
-    IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic](
+  val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Raw] =
+    IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Raw](
       "toll.vehicles-with-expired-registration-diagnostic-table-id"
     )
 
   val TotalVehicleTimeTableIoId: IoIdentifier[TotalVehicleTime.Raw] =
     IoIdentifier[TotalVehicleTime.Raw]("total-vehicle-time-table-id")
 
-  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic] =
-    IoIdentifier[TotalVehicleTimeDiagnostic]("total-vehicle-time-diagnostic-table-id")
+  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Raw] =
+    IoIdentifier[TotalVehicleTimeDiagnostic.Raw]("total-vehicle-time-diagnostic-table-id")
 }

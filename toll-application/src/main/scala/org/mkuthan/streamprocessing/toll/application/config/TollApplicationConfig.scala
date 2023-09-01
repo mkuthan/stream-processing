@@ -26,10 +26,10 @@ case class TollApplicationConfig(
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterRaw],
     entryStatsTable: BigQueryTable[TollBoothStats.Raw],
     totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Raw],
-    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic],
+    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic.Raw],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Raw],
-    vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic],
-    diagnosticTable: BigQueryTable[IoDiagnostic]
+    vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic.Raw],
+    diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
 )
 
 object TollApplicationConfig {

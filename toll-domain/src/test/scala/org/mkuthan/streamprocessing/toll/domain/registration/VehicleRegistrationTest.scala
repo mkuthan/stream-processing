@@ -1,13 +1,10 @@
 package org.mkuthan.streamprocessing.toll.domain.registration
 
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.TestStreamScioContext
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.test.scio.TestScioContext
+import org.mkuthan.streamprocessing.test.scio._
 
 class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     with TestScioContext
@@ -18,11 +15,11 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
   behavior of "VehicleRegistration"
 
   it should "decode valid VehicleRegistration into raw" in runWithScioContext { sc =>
-    val inputs = testStreamOf[VehicleRegistration.Raw]
-      .addElements(anyVehicleRegistrationRaw)
+    val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
+      .addElementsAtMinimumTime(anyVehicleRegistrationRaw)
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.testStream(inputs))
+    val (results, dlq) = decode(sc.test(inputs))
 
     results should containSingleValue(anyVehicleRegistration)
     dlq should beEmpty
@@ -30,11 +27,11 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "put invalid VehicleRegistration into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = testStreamOf[VehicleRegistration.Raw]
-        .addElements(vehicleRegistrationRawInvalid)
+      val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
+        .addElementsAtMinimumTime(vehicleRegistrationRawInvalid)
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.testStream(inputs))
+      val (results, dlq) = decode(sc.test(inputs))
 
       results should beEmpty
       dlq should containSingleValue(vehicleRegistrationDecodingError)
@@ -49,11 +46,11 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     val history = sc.parallelize(Seq(vehicleRegistrationHistory))
 
     val vehicleRegistrationUpdate = anyVehicleRegistrationRaw.copy(id = "update")
-    val updates = testStreamOf[Message[VehicleRegistration.Raw]]
-      .addElements(Message(vehicleRegistrationUpdate))
+    val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Raw]]
+      .addElementsAtMinimumTime(Message(vehicleRegistrationUpdate))
       .advanceWatermarkToInfinity()
 
-    val result = unionHistoryWithUpdates(history, sc.testStream(updates))
+    val result = unionHistoryWithUpdates(history, sc.test(updates))
 
     result should containInAnyOrder(Seq(vehicleRegistrationHistory, vehicleRegistrationUpdate))
   }

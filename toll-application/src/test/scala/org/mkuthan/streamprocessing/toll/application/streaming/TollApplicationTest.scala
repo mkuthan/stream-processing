@@ -51,27 +51,27 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubMessage](
         CustomIO[PubsubMessage](EntrySubscriptionIoId.id),
-        testStreamOf[PubsubMessage]
+        unboundedTestCollectionOf[PubsubMessage]
           .addElementsAtTime(
-            tollBoothEntryTime,
+            tollBoothEntryTime.toString,
             tollBoothEntryPubsubMessage,
             corruptedJsonPubsubMessage,
             invalidTollBoothEntryPubsubMessage
           )
-          .advanceWatermarkToInfinity()
+          .advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[String](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingErrorString)
       }
       .inputStream(
         CustomIO[PubsubMessage](ExitSubscriptionIoId.id),
-        testStreamOf[PubsubMessage]
+        unboundedTestCollectionOf[PubsubMessage]
           .addElementsAtTime(
-            tollBoothExitTime,
+            tollBoothExitTime.toString,
             tollBoothExitPubsubMessage,
             corruptedJsonPubsubMessage,
             invalidTollBoothExitPubsubMessage
-          ).advanceWatermarkToInfinity()
+          ).advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingErrorString)
@@ -79,12 +79,12 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       // receive vehicle registrations
       .inputStream(
         CustomIO[PubsubMessage](VehicleRegistrationSubscriptionIoId.id),
-        testStreamOf[PubsubMessage]
+        unboundedTestCollectionOf[PubsubMessage]
           // TODO: add event time to vehicle registration messages
-          .addElements(anyVehicleRegistrationRawPubsubMessage)
+          .addElementsAtMinimumTime(anyVehicleRegistrationRawPubsubMessage)
           // TODO: add corrupted json message and check counter
           // TODO: add invalid message and check dead letter
-          .advanceWatermarkToInfinity()
+          .advanceWatermarkToInfinity().testStream
       )
       .input(
         CustomIO[TableRow](VehicleRegistrationTableIoId.id),

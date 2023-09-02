@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
-import com.spotify.scio.testing._
-
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
@@ -34,16 +32,16 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = true)
 
-    val boothEntries = testStreamOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(entryTime.toString, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = testStreamOf[VehicleRegistration]
-      .addElements(vehicleRegistration)
+    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtMinimumTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testStream(boothEntries), sc.testStream(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
@@ -62,16 +60,16 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = false)
 
-    val boothEntries = testStreamOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(entryTime.toString, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = testStreamOf[VehicleRegistration]
-      .addElements(vehicleRegistration)
+    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtMinimumTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testStream(boothEntries), sc.testStream(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
 
     results should beEmpty
 
@@ -88,16 +86,16 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = LicensePlate("License Plate 1"))
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = LicensePlate("License Plate 2"))
 
-    val boothEntries = testStreamOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(entryTime.toString, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = testStreamOf[VehicleRegistration]
-      .addElements(vehicleRegistration)
+    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtMinimumTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testStream(boothEntries), sc.testStream(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
 
     results should beEmpty
 
@@ -110,11 +108,11 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   }
 
   it should "encode into Raw" in runWithScioContext { sc =>
-    val inputs = testStreamOf[VehiclesWithExpiredRegistration]
-      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at, anyVehicleWithExpiredRegistration)
+    val inputs = unboundedTestCollectionOf[VehiclesWithExpiredRegistration]
+      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at.toString, anyVehicleWithExpiredRegistration)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.testStream(inputs))
+    val results = encode(sc.test(inputs))
     results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
   }
 }

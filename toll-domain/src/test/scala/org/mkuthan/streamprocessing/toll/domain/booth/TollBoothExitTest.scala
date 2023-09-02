@@ -1,13 +1,10 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.TestStreamScioContext
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.test.scio.TestScioContext
+import org.mkuthan.streamprocessing.test.scio._
 
 class TollBoothExitTest extends AnyFlatSpec with Matchers
     with TestScioContext
@@ -18,11 +15,11 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
   behavior of "TollBoothExit"
 
   it should "decode valid TollBoothExit into raw" in runWithScioContext { sc =>
-    val inputs = testStreamOf[Message[TollBoothExit.Raw]]
-      .addElements(Message(anyTollBoothExitRaw))
+    val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Raw]]
+      .addElementsAtMinimumTime(Message(anyTollBoothExitRaw))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.testStream(inputs))
+    val (results, dlq) = decode(sc.test(inputs))
 
     results should containSingleValue(anyTollBoothExit)
     dlq should beEmpty
@@ -30,11 +27,11 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
   it should "put invalid TollBoothExit into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = testStreamOf[Message[TollBoothExit.Raw]]
-        .addElements(Message(tollBoothExitRawInvalid))
+      val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Raw]]
+        .addElementsAtMinimumTime(Message(tollBoothExitRawInvalid))
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.testStream(inputs))
+      val (results, dlq) = decode(sc.test(inputs))
 
       results should beEmpty
       dlq should containSingleValue(tollBoothExitDecodingError)

@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.infrastructure.diagnostic
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.testing._
 
 import org.joda.time.Instant
 import org.joda.time.LocalDateTime
@@ -42,12 +41,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withTable(datasetName, sampleDiagnosticType.schema) { tableName =>
         val instant = Instant.parse("1970-01-01T12:09:59.999Z")
 
-        val sampleDiagnostics = testStreamOf[IoDiagnostic]
+        val sampleDiagnostics = unboundedTestCollectionOf[IoDiagnostic]
           .addElementsAtTime("12:00:00", diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2)
           .advanceWatermarkToInfinity()
 
         sc
-          .testStream(sampleDiagnostics)
+          .test(sampleDiagnostics)
           .writeUnboundedDiagnosticToBigQuery(
             IoIdentifier[IoDiagnostic.Raw]("any-id"),
             BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName"),

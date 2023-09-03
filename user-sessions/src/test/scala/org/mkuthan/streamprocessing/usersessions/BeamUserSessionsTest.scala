@@ -19,7 +19,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
   "No activities" should "create empty session" in runWithScioContext { sc =>
     val activities = unboundedTestCollectionOf[(User, Activity)].advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results should beEmpty
   }
@@ -30,7 +30,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:01:00", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -43,7 +43,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:00:00", ("joe", "open app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -58,7 +58,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:01:30", ("ben", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
       containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
@@ -78,7 +78,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
       containSingleValueAtTime(
@@ -97,7 +97,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
       containSingleValueAtTime(
@@ -121,7 +121,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .addElementsAtTime("00:13:10", ("joe", "close app"))
       .advanceWatermarkToInfinity()
 
-    val results = activitiesInSessionWindow(sc.test(activities), TenMinutesGap)
+    val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
       containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
@@ -147,7 +147,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       .advanceWatermarkToInfinity()
 
     val results = activitiesInSessionWindow(
-      sc.test(activities),
+      sc.testUnbounded(activities),
       TenMinutesGap,
       allowedLateness = Duration.standardMinutes(5)
     )
@@ -177,7 +177,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
         .advanceWatermarkToInfinity()
 
       val results = activitiesInSessionWindow(
-        sc.test(activities),
+        sc.testUnbounded(activities),
         TenMinutesGap,
         allowedLateness = Duration.standardMinutes(5),
         accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES
@@ -216,7 +216,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
         .advanceWatermarkToInfinity()
 
       val results = activitiesInSessionWindow(
-        sc.test(activities),
+        sc.testUnbounded(activities),
         TenMinutesGap,
         accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES,
         allowedLateness = Duration.standardMinutes(10),

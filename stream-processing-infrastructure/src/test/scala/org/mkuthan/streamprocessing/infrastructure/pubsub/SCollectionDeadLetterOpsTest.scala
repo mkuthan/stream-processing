@@ -26,7 +26,7 @@ class SCollectionDeadLetterOpsTest extends AnyFlatSpec
       .addElementsAtMinimumTime(deadLetter1, deadLetter2)
       .advanceWatermarkToInfinity()
 
-    val results = sc.test(deadLetters).toDiagnostic()
+    val results = sc.testUnbounded(deadLetters).toDiagnostic()
 
     results should containInAnyOrder(Seq(
       IoDiagnostic(id1.id, error),

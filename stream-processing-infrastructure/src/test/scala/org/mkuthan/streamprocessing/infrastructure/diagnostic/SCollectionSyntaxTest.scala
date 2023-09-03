@@ -41,12 +41,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withTable(datasetName, sampleDiagnosticType.schema) { tableName =>
         val instant = Instant.parse("1970-01-01T12:09:59.999Z")
 
-        val sampleDiagnostics = unboundedTestCollectionOf[IoDiagnostic]
+        val ioDiagnostics = unboundedTestCollectionOf[IoDiagnostic]
           .addElementsAtTime("12:00:00", diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2)
           .advanceWatermarkToInfinity()
 
         sc
-          .test(sampleDiagnostics)
+          .testUnbounded(ioDiagnostics)
           .writeUnboundedDiagnosticToBigQuery(
             IoIdentifier[IoDiagnostic.Raw]("any-id"),
             BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName"),
@@ -77,8 +77,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withPartitionedTable(datasetName, "HOUR", sampleDiagnosticType.schema) { tableName =>
         val localDateTime = LocalDateTime.parse("2023-06-15T14:00:00")
 
+        val ioDiagnostics = boundedTestCollectionOf[IoDiagnostic]
+          .addElementsAtMinimumTime(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2)
+          .build()
+
         sc
-          .parallelize(Seq(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2))
+          .testBounded(ioDiagnostics)
           .writeBoundedDiagnosticToBigQuery(
             IoIdentifier[IoDiagnostic.Raw]("any-id"),
             BigQueryPartition.hourly[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName", localDateTime),

@@ -17,7 +17,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
   "Words aggregate" should "be empty for empty stream" in runWithScioContext { sc =>
     val words = unboundedTestCollectionOf[String].advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.test(words), OneMinute)
+    val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
     results should beEmpty
   }
@@ -28,7 +28,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .addElementsAtTime("00:00:30", "baz baz")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.test(words), OneMinute)
+    val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -44,7 +44,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
-      sc.test(words),
+      sc.testUnbounded(words),
       OneMinute,
       timestampCombiner = TimestampCombiner.LATEST
     )
@@ -64,7 +64,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .addElementsAtTime("00:01:30", "bar foo")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.test(words), OneMinute)
+    val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -83,7 +83,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .addElementsAtTime("00:02:30", "bar foo")
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.test(words), OneMinute)
+    val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -106,7 +106,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .addElementsAtTime("00:00:40", "foo") // late event
       .advanceWatermarkToInfinity()
 
-    val results = wordCountInFixedWindow(sc.test(words), OneMinute)
+    val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
     results.withTimestamp should containInAnyOrderAtTime(Seq(
       ("00:00:59.999", ("foo", 1L)),
@@ -124,7 +124,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
-      sc.test(words),
+      sc.testUnbounded(words),
       OneMinute,
       allowedLateness = Duration.standardSeconds(30)
     )
@@ -154,7 +154,7 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
-      sc.test(words),
+      sc.testUnbounded(words),
       OneMinute,
       allowedLateness = Duration.standardSeconds(30),
       accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES

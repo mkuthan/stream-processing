@@ -50,7 +50,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(tollBoothEntry3.entryTime.toString, tollBoothEntry3)
       .advanceWatermarkToInfinity()
 
-    val results = calculateInFixedWindow(sc.test(inputs), FiveMinutes)
+    val results = calculateInFixedWindow(sc.testUnbounded(inputs), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containInAnyOrderAtTime(
@@ -81,7 +81,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(recordTimestamp.toString, anyTollBoothStats)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.test(inputs))
+    val results = encode(sc.testUnbounded(inputs))
     results should containSingleValue(anyTollBoothStatsRaw.copy(record_timestamp = recordTimestamp))
   }
 }

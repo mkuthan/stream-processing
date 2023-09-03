@@ -19,7 +19,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
       .addElementsAtMinimumTime(anyVehicleRegistrationRaw)
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.test(inputs))
+    val (results, dlq) = decode(sc.testUnbounded(inputs))
 
     results should containSingleValue(anyVehicleRegistration)
     dlq should beEmpty
@@ -31,7 +31,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
         .addElementsAtMinimumTime(vehicleRegistrationRawInvalid)
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.test(inputs))
+      val (results, dlq) = decode(sc.testUnbounded(inputs))
 
       results should beEmpty
       dlq should containSingleValue(vehicleRegistrationDecodingError)
@@ -43,14 +43,16 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "union history with updates" in runWithScioContext { sc =>
     val vehicleRegistrationHistory = anyVehicleRegistrationRaw.copy(id = "history")
-    val history = sc.parallelize(Seq(vehicleRegistrationHistory))
+    val history = boundedTestCollectionOf[VehicleRegistration.Raw]
+      .addElementsAtMinimumTime(vehicleRegistrationHistory)
+      .build()
 
     val vehicleRegistrationUpdate = anyVehicleRegistrationRaw.copy(id = "update")
     val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Raw]]
       .addElementsAtMinimumTime(Message(vehicleRegistrationUpdate))
       .advanceWatermarkToInfinity()
 
-    val result = unionHistoryWithUpdates(history, sc.test(updates))
+    val result = unionHistoryWithUpdates(sc.testBounded(history), sc.testUnbounded(updates))
 
     result should containInAnyOrder(Seq(vehicleRegistrationHistory, vehicleRegistrationUpdate))
   }

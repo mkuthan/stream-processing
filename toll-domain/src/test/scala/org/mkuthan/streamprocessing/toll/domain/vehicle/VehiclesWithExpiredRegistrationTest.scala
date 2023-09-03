@@ -41,7 +41,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
@@ -69,7 +69,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
 
     results should beEmpty
 
@@ -95,7 +95,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.test(boothEntries), sc.test(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
 
     results should beEmpty
 
@@ -112,7 +112,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at.toString, anyVehicleWithExpiredRegistration)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.test(inputs))
+    val results = encode(sc.testUnbounded(inputs))
     results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
   }
 }

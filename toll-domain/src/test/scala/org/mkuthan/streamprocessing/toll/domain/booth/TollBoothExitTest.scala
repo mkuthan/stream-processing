@@ -19,7 +19,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
       .addElementsAtMinimumTime(Message(anyTollBoothExitRaw))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.test(inputs))
+    val (results, dlq) = decode(sc.testUnbounded(inputs))
 
     results should containSingleValue(anyTollBoothExit)
     dlq should beEmpty
@@ -31,7 +31,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
         .addElementsAtMinimumTime(Message(tollBoothExitRawInvalid))
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.test(inputs))
+      val (results, dlq) = decode(sc.testUnbounded(inputs))
 
       results should beEmpty
       dlq should containSingleValue(tollBoothExitDecodingError)

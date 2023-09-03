@@ -38,7 +38,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .advanceWatermarkToInfinity()
 
       sc
-        .test(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),
@@ -67,7 +67,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .advanceWatermarkToInfinity()
 
       sc
-        .test(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),
@@ -99,7 +99,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         .advanceWatermarkToInfinity()
 
       sc
-        .test(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),

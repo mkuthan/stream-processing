@@ -43,7 +43,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.test(boothEntries), sc.test(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
@@ -79,7 +79,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.test(boothEntries), sc.test(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
 
     results should beEmpty
 
@@ -97,7 +97,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(recordTimestamp.toString, anyTotalVehicleTime)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.test(inputs))
+    val results = encode(sc.testUnbounded(inputs))
     results should containSingleValue(anyTotalVehicleTimeRaw.copy(record_timestamp = recordTimestamp))
   }
 }

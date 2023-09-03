@@ -7,7 +7,9 @@ import org.apache.beam.sdk.testing.TestStream
 import org.apache.beam.sdk.values.TimestampedValue
 import org.joda.time.Duration
 
-case class UnboundedTestCollection[T](testStream: TestStream[T])
+// TODO: make it more private to scio package
+
+case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
 
 object UnboundedTestCollection {
 
@@ -16,7 +18,7 @@ object UnboundedTestCollection {
     Builder(testStream)
   }
 
-  case class Builder[T](builder: TestStream.Builder[T]) extends InstantSyntax {
+  case class Builder[T: Coder](builder: TestStream.Builder[T]) extends InstantSyntax {
     def addElementsAtMinimumTime(element: T, elements: T*): Builder[T] = {
       val timestampedElement = TimestampedValue.atMinimumTimestamp(element)
       val timestampedElements = elements.map(e => TimestampedValue.atMinimumTimestamp(e))
@@ -44,7 +46,9 @@ object UnboundedTestCollection {
 
     def advanceWatermarkToInfinity(): UnboundedTestCollection[T] = {
       val testStream = builder.advanceWatermarkToInfinity()
-      UnboundedTestCollection(testStream)
+
+      // TODO: make transform name unique and avoid warnings from direct runner
+      UnboundedTestCollection("foo", testStream)
     }
   }
 }

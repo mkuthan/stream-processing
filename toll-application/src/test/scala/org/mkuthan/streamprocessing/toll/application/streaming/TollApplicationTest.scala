@@ -1,7 +1,8 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.io.CustomIO
-import com.spotify.scio.testing._
+import com.spotify.scio.testing.JobTest
+import com.spotify.scio.testing.TransformOverride
 
 import com.google.api.services.bigquery.model.TableRow
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage

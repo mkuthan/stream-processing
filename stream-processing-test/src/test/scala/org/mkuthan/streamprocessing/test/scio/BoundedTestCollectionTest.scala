@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.test.scio
 
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow
+
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

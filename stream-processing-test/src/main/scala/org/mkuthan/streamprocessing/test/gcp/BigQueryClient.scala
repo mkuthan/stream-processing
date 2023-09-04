@@ -3,6 +3,15 @@ package org.mkuthan.streamprocessing.test.gcp
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
+import org.apache.beam.sdk.io.gcp.bigquery.InsertRetryPolicy
+import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow
+import org.apache.beam.sdk.transforms.windowing.GlobalWindow
+import org.apache.beam.sdk.transforms.windowing.PaneInfo
+import org.apache.beam.sdk.values.FailsafeValueInSingleWindow
+
 import com.google.api.services.bigquery.model.Table
 import com.google.api.services.bigquery.model.TableReference
 import com.google.api.services.bigquery.model.TableRow
@@ -18,14 +27,6 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.avro.io.BinaryDecoder
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.Schema
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryServicesFactory
-import org.apache.beam.sdk.io.gcp.bigquery.InsertRetryPolicy
-import org.apache.beam.sdk.options.PipelineOptionsFactory
-import org.apache.beam.sdk.transforms.windowing.BoundedWindow
-import org.apache.beam.sdk.transforms.windowing.GlobalWindow
-import org.apache.beam.sdk.transforms.windowing.PaneInfo
-import org.apache.beam.sdk.values.FailsafeValueInSingleWindow
 
 import org.mkuthan.streamprocessing.test.common.RandomString._
 

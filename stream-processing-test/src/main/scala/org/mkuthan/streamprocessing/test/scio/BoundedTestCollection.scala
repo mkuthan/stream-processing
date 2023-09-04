@@ -1,10 +1,11 @@
 package org.mkuthan.streamprocessing.test.scio
 
+import org.apache.beam.sdk.transforms.Create
+import org.apache.beam.sdk.values.TimestampedValue
+
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.coders.CoderMaterializer
 
-import org.apache.beam.sdk.transforms.Create
-import org.apache.beam.sdk.values.TimestampedValue
 import org.joda.time.Instant
 
 case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])

@@ -1,10 +1,11 @@
 package org.mkuthan.streamprocessing.test.scio
 
+import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.apache.beam.sdk.testing.TestPipelineOptions
+
 import com.spotify.scio.testing.SCollectionMatchers
 import com.spotify.scio.ScioContext
 
-import org.apache.beam.sdk.options.PipelineOptionsFactory
-import org.apache.beam.sdk.testing.TestPipelineOptions
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite
 

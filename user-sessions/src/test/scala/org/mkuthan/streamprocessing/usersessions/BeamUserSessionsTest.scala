@@ -4,6 +4,7 @@ import org.apache.beam.sdk.transforms.windowing.AfterPane
 import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
 import org.apache.beam.sdk.transforms.windowing.AfterWatermark
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import org.joda.time.Duration
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

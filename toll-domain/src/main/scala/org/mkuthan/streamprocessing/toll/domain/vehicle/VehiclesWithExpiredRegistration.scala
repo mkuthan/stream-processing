@@ -1,13 +1,14 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
+import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
 
-import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
-import org.apache.beam.sdk.transforms.windowing.Repeatedly
-import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 import org.joda.time.Instant
 

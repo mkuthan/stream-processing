@@ -1,13 +1,14 @@
 package org.mkuthan.streamprocessing.infrastructure.dlq
 
-import com.spotify.scio.values.WindowOptions
-
 import org.apache.beam.sdk.transforms.windowing.AfterFirst
 import org.apache.beam.sdk.transforms.windowing.AfterPane
 import org.apache.beam.sdk.transforms.windowing.AfterWatermark
 import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.transforms.windowing.Window
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
+import com.spotify.scio.values.WindowOptions
+
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure.storage.NumShards

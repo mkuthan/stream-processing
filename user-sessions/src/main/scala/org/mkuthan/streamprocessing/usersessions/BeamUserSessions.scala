@@ -1,11 +1,12 @@
 package org.mkuthan.streamprocessing.usersessions
 
-import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.WindowOptions
-
 import org.apache.beam.sdk.transforms.windowing.DefaultTrigger
 import org.apache.beam.sdk.transforms.windowing.Trigger
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
+import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
+
 import org.joda.time.Duration
 import org.joda.time.Instant
 

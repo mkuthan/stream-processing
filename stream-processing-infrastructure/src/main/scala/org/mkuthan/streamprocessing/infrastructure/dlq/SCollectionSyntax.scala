@@ -2,11 +2,11 @@ package org.mkuthan.streamprocessing.infrastructure.dlq
 
 import scala.util.chaining._
 
-import com.spotify.scio.coders.Coder
-import com.spotify.scio.values.SCollection
-
 import org.apache.beam.sdk.io.FileIO
 import org.apache.beam.sdk.io.TextIO
+
+import com.spotify.scio.coders.Coder
+import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket

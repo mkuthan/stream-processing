@@ -2,6 +2,7 @@ package org.mkuthan.streamprocessing.wordcount
 
 import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import org.joda.time.Duration
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

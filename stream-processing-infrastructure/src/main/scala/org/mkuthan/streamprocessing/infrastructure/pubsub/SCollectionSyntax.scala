@@ -2,11 +2,11 @@ package org.mkuthan.streamprocessing.infrastructure.pubsub
 
 import scala.util.chaining._
 
-import com.spotify.scio.coders.Coder
-import com.spotify.scio.values.SCollection
-
 import org.apache.beam.sdk.io.gcp.pubsub.{PubsubMessage => BeamPubsubMessage}
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
+
+import com.spotify.scio.coders.Coder
+import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic

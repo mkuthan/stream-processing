@@ -1,6 +1,7 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
 import org.apache.beam.sdk.Pipeline.PipelineExecutionException
+
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime

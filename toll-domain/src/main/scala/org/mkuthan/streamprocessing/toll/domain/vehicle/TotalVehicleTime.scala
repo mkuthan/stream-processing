@@ -4,7 +4,6 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 
-import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
 
@@ -33,30 +32,11 @@ object TotalVehicleTime {
       duration_seconds: Long
   )
 
-  type DiagnosticKey = String
-
-  @BigQueryType.toTable
-  case class Diagnostic(
-      created_at: Instant,
-      toll_both_id: String,
-      reason: String,
-      count: Long = 1L
-  ) {
-    lazy val key: String = toll_both_id + reason
-  }
-
-  implicit case object DiagnosticSemigroup extends Semigroup[Diagnostic] {
-    override def plus(x: Diagnostic, y: Diagnostic): Diagnostic = {
-      require(x.key == y.key)
-      Diagnostic(x.created_at, x.toll_both_id, x.reason, x.count + y.count)
-    }
-  }
-
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration
-  ): (SCollection[TotalVehicleTime], SCollection[(DiagnosticKey, Diagnostic)]) = {
+  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration)
@@ -64,20 +44,20 @@ object TotalVehicleTime {
       .keyBy(exit => (exit.id, exit.licensePlate))
       .withSessionWindows(gapDuration)
 
-    val diagnostic = SideOutput[Diagnostic]()
+    val diagnostic = SideOutput[TotalVehicleTimeDiagnostic]()
     val (results, sideOutputs) = boothEntriesById
       .leftOuterJoin(boothExistsById)
       .values
       .withSideOutputs(diagnostic)
       .flatMap {
         case ((boothEntry, Some(boothExit)), _) =>
-          Some(totalVehicleTime(boothEntry, boothExit))
+          Some(toTotalVehicleTime(boothEntry, boothExit))
         case ((boothEntry, None), ctx) =>
           val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          ctx.output(diagnostic, toDiagnostic(boothEntry, diagnosticReason))
+          ctx.output(diagnostic, TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
           None
       }
-    (results, sideOutputs(diagnostic).keyBy(_.key))
+    (results, sideOutputs(diagnostic))
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =
@@ -92,7 +72,7 @@ object TotalVehicleTime {
       )
     }
 
-  private def totalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
+  private def toTotalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis
     TotalVehicleTime(
       licensePlate = boothEntry.licensePlate,
@@ -102,11 +82,4 @@ object TotalVehicleTime {
       duration = Duration.millis(diff)
     )
   }
-
-  private def toDiagnostic(boothEntry: TollBoothEntry, reason: String): Diagnostic =
-    Diagnostic(
-      created_at = boothEntry.entryTime,
-      toll_both_id = boothEntry.id.id,
-      reason = reason
-    )
 }

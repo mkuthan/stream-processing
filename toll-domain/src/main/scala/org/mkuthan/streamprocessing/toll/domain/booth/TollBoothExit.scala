@@ -2,15 +2,16 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import scala.util.control.NonFatal
 
+import org.apache.beam.sdk.metrics.Counter
+
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
-import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.shared.scio.coreSCollectionEitherOps
-import org.mkuthan.streamprocessing.shared.scio.pubsub.PubsubMessage
-import org.mkuthan.streamprocessing.toll.domain.common.DeadLetter
+import org.mkuthan.streamprocessing.shared._
+import org.mkuthan.streamprocessing.shared.common.DeadLetter
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 final case class TollBoothExit(
@@ -31,7 +32,7 @@ object TollBoothExit {
       license_plate: String
   )
 
-  def decode(input: SCollection[PubsubMessage[Raw]]): (SCollection[TollBoothExit], SCollection[DeadLetterRaw]) =
+  def decode(input: SCollection[Message[Raw]]): (SCollection[TollBoothExit], SCollection[DeadLetterRaw]) =
     input
       .map(element => fromRaw(element.payload))
       .unzip

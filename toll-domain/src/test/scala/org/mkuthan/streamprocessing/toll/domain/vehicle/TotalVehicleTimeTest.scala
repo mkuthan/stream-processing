@@ -1,8 +1,5 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.TestStreamScioContext
-
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
@@ -28,7 +25,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
   behavior of "TotalVehicleTime"
 
-  it should "calculate TotalVehicleTime in session window" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTime" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -37,16 +34,16 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
-    val boothEntries = testStreamOf[TollBoothEntry]
+    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val boothExits = testStreamOf[TollBoothExit]
+    val boothExits = unboundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testStream(boothEntries), sc.testStream(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
@@ -73,35 +70,34 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
-    val boothEntries = testStreamOf[TollBoothEntry]
+    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val boothExits = testStreamOf[TollBoothExit]
+    val boothExits = unboundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testStream(boothEntries), sc.testStream(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
 
     results should beEmpty
 
-    diagnostic.values.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
+    diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
       containSingleValueAtTime(
         "2014-09-10T12:08:00.999Z",
-        Diagnostic(entryTime, tollBoothId.id, "Missing TollBoothExit to calculate TotalVehicleTime", 1)
+        TotalVehicleTimeDiagnostic(tollBoothId, "Missing TollBoothExit to calculate TotalVehicleTime", 1)
       )
     }
   }
 
-  it should "encode TotalVehicleTime into raw" in runWithScioContext { sc =>
+  it should "encode into Raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
-    val inputs = testStreamOf[TotalVehicleTime]
+    val inputs = unboundedTestCollectionOf[TotalVehicleTime]
       .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.testStream(inputs))
+    val results = encode(sc.testUnbounded(inputs))
     results should containSingleValue(anyTotalVehicleTimeRaw.copy(record_timestamp = recordTimestamp))
-
   }
 }

@@ -8,7 +8,6 @@ import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
-import org.scalacheck._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
@@ -32,7 +31,11 @@ object JsonSerdeTest extends JodaTimeArbitrary {
       localTime: LocalTime
   )
 
-  implicit val sampleClassArbitrary = implicitly[Arbitrary[SampleClass]]
+  case class SingleFieldClass(f1: String)
+
+  case class TwoFieldsClass(f1: String, f2: String)
+
+  case class ParametrizedClass[T](f: T)
 }
 
 class JsonSerdeTest extends AnyFlatSpec
@@ -47,17 +50,31 @@ class JsonSerdeTest extends AnyFlatSpec
 
   behavior of "JsonSerde"
 
-  it should "serialize and deserialize" in {
+  it should "serialize and deserialize sample type" in {
     forAll { sample: SampleClass =>
       val serialized = writeJsonAsString(sample)
-      val deserialized = readJsonFromString[SampleClass](serialized).success.value
-      deserialized shouldMatchTo sample
+      val deserialized = readJsonFromString[SampleClass](serialized)
+      deserialized.success.value shouldMatchTo sample
     }
   }
 
-  it should "not deserialize unknown object" in {
-    val unknownObjectJson = """{"unknownField":"a"}"""
-    val result = readJsonFromString[SampleClass](unknownObjectJson)
-    result.failure.exception.getMessage should startWith("Unrecognized field \"unknownField\"")
+  it should "serialize and deserialize parametrized type" in {
+    val parametrized = ParametrizedClass("field")
+    val serialized = writeJsonAsString(parametrized)
+    val deserialized = readJsonFromString[ParametrizedClass[String]](serialized)
+    deserialized.success.value shouldMatchTo parametrized
+  }
+
+  it should "deserialize unknown field" in {
+    val twoFields = TwoFieldsClass("f1", "f2")
+    val twoFieldsSerialized = writeJsonAsString(twoFields)
+    val result = readJsonFromString[SingleFieldClass](twoFieldsSerialized)
+    result.success.value shouldMatchTo SingleFieldClass("f1")
+  }
+
+  it should "not deserialize null for required fields" in {
+    val nullJson = "{}"
+    val result = readJsonFromString[SampleClass](nullJson)
+    result.failure.exception.getMessage should startWith("Null value for creator property 'string'")
   }
 }

@@ -1,10 +1,11 @@
 package org.mkuthan.streamprocessing.test.scio
 
+import org.apache.beam.sdk.options.PipelineOptionsFactory
+import org.apache.beam.sdk.testing.TestPipelineOptions
+
 import com.spotify.scio.testing.SCollectionMatchers
 import com.spotify.scio.ScioContext
 
-import org.apache.beam.sdk.options.PipelineOptionsFactory
-import org.apache.beam.sdk.testing.TestPipelineOptions
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite
 
@@ -12,7 +13,7 @@ import org.mkuthan.streamprocessing.test.gcp.GcpProjectId
 import org.mkuthan.streamprocessing.test.gcp.StorageClient
 
 trait IntegrationTestScioContext extends BeforeAndAfterAll
-    with SCollectionMatchers with TimestampedMatchers
+    with SCollectionMatchers with TimestampedMatchers with TestCollectionSyntax
     with GcpProjectId {
   this: Suite =>
 

@@ -2,14 +2,11 @@ import sbt.*
 import sbt.nio.Keys.*
 import sbt.Keys.*
 
-import com.github.sbt.jacoco.JacocoItPlugin.autoImport.jacocoMergedReportSettings
 import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 
 object Settings {
-  lazy val IntegrationTest = Configuration.of("IntegrationTest", "it") extend (Test)
-
   val commonSettings = Seq(
     scalaVersion := "2.13.11",
     scalacOptions := Seq(
@@ -41,15 +38,7 @@ object Settings {
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
     // enable XML report for codecov
-    jacocoReportSettings := jacocoDefaultReport
+    jacocoReportSettings := JacocoReportSettings()
+      .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
   )
-
-  val integrationTestSettings = Seq(
-    // enable XML report for codecov
-    IntegrationTest / jacocoReportSettings := jacocoDefaultReport,
-    IntegrationTest / jacocoMergedReportSettings := jacocoDefaultReport
-  )
-
-  private val jacocoDefaultReport = JacocoReportSettings()
-    .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
 }

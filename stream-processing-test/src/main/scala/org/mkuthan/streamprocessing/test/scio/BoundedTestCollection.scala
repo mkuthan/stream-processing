@@ -5,8 +5,7 @@ import com.spotify.scio.coders.CoderMaterializer
 
 import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.values.TimestampedValue
-
-// TODO: make it more private to scio package
+import org.joda.time.Instant
 
 case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])
 
@@ -16,16 +15,18 @@ object BoundedTestCollection extends InstantSyntax {
     Builder[T](Seq.empty)
 
   case class Builder[T: Coder](content: Seq[TimestampedValue[T]]) {
-
     def addElementsAtMinimumTime(element: T, elements: T*): Builder[T] = {
       val timestampedElements = (element +: elements)
         .foldLeft(content)((acc, e) => acc :+ TimestampedValue.atMinimumTimestamp(e))
       Builder(timestampedElements)
     }
 
-    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] = {
+    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] =
+      addElementsAtTime(time.toInstant, element, elements: _*)
+
+    def addElementsAtTime(instant: Instant, element: T, elements: T*): Builder[T] = {
       val timestampedElements = (element +: elements)
-        .foldLeft(content)((acc, e) => acc :+ TimestampedValue.of(e, time.toInstant))
+        .foldLeft(content)((acc, e) => acc :+ TimestampedValue.of(e, instant))
       Builder(timestampedElements)
     }
 
@@ -36,7 +37,7 @@ object BoundedTestCollection extends InstantSyntax {
       val timestampedValues = Create.timestamped(content.asJava).withCoder(coder)
 
       // TODO: make transform name unique and avoid warnings from direct runner
-      new BoundedTestCollection[T]("foo", timestampedValues)
+      BoundedTestCollection[T]("foo", timestampedValues)
     }
   }
 }

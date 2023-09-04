@@ -23,7 +23,7 @@ class SCollectionDeadLetterOpsTest extends AnyFlatSpec
     val deadLetter2 = BigQueryDeadLetter(id2, SampleObject2, error)
 
     val deadLetters = unboundedTestCollectionOf[BigQueryDeadLetter[SampleClass]]
-      .addElementsAtMinimumTime(deadLetter1, deadLetter2)
+      .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
       .advanceWatermarkToInfinity()
 
     val results = sc.testUnbounded(deadLetters).toDiagnostic()

@@ -6,8 +6,7 @@ import com.spotify.scio.coders.CoderMaterializer
 import org.apache.beam.sdk.testing.TestStream
 import org.apache.beam.sdk.values.TimestampedValue
 import org.joda.time.Duration
-
-// TODO: make it more private to scio package
+import org.joda.time.Instant
 
 case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
 
@@ -19,30 +18,27 @@ object UnboundedTestCollection {
   }
 
   case class Builder[T: Coder](builder: TestStream.Builder[T]) extends InstantSyntax {
-    def addElementsAtMinimumTime(element: T, elements: T*): Builder[T] = {
-      val timestampedElement = TimestampedValue.atMinimumTimestamp(element)
-      val timestampedElements = elements.map(e => TimestampedValue.atMinimumTimestamp(e))
+    def addElementsAtWatermarkTime(element: T, elements: T*): Builder[T] =
+      Builder(builder.addElements(element, elements: _*))
 
-      Builder(builder.addElements(timestampedElement, timestampedElements: _*))
-    }
+    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] =
+      addElementsAtTime(time.toInstant, element, elements: _*)
 
-    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] = {
-      val instant = time.toInstant
-
+    def addElementsAtTime(instant: Instant, element: T, elements: T*): Builder[T] = {
       val timestampedElement = TimestampedValue.of(element, instant)
       val timestampedElements = elements.map(e => TimestampedValue.of(e, instant))
 
       Builder(builder.addElements(timestampedElement, timestampedElements: _*))
     }
 
-    // TODO: Joda or Scala duration?
     def advanceProcessingTime(duration: Duration): Builder[T] =
       Builder(builder.advanceProcessingTime(duration))
 
-    def advanceWatermarkTo(time: String): Builder[T] = {
-      val instant = time.toInstant
+    def advanceWatermarkTo(time: String): Builder[T] =
+      advanceWatermarkTo(time.toInstant)
+
+    def advanceWatermarkTo(instant: Instant): Builder[T] =
       Builder(builder.advanceWatermarkTo(instant))
-    }
 
     def advanceWatermarkToInfinity(): UnboundedTestCollection[T] = {
       val testStream = builder.advanceWatermarkToInfinity()

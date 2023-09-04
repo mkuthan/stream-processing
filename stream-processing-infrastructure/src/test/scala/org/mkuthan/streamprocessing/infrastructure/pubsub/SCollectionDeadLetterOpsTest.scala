@@ -23,7 +23,7 @@ class SCollectionDeadLetterOpsTest extends AnyFlatSpec
     val deadLetter2 = PubsubDeadLetter(id2, SampleJson1, SampleMap1, error)
 
     val deadLetters = unboundedTestCollectionOf[PubsubDeadLetter[SampleClass]]
-      .addElementsAtMinimumTime(deadLetter1, deadLetter2)
+      .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
       .advanceWatermarkToInfinity()
 
     val results = sc.testUnbounded(deadLetters).toDiagnostic()

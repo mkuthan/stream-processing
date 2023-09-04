@@ -53,7 +53,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubMessage](EntrySubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubMessage]
           .addElementsAtTime(
-            tollBoothEntryTime.toString,
+            tollBoothEntryTime,
             tollBoothEntryPubsubMessage,
             corruptedJsonPubsubMessage,
             invalidTollBoothEntryPubsubMessage
@@ -67,7 +67,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubMessage](ExitSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubMessage]
           .addElementsAtTime(
-            tollBoothExitTime.toString,
+            tollBoothExitTime,
             tollBoothExitPubsubMessage,
             corruptedJsonPubsubMessage,
             invalidTollBoothExitPubsubMessage
@@ -81,7 +81,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubMessage](VehicleRegistrationSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubMessage]
           // TODO: add event time to vehicle registration messages
-          .addElementsAtMinimumTime(anyVehicleRegistrationRawPubsubMessage)
+          .addElementsAtWatermarkTime(anyVehicleRegistrationRawPubsubMessage)
           // TODO: add corrupted json message and check counter
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream

@@ -33,11 +33,11 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = true)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime.toString, tollBoothEntry)
+      .addElementsAtTime(entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtMinimumTime(vehicleRegistration)
+      .addElementsAtWatermarkTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
@@ -61,11 +61,11 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = false)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime.toString, tollBoothEntry)
+      .addElementsAtTime(entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtMinimumTime(vehicleRegistration)
+      .addElementsAtWatermarkTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
@@ -87,11 +87,11 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = LicensePlate("License Plate 2"))
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime.toString, tollBoothEntry)
+      .addElementsAtTime(entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtMinimumTime(vehicleRegistration)
+      .addElementsAtWatermarkTime(vehicleRegistration)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
@@ -109,7 +109,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "encode into Raw" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[VehiclesWithExpiredRegistration]
-      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at.toString, anyVehicleWithExpiredRegistration)
+      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at, anyVehicleWithExpiredRegistration)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testUnbounded(inputs))

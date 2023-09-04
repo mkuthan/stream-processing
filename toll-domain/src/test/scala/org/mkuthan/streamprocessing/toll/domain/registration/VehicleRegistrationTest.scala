@@ -16,7 +16,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "decode valid VehicleRegistration into raw" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-      .addElementsAtMinimumTime(anyVehicleRegistrationRaw)
+      .addElementsAtWatermarkTime(anyVehicleRegistrationRaw)
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decode(sc.testUnbounded(inputs))
@@ -28,7 +28,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
   it should "put invalid VehicleRegistration into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-        .addElementsAtMinimumTime(vehicleRegistrationRawInvalid)
+        .addElementsAtWatermarkTime(vehicleRegistrationRawInvalid)
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decode(sc.testUnbounded(inputs))
@@ -49,7 +49,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
     val vehicleRegistrationUpdate = anyVehicleRegistrationRaw.copy(id = "update")
     val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Raw]]
-      .addElementsAtMinimumTime(Message(vehicleRegistrationUpdate))
+      .addElementsAtWatermarkTime(Message(vehicleRegistrationUpdate))
       .advanceWatermarkToInfinity()
 
     val result = unionHistoryWithUpdates(sc.testBounded(history), sc.testUnbounded(updates))

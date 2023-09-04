@@ -35,11 +35,11 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(tollBoothEntry.entryTime.toString, tollBoothEntry)
+      .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val boothExits = unboundedTestCollectionOf[TollBoothExit]
-      .addElementsAtTime(tollBoothExit.exitTime.toString, tollBoothExit)
+      .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
@@ -71,11 +71,11 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(tollBoothEntry.entryTime.toString, tollBoothEntry)
+      .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
       .advanceWatermarkToInfinity()
 
     val boothExits = unboundedTestCollectionOf[TollBoothExit]
-      .addElementsAtTime(tollBoothExit.exitTime.toString, tollBoothExit)
+      .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
@@ -94,7 +94,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
   it should "encode into Raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = unboundedTestCollectionOf[TotalVehicleTime]
-      .addElementsAtTime(recordTimestamp.toString, anyTotalVehicleTime)
+      .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testUnbounded(inputs))

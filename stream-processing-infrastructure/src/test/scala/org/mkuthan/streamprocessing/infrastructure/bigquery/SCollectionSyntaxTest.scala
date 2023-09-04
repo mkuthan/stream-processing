@@ -135,7 +135,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         val sampleObjects = unboundedTestCollectionOf[SampleClass]
-          .addElementsAtMinimumTime(SampleObject1, SampleObject2)
+          .addElementsAtWatermarkTime(SampleObject1, SampleObject2)
           .advanceWatermarkToInfinity()
 
         sc
@@ -165,7 +165,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
         val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
 
         val sampleObjects = unboundedTestCollectionOf[SampleClass]
-          .addElementsAtMinimumTime(invalidObject)
+          .addElementsAtWatermarkTime(invalidObject)
           .advanceWatermarkToInfinity()
 
         val results = sc

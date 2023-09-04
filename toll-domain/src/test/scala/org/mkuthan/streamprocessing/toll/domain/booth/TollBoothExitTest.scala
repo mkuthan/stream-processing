@@ -16,7 +16,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
   it should "decode valid TollBoothExit into raw" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Raw]]
-      .addElementsAtMinimumTime(Message(anyTollBoothExitRaw))
+      .addElementsAtWatermarkTime(Message(anyTollBoothExitRaw))
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decode(sc.testUnbounded(inputs))
@@ -28,7 +28,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
   it should "put invalid TollBoothExit into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Raw]]
-        .addElementsAtMinimumTime(Message(tollBoothExitRawInvalid))
+        .addElementsAtWatermarkTime(Message(tollBoothExitRawInvalid))
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decode(sc.testUnbounded(inputs))

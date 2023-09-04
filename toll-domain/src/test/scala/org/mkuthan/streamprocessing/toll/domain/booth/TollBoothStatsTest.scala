@@ -1,8 +1,5 @@
 package org.mkuthan.streamprocessing.toll.domain.booth
 
-import com.spotify.scio.testing.testStreamOf
-import com.spotify.scio.testing.TestStreamScioContext
-
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
@@ -46,13 +43,13 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
       toll = BigDecimal(3)
     )
 
-    val inputs = testStreamOf[TollBoothEntry]
+    val inputs = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry1.entryTime, tollBoothEntry1)
       .addElementsAtTime(tollBoothEntry2.entryTime, tollBoothEntry2)
       .addElementsAtTime(tollBoothEntry3.entryTime, tollBoothEntry3)
       .advanceWatermarkToInfinity()
 
-    val results = calculateInFixedWindow(sc.testStream(inputs), FiveMinutes)
+    val results = calculateInFixedWindow(sc.testUnbounded(inputs), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containInAnyOrderAtTime(
@@ -79,11 +76,11 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
 
   it should "encode TollBoothStats to raw" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
-    val inputs = testStreamOf[TollBoothStats]
+    val inputs = unboundedTestCollectionOf[TollBoothStats]
       .addElementsAtTime(recordTimestamp, anyTollBoothStats)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.testStream(inputs))
+    val results = encode(sc.testUnbounded(inputs))
     results should containSingleValue(anyTollBoothStatsRaw.copy(record_timestamp = recordTimestamp))
   }
 }

@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.infrastructure.dlq
 
-import com.spotify.scio.testing._
-
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -34,13 +32,13 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   it should "write on GCS as single JSON file" in withScioContext { sc =>
     withBucket { bucket =>
-      val sampleObjects = testStreamOf[SampleClass]
+      val sampleObjects = unboundedTestCollectionOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
         .addElementsAtTime("2014-09-10T12:02:00.000Z", SampleObject2)
         .advanceWatermarkToInfinity()
 
       sc
-        .testStream(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),
@@ -63,13 +61,13 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   it should "write on GCS as two JSON files if dead letters overflows" in withScioContext { sc =>
     withBucket { bucket =>
-      val sampleObjects = testStreamOf[SampleClass]
+      val sampleObjects = unboundedTestCollectionOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
         .addElementsAtTime("2014-09-10T12:02:00.000Z", SampleObject2)
         .advanceWatermarkToInfinity()
 
       sc
-        .testStream(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),
@@ -95,13 +93,13 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
 
   it should "write on GCS two JSON files if there are two windows" in withScioContext { sc =>
     withBucket { bucket =>
-      val sampleObjects = testStreamOf[SampleClass]
+      val sampleObjects = unboundedTestCollectionOf[SampleClass]
         .addElementsAtTime("2014-09-10T12:01:00.000Z", SampleObject1)
         .addElementsAtTime("2014-09-10T12:11:00.000Z", SampleObject2)
         .advanceWatermarkToInfinity()
 
       sc
-        .testStream(sampleObjects)
+        .testUnbounded(sampleObjects)
         .writeDeadLetterToStorageAsJson(
           IoIdentifier[SampleClass]("any-id"),
           StorageBucket[SampleClass](bucket),

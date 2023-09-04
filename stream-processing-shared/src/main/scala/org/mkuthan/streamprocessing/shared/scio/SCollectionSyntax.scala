@@ -1,13 +1,13 @@
 package org.mkuthan.streamprocessing.shared.scio
 
+import org.apache.beam.sdk.transforms.windowing.AfterPane
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
-
-import org.apache.beam.sdk.transforms.windowing.AfterPane
-import org.apache.beam.sdk.transforms.windowing.Repeatedly
-import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 
 private[scio] class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
   def unzip: (SCollection[R], SCollection[L]) = {

@@ -1,10 +1,11 @@
 package org.mkuthan.streamprocessing.wordcount
 
+import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions
 
-import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
-import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 import org.joda.time.Duration
 
 object BeamWordCount {

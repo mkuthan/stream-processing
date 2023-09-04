@@ -1,7 +1,6 @@
 package org.mkuthan.streamprocessing.infrastructure.diagnostic
 
 import com.spotify.scio.bigquery.types.BigQueryType
-import com.spotify.scio.testing._
 
 import org.joda.time.Instant
 import org.joda.time.LocalDateTime
@@ -40,14 +39,15 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   it should "write unbounded into BigQuery" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, sampleDiagnosticType.schema) { tableName =>
-        val instant = Instant.parse("1970-01-01T12:09:59.999Z")
+        val instant = Instant.parse("2023-06-15T12:09:59.999Z")
 
-        val sampleDiagnostics = testStreamOf[IoDiagnostic]
-          .addElementsAtTime("12:00:00", diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2)
+        val ioDiagnostics = unboundedTestCollectionOf[IoDiagnostic]
+          .addElementsAtTime("2023-06-15T12:01:00Z", diagnostic1, diagnostic1, diagnostic2)
+          .addElementsAtTime("2023-06-15T12:02:00Z", diagnostic1, diagnostic2)
           .advanceWatermarkToInfinity()
 
         sc
-          .testStream(sampleDiagnostics)
+          .testUnbounded(ioDiagnostics)
           .writeUnboundedDiagnosticToBigQuery(
             IoIdentifier[IoDiagnostic.Raw]("any-id"),
             BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName"),
@@ -70,16 +70,20 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     }
   }
 
-  // TODO: better builder for bounded collections with timestamp handling
-  ignore should "write bounded into BigQuery" in withScioContext { sc =>
+  it should "write bounded into BigQuery" in withScioContext { sc =>
     withDataset { datasetName =>
-      val instant = Instant.parse("1970-01-01T12:09:59.999Z")
+      val instant = Instant.parse("2023-06-15T12:09:59.999Z")
 
       withPartitionedTable(datasetName, "HOUR", sampleDiagnosticType.schema) { tableName =>
-        val localDateTime = LocalDateTime.parse("2023-06-15T14:00:00")
+        val localDateTime = LocalDateTime.parse("2023-06-15T12:00:00")
+
+        val ioDiagnostics = boundedTestCollectionOf[IoDiagnostic]
+          .addElementsAtTime("2023-06-15T12:01:00Z", diagnostic1, diagnostic1, diagnostic2)
+          .addElementsAtTime("2023-06-15T12:02:00Z", diagnostic1, diagnostic2)
+          .build()
 
         sc
-          .parallelize(Seq(diagnostic1, diagnostic1, diagnostic1, diagnostic2, diagnostic2))
+          .testBounded(ioDiagnostics)
           .writeBoundedDiagnosticToBigQuery(
             IoIdentifier[IoDiagnostic.Raw]("any-id"),
             BigQueryPartition.hourly[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName", localDateTime),

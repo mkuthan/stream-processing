@@ -2,10 +2,11 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import scala.util.control.NonFatal
 
+import org.apache.beam.sdk.metrics.Counter
+
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
-import org.apache.beam.sdk.metrics.Counter
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared._

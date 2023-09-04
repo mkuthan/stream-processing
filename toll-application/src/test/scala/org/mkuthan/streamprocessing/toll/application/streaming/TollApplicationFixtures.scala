@@ -2,9 +2,9 @@ package org.mkuthan.streamprocessing.toll.application.streaming
 
 import java.{util => ju}
 
-import com.spotify.scio.bigquery.BigQueryType
-
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+
+import com.spotify.scio.bigquery.BigQueryType
 
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture

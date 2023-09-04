@@ -2,11 +2,11 @@ package org.mkuthan.streamprocessing.toll.domain.registration
 
 import scala.util.control.NonFatal
 
+import org.apache.beam.sdk.metrics.Counter
+
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
-
-import org.apache.beam.sdk.metrics.Counter
 
 import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.shared.common.DeadLetter

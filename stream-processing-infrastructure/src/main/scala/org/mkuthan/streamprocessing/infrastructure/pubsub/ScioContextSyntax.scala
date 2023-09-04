@@ -5,11 +5,11 @@ import scala.util.chaining._
 import scala.util.Failure
 import scala.util.Success
 
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
+
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
-
-import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.pubsub

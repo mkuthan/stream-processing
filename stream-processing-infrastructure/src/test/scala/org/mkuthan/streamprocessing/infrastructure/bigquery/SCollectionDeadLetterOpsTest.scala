@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-import com.spotify.scio.testing._
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -9,7 +7,7 @@ import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
-import org.mkuthan.streamprocessing.test.scio.TestScioContext
+import org.mkuthan.streamprocessing.test.scio._
 
 class SCollectionDeadLetterOpsTest extends AnyFlatSpec
     with Matchers
@@ -24,11 +22,11 @@ class SCollectionDeadLetterOpsTest extends AnyFlatSpec
     val deadLetter1 = BigQueryDeadLetter(id1, SampleObject1, error)
     val deadLetter2 = BigQueryDeadLetter(id2, SampleObject2, error)
 
-    val deadLetters = testStreamOf[BigQueryDeadLetter[SampleClass]]
-      .addElements(deadLetter1, deadLetter2)
+    val deadLetters = unboundedTestCollectionOf[BigQueryDeadLetter[SampleClass]]
+      .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
       .advanceWatermarkToInfinity()
 
-    val results = sc.testStream(deadLetters).toDiagnostic()
+    val results = sc.testUnbounded(deadLetters).toDiagnostic()
 
     results should containInAnyOrder(Seq(
       IoDiagnostic(id1.id, error),

@@ -1,8 +1,7 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-import com.spotify.scio.testing._
-
 import org.apache.beam.sdk.Pipeline.PipelineExecutionException
+
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
@@ -32,8 +31,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   it should "write bounded into not partitioned table" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
+        val sampleObjects = boundedTestCollectionOf[SampleClass]
+          .addElementsAtMinimumTime(SampleObject1, SampleObject2)
+          .build()
+
         sc
-          .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
+          .testBounded(sampleObjects)
           .writeBoundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryPartition.notPartitioned[SampleClass](s"$projectId:$datasetName.$tableName")
@@ -55,9 +58,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withDataset { datasetName =>
       withPartitionedTable(datasetName, "HOUR", SampleClassBigQuerySchema) { tableName =>
         val localDateTime = LocalDateTime.parse("2023-06-15T14:00:00")
+        val sampleObjects = boundedTestCollectionOf[SampleClass]
+          .addElementsAtMinimumTime(SampleObject1, SampleObject2)
+          .build()
 
         sc
-          .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
+          .testBounded(sampleObjects)
           .writeBoundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryPartition.hourly[SampleClass](s"$projectId:$datasetName.$tableName", localDateTime)
@@ -79,9 +85,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withDataset { datasetName =>
       withPartitionedTable(datasetName, "DAY", SampleClassBigQuerySchema) { tableName =>
         val localDate = LocalDate.parse("2023-06-15")
+        val sampleObjects = boundedTestCollectionOf[SampleClass]
+          .addElementsAtMinimumTime(SampleObject1, SampleObject2)
+          .build()
 
         sc
-          .parallelize[SampleClass](Seq(SampleObject1, SampleObject2))
+          .testBounded(sampleObjects)
           .writeBoundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryPartition.daily[SampleClass](s"$projectId:$datasetName.$tableName", localDate)
@@ -103,9 +112,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
+        val sampleObjects = boundedTestCollectionOf[SampleClass]
+          .addElementsAtMinimumTime(invalidObject)
+          .build()
 
         sc
-          .parallelize[SampleClass](Seq(invalidObject))
+          .testBounded(sampleObjects)
           .writeBoundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryPartition.notPartitioned[SampleClass](s"$projectId:$datasetName.$tableName")
@@ -123,12 +135,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
   it should "write unbounded into table" in withScioContext { sc =>
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
-        val sampleObjects = testStreamOf[SampleClass]
-          .addElements(SampleObject1, SampleObject2)
+        val sampleObjects = unboundedTestCollectionOf[SampleClass]
+          .addElementsAtWatermarkTime(SampleObject1, SampleObject2)
           .advanceWatermarkToInfinity()
 
         sc
-          .testStream(sampleObjects)
+          .testUnbounded(sampleObjects)
           .writeUnboundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
@@ -153,12 +165,12 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
 
-        val sampleObjects = testStreamOf[SampleClass]
-          .addElements(invalidObject)
+        val sampleObjects = unboundedTestCollectionOf[SampleClass]
+          .addElementsAtWatermarkTime(invalidObject)
           .advanceWatermarkToInfinity()
 
         val results = sc
-          .testStream(sampleObjects)
+          .testUnbounded(sampleObjects)
           .writeUnboundedToBigQuery(
             IoIdentifier[SampleClass]("any-id"),
             BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")

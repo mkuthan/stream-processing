@@ -15,9 +15,15 @@ import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.shared.common.SumByKey
 
-private[diagnostic] class SCollectionOps[D: Coder: SumByKey](
-    private val self: SCollection[D]
-) {
+trait DiagnosticSCollectionSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def diagnosticSCollectionOps[D: Coder: SumByKey](sc: SCollection[D]): SCollectionOps[D] =
+    new SCollectionOps[D](sc)
+}
+
+private[diagnostic] class SCollectionOps[D: Coder: SumByKey](private val self: SCollection[D]) {
 
   import SCollectionOps._
 
@@ -62,12 +68,4 @@ private[diagnostic] object SCollectionOps {
           .withTimestamp
           .map { case (diagnostic, timestamp) => toBigQueryTypeFn(diagnostic, timestamp) }
       }
-}
-
-trait SCollectionSyntax {
-
-  import scala.language.implicitConversions
-
-  implicit def diagnosticSCollectionOps[D: Coder: SumByKey](sc: SCollection[D]): SCollectionOps[D] =
-    new SCollectionOps[D](sc)
 }

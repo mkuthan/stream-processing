@@ -1,7 +1,5 @@
 package org.mkuthan.streamprocessing.shared.scio
 
-import com.spotify.scio.testing.SCollectionMatchers
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +9,6 @@ import org.mkuthan.streamprocessing.test.scio.TestScioContext
 class SContextSyntaxTest extends AnyFlatSpec
     with Matchers
     with TestScioContext
-    with SCollectionMatchers
     with ScioContextSyntax {
 
   behavior of "SContext syntax"

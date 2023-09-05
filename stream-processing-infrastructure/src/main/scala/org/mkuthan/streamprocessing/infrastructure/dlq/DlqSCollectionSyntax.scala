@@ -13,6 +13,15 @@ import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageConfiguration
 import org.mkuthan.streamprocessing.infrastructure.storage.Suffix
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
+
+trait DlqSCollectionSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def dlqSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sc)
+}
+
 private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
   def writeDeadLetterToStorageAsJson(
       id: IoIdentifier[T],
@@ -36,11 +45,4 @@ private[dlq] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollect
       .withFixedWindows(duration = configuration.windowDuration, options = configuration.windowOptions)
       .saveAsCustomOutput(id.id, io)
   }
-}
-
-trait SCollectionSyntax {
-  import scala.language.implicitConversions
-
-  implicit def dlqSCollectionOps[T <: AnyRef: Coder](sc: SCollection[T]): SCollectionOps[T] =
-    new SCollectionOps(sc)
 }

@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
-class ScioContextSyntaxTest extends AnyFlatSpec with Matchers
+class BigQueryScioContextSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

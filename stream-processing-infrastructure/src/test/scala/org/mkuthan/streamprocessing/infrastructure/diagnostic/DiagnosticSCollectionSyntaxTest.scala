@@ -19,7 +19,7 @@ import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio._
 
 @Slow
-class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class DiagnosticSCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with BigQueryContext {

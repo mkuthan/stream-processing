@@ -1,9 +1,9 @@
 package org.mkuthan.streamprocessing
 
-package object infrastructure extends bigquery.ScioContextSyntax
-    with bigquery.SCollectionSyntax
-    with diagnostic.SCollectionSyntax
-    with dlq.SCollectionSyntax
-    with pubsub.ScioContextSyntax
-    with pubsub.SCollectionSyntax
+package object infrastructure extends bigquery.BigQueryScioContextSyntax
+    with bigquery.BigQuerySCollectionSyntax
+    with diagnostic.DiagnosticSCollectionSyntax
+    with dlq.DlqSCollectionSyntax
+    with pubsub.PubsubScioContextSyntax
+    with pubsub.PubsubSCollectionSyntax
     with pubsub.PubsubCoders

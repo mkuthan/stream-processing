@@ -17,7 +17,7 @@ import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio._
 
 @Slow
-class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class PubsubSCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

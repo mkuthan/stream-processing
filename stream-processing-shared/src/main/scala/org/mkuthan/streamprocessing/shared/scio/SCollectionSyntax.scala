@@ -9,21 +9,16 @@ import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
 
-private[scio] class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
-  def unzip: (SCollection[R], SCollection[L]) = {
-    val leftOutput = SideOutput[L]()
+trait SCollectionSyntax {
 
-    val (rightOutput, sideOutputs) = self
-      .withSideOutputs(leftOutput)
-      .flatMap {
-        case (Right(r), _) => Some(r)
-        case (Left(l), ctx) =>
-          ctx.output(leftOutput, l)
-          None
-      }
+  import scala.language.implicitConversions
 
-    (rightOutput, sideOutputs(leftOutput))
-  }
+  implicit def sharedSCollectionOps[T: Coder](sc: SCollection[T]): SCollectionOps[T] =
+    new SCollectionOps(sc)
+
+  implicit def sharedSCollectionEitherOps[L: Coder, R: Coder](sc: SCollection[Either[L, R]])
+      : SCollectionEitherOps[L, R] =
+    new SCollectionEitherOps(sc)
 }
 
 private[scio] class SCollectionOps[T: Coder](private val self: SCollection[T]) {
@@ -41,13 +36,19 @@ private[scio] class SCollectionOps[T: Coder](private val self: SCollection[T]) {
     }
   }
 }
+private[scio] class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
+  def unzip: (SCollection[R], SCollection[L]) = {
+    val leftOutput = SideOutput[L]()
 
-trait SCollectionSyntax {
-  import scala.language.implicitConversions
+    val (rightOutput, sideOutputs) = self
+      .withSideOutputs(leftOutput)
+      .flatMap {
+        case (Right(r), _) => Some(r)
+        case (Left(l), ctx) =>
+          ctx.output(leftOutput, l)
+          None
+      }
 
-  implicit def coreSCollectionOps[T: Coder](sc: SCollection[T]): SCollectionOps[T] =
-    new SCollectionOps(sc)
-
-  implicit def coreSCollectionEitherOps[L: Coder, R: Coder](sc: SCollection[Either[L, R]]): SCollectionEitherOps[L, R] =
-    new SCollectionEitherOps(sc)
+    (rightOutput, sideOutputs(leftOutput))
+  }
 }

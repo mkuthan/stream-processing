@@ -15,6 +15,21 @@ import com.spotify.scio.values.SCollection
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 
+trait BigQuerySCollectionSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def bigQuerySCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
+      sc: SCollection[T]
+  ): SCollectionOps[T] =
+    new SCollectionOps(sc)
+
+  implicit def bigQuerySCollectionDeadLetterOps[T <: AnyRef: Coder](
+      sc: SCollection[BigQueryDeadLetter[T]]
+  ): SCollectionDeadLetterOps[T] =
+    new SCollectionDeadLetterOps(sc)
+}
+
 private[bigquery] class SCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
     private val self: SCollection[T]
 ) {
@@ -67,18 +82,4 @@ private[bigquery] class SCollectionDeadLetterOps[T <: AnyRef: Coder](
 ) {
   def toDiagnostic(): SCollection[IoDiagnostic] =
     self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
-}
-
-trait SCollectionSyntax {
-
-  import scala.language.implicitConversions
-
-  implicit def bigQuerySCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
-      sc: SCollection[T]
-  ): SCollectionOps[T] =
-    new SCollectionOps(sc)
-
-  implicit def bigquerySCollectionDeadLetterOps[T <: AnyRef: Coder](sc: SCollection[BigQueryDeadLetter[T]])
-      : SCollectionDeadLetterOps[T] =
-    new SCollectionDeadLetterOps(sc)
 }

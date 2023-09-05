@@ -14,6 +14,13 @@ import com.spotify.scio.ScioContext
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 
+trait BigQueryScioContextSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def bigQueryScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
+}
+
 private[bigquery] class ScioContextOps(private val self: ScioContext) extends AnyVal {
 
   def queryFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
@@ -51,10 +58,4 @@ private[bigquery] class ScioContextOps(private val self: ScioContext) extends An
       .withName(s"$id/Deserialize")
       .map(bigQueryType.fromTableRow)
   }
-}
-
-trait ScioContextSyntax {
-  import scala.language.implicitConversions
-
-  implicit def bigQueryScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
 }

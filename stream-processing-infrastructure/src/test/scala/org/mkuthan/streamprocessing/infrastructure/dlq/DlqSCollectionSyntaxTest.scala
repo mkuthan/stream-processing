@@ -19,7 +19,7 @@ import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
-class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class DlqSCollectionSyntaxTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

@@ -16,7 +16,14 @@ import org.mkuthan.streamprocessing.infrastructure.pubsub
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
-private[pubsub] class ScioContextOps(private val self: ScioContext) {
+trait PubsubScioContextSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def pubsubScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
+}
+
+private[pubsub] class ScioContextOps(private val self: ScioContext) extends AnyVal {
 
   import ScioContextOps._
 
@@ -51,9 +58,3 @@ private[pubsub] class ScioContextOps(private val self: ScioContext) {
 }
 
 private[pubsub] object ScioContextOps extends Utils with PubsubCoders
-
-trait ScioContextSyntax {
-  import scala.language.implicitConversions
-
-  implicit def pubsubScioContextOps(sc: ScioContext): ScioContextOps = new ScioContextOps(sc)
-}

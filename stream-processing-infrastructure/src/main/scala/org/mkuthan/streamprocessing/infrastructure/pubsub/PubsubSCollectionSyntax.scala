@@ -13,6 +13,19 @@ import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
+trait PubsubSCollectionSyntax {
+
+  import scala.language.implicitConversions
+
+  implicit def pubsubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[Message[T]]): SCollectionOps[T] =
+    new SCollectionOps(sc)
+
+  implicit def pubsubSCollectionDeadLetterOps[T <: AnyRef: Coder](
+      sc: SCollection[PubsubDeadLetter[T]]
+  ): SCollectionDeadLetterOps[T] =
+    new SCollectionDeadLetterOps(sc)
+}
+
 private[pubsub] class SCollectionOps[T <: AnyRef: Coder](private val self: SCollection[Message[T]]) {
 
   import SCollectionOps._
@@ -44,16 +57,4 @@ private[pubsub] object SCollectionOps extends Utils with PubsubCoders
 private[pubsub] class SCollectionDeadLetterOps[T <: AnyRef: Coder](private val self: SCollection[PubsubDeadLetter[T]]) {
   def toDiagnostic(): SCollection[IoDiagnostic] =
     self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
-}
-
-trait SCollectionSyntax {
-
-  import scala.language.implicitConversions
-
-  implicit def pubsubSCollectionOps[T <: AnyRef: Coder](sc: SCollection[Message[T]]): SCollectionOps[T] =
-    new SCollectionOps(sc)
-
-  implicit def pubsubSCollectionDeadLetterOps[T <: AnyRef: Coder](sc: SCollection[PubsubDeadLetter[T]])
-      : SCollectionDeadLetterOps[T] =
-    new SCollectionDeadLetterOps(sc)
 }

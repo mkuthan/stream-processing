@@ -176,6 +176,8 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
             BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
           )
 
+        results.debug()
+
         val resultsSink = InMemorySink(results)
 
         val run = sc.run()
@@ -184,7 +186,7 @@ class SCollectionSyntaxTest extends AnyFlatSpec with Matchers
           val deadLetter = resultsSink.toElement
 
           deadLetter.row should be(invalidObject)
-          deadLetter.error should include("Problem converting field root.instantField expected type: TIMESTAMP")
+          deadLetter.error should include("Problem converting field root.instantfield expected type: TIMESTAMP")
         }
 
         run.pipelineResult.cancel()

@@ -1,12 +1,12 @@
-package org.mkuthan.streamprocessing.infrastructure.dlq
+package org.mkuthan.streamprocessing.infrastructure.dlq.syntax
 
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 
-import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.dlq.DlqConfiguration
 import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
@@ -19,7 +19,7 @@ import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
-class DlqSCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class DlqSCollectionOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

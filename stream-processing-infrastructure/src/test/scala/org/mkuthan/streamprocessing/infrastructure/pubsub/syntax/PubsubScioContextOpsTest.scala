@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.pubsub
+package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
 import org.joda.time.Instant
 import org.scalatest.concurrent.Eventually
@@ -7,8 +7,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 import org.scalatest.LoneElement._
 
-import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonReadConfiguration
+import org.mkuthan.streamprocessing.infrastructure.pubsub.NamedIdAttribute
+import org.mkuthan.streamprocessing.infrastructure.pubsub.NamedTimestampAttribute
+import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.shared.common.Message
@@ -20,7 +23,7 @@ import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
-class PubsubScioContextSyntaxTest extends AnyFlatSpec with Matchers
+class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

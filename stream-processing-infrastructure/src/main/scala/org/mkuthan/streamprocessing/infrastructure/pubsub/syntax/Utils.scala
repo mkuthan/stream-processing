@@ -1,10 +1,10 @@
-package org.mkuthan.streamprocessing.infrastructure.pubsub
+package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
 import java.util.{Map => JMap}
 
 import scala.jdk.CollectionConverters._
 
-private[pubsub] trait Utils {
+private[syntax] object Utils {
   def readAttributes(attributes: JMap[String, String]): Map[String, String] =
     if (attributes == null) {
       Map.empty[String, String]

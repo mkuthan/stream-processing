@@ -1,11 +1,15 @@
-package org.mkuthan.streamprocessing.infrastructure.bigquery
+package org.mkuthan.streamprocessing.infrastructure.bigquery.syntax
 
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 
-import org.mkuthan.streamprocessing.infrastructure._
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryQuery
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
+import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction
+import org.mkuthan.streamprocessing.infrastructure.bigquery.SelectedFields
+import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageReadConfiguration
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
@@ -15,7 +19,7 @@ import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
-class BigQueryScioContextSyntaxTest extends AnyFlatSpec with Matchers
+class BigQueryScioContextOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

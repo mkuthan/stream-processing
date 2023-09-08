@@ -1,0 +1,3 @@
+package org.mkuthan.streamprocessing.infrastructure.bigquery.syntax
+
+trait BigQuerySyntax extends BigQueryScioContextSyntax with BigQuerySCollectionSyntax

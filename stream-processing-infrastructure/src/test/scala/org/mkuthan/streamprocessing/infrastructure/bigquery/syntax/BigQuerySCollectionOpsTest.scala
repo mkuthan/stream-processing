@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.bigquery
+package org.mkuthan.streamprocessing.infrastructure.bigquery.syntax
 
 import org.apache.beam.sdk.Pipeline.PipelineExecutionException
 
@@ -10,7 +10,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 
-import org.mkuthan.streamprocessing.infrastructure._
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
+import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
@@ -20,7 +21,7 @@ import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio._
 
 @Slow
-class BigQuerySCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

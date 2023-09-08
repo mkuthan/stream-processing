@@ -1,0 +1,3 @@
+package org.mkuthan.streamprocessing.infrastructure.diagnostic.syntax
+
+trait DiagnosticSyntax extends DiagnosticSCollectionSyntax

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.pubsub
+package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
 import scala.collection.mutable
 
@@ -9,6 +9,7 @@ import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
@@ -17,7 +18,7 @@ import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio._
 
 @Slow
-class PubsubSCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class PubsubSCollectionOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with IntegrationTestFixtures

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.diagnostic
+package org.mkuthan.streamprocessing.infrastructure.diagnostic.syntax
 
 import com.spotify.scio.bigquery.types.BigQueryType
 
@@ -9,17 +9,17 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 
-import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.scio._
 
 @Slow
-class DiagnosticSCollectionSyntaxTest extends AnyFlatSpec with Matchers
+class DiagnosticSCollectionOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext
     with BigQueryContext {

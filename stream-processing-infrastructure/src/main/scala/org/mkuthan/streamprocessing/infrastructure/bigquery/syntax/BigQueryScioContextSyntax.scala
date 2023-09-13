@@ -1,15 +1,17 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery.syntax
 
-import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.ClassTag
 import scala.util.chaining.scalaUtilChainingOps
 
-import com.spotify.scio.ScioContext
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
+import com.spotify.scio.ScioContext
+
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryQuery
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.bigquery.ExportConfiguration

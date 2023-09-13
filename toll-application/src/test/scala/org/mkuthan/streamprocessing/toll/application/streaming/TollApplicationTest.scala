@@ -1,8 +1,14 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
-import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
+
+import org.scalactic.Equality
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.test.scio._
@@ -12,9 +18,6 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
-import org.scalactic.Equality
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext

@@ -1,17 +1,15 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery.syntax
 
-import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 import scala.util.chaining.scalaUtilChainingOps
 
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
-
+import com.spotify.scio.ScioContext
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.ScioContext
-
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryQuery
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.bigquery.ExportConfiguration
@@ -21,6 +19,8 @@ import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 private[syntax] trait BigQueryScioContextSyntax {
 
   implicit class BigQueryScioContextOps(private val self: ScioContext) {
+
+    import com.spotify.scio.BetterScioContext._
 
     def queryFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
         id: IoIdentifier[T],
@@ -34,10 +34,16 @@ private[syntax] trait BigQueryScioContextSyntax {
 
       val bigQueryType = BigQueryType[T]
 
-      self
-        .customInput(id.id, io)
-        .withName(s"$id/Deserialize")
-        .map(bigQueryType.fromTableRow)
+      self.betterCustomInput(id.id) { in =>
+        self.wrap(in.apply("Query", io))
+          .withName("Deserialize")
+          .map(bigQueryType.fromTableRow)
+      }
+
+//      self
+//        .customInput(id.id, io)
+//        .withName(s"$id/Deserialize")
+//        .map(bigQueryType.fromTableRow)
     }
 
     def readFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
@@ -52,10 +58,16 @@ private[syntax] trait BigQueryScioContextSyntax {
 
       val bigQueryType = BigQueryType[T]
 
-      self
-        .customInput(id.id, io)
-        .withName(s"$id/Deserialize")
-        .map(bigQueryType.fromTableRow)
+      self.betterCustomInput(id.id) { in =>
+        self.wrap(in.apply("Read", io))
+          .withName("Deserialize")
+          .map(bigQueryType.fromTableRow)
+      }
+
+//      self
+//        .customInput(id.id, io)
+//        .withName(s"$id/Deserialize")
+//        .map(bigQueryType.fromTableRow)
     }
   }
 

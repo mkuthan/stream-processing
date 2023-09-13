@@ -1,25 +1,20 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
-import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
-
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
-import com.spotify.scio.testing.TransformOverride
-
-import com.google.api.services.bigquery.model.TableRow
-import org.scalactic.Equality
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage
 import org.mkuthan.streamprocessing.infrastructure._
-import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
+import org.scalactic.Equality
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
@@ -89,10 +84,10 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           .advanceWatermarkToInfinity().testStream
       )
       .input(
-        CustomIO[TableRow](VehicleRegistrationTableIoId.id),
+        CustomIO[VehicleRegistration.Raw](VehicleRegistrationTableIoId.id),
         Seq(
           // TODO: define another vehicle registration(s) for reading historical data
-          anyVehicleRegistrationRawTableRow
+          anyVehicleRegistrationRaw
         )
       )
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
@@ -100,49 +95,32 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // calculate tool booth stats
-      .transformOverride(TransformOverride.ofIter[TollBoothStats.Raw, BigQueryDeadLetter[TollBoothStats.Raw]](
-        EntryStatsTableIoId.id,
-        (r: TollBoothStats.Raw) =>
-          // TODO: assert that diagnostic table contains expected rows
-          // r should be(anyTollBoothEntryRawTableRow)
-          Option.empty[BigQueryDeadLetter[TollBoothStats.Raw]].toList
-      ))
+      .output(CustomIO[TollBoothStats.Raw](EntryStatsTableIoId.id)) { results =>
+        results should containSingleValue(anyTollBoothStatsRaw)
+      }
       // calculate total vehicle times
-      .transformOverride(TransformOverride.ofIter[TotalVehicleTime.Raw, BigQueryDeadLetter[TotalVehicleTime.Raw]](
-        TotalVehicleTimeTableIoId.id,
-        (r: TotalVehicleTime.Raw) =>
-          // TODO: assert that diagnostic table contains expected rows
-          // r should be(anyTotalVehicleTimeRawTableRow)
-          Option.empty[BigQueryDeadLetter[TotalVehicleTime.Raw]].toList
-      ))
-      .transformOverride(TransformOverride.ofIter[
-        TotalVehicleTimeDiagnostic.Raw,
-        BigQueryDeadLetter[TotalVehicleTimeDiagnostic.Raw]
-      ](
-        TotalVehicleTimeDiagnosticTableIoId.id,
-        (r: TotalVehicleTimeDiagnostic.Raw) =>
-          // TODO: add scenario with diagnostic output
-          Option.empty[BigQueryDeadLetter[TotalVehicleTimeDiagnostic.Raw]].toList
-      ))
+      .output(CustomIO[TotalVehicleTime.Raw](TotalVehicleTimeTableIoId.id)) { results =>
+        results should containSingleValue(anyTotalVehicleTimeRaw)
+      }
+      .output(CustomIO[TotalVehicleTimeDiagnostic.Raw](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+        // TODO
+        results should beEmpty
+      }
       // calculate vehicles with expired registrations
       .output(CustomIO[PubsubMessage](VehiclesWithExpiredRegistrationTopicIoId.id)) { results =>
         results should containSingleValue(anyVehicleWithExpiredRegistrationRawPubsubMessage)
       }
-      .transformOverride(TransformOverride.ofIter[
-        VehiclesWithExpiredRegistrationDiagnostic.Raw,
-        BigQueryDeadLetter[VehiclesWithExpiredRegistrationDiagnostic.Raw]
-      ](
-        VehiclesWithExpiredRegistrationDiagnosticTableIoId.id,
-        (r: VehiclesWithExpiredRegistrationDiagnostic.Raw) =>
-          // TODO: add scenario with diagnostic output
-          Option.empty[BigQueryDeadLetter[VehiclesWithExpiredRegistrationDiagnostic.Raw]].toList
-      ))
-      .transformOverride(TransformOverride.ofIter[IoDiagnostic.Raw, BigQueryDeadLetter[IoDiagnostic.Raw]](
-        DiagnosticTableIoId.id,
-        (r: IoDiagnostic.Raw) =>
-          // TODO: test for two invalid IoDiagnostic: toll booth entry and toll booth exit
-          Option.empty[BigQueryDeadLetter[IoDiagnostic.Raw]].toList
-      ))
+      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Raw](
+        VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
+      )) {
+        results =>
+          // TODO
+          results should beEmpty
+      }
+      .output(CustomIO[IoDiagnostic.Raw](DiagnosticTableIoId.id)) { results =>
+        // toll booth entry and toll booth exit
+        results should haveSize(2)
+      }
       .run()
   }
 

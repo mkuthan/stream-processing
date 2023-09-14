@@ -21,6 +21,9 @@ private[syntax] trait PubsubSCollectionSyntax {
   implicit class PubsubSCollectionOps[T <: AnyRef: Coder](
       private val self: SCollection[Message[T]]
   ) {
+
+    import com.spotify.scio.values.BetterSCollection._
+
     def publishJsonToPubSub(
         id: IoIdentifier[T],
         topic: PubsubTopic[T],
@@ -31,15 +34,26 @@ private[syntax] trait PubsubSCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(topic.id)
 
-      val serializedMessages = self
-        .withName(s"$id/Serialize")
-        .map { msg =>
-          val payload = JsonSerde.writeJsonAsBytes[T](msg.payload)
-          val attributes = Utils.writeAttributes(msg.attributes)
-          new BeamPubsubMessage(payload, attributes)
-        }
+      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+        in
+          .withName("Serialize")
+          .map { msg =>
+            val payload = JsonSerde.writeJsonAsBytes[T](msg.payload)
+            val attributes = Utils.writeAttributes(msg.attributes)
+            new BeamPubsubMessage(payload, attributes)
+          }
+          .internal.apply("Publish", io)
+      }
 
-      val _ = serializedMessages.saveAsCustomOutput(id.id, io)
+//      val serializedMessages = self
+//        .withName(s"$id/Serialize")
+//        .map { msg =>
+//          val payload = JsonSerde.writeJsonAsBytes[T](msg.payload)
+//          val attributes = Utils.writeAttributes(msg.attributes)
+//          new BeamPubsubMessage(payload, attributes)
+//        }
+//
+//      val _ = serializedMessages.saveAsCustomOutput(id.id, io)
     }
   }
 
@@ -49,5 +63,4 @@ private[syntax] trait PubsubSCollectionSyntax {
     def toDiagnostic(): SCollection[IoDiagnostic] =
       self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
   }
-
 }

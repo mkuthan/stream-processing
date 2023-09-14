@@ -30,12 +30,14 @@ object TollApplication {
     // receive toll booth entries and toll booth exists
     val (boothEntriesRaw, boothEntriesRawDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
+        .unzip
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
     boothEntriesDlq.writeDeadLetterToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) =
       sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
+        .unzip
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq.writeDeadLetterToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
@@ -43,7 +45,7 @@ object TollApplication {
     // receive vehicle registrations
     val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
       sc.subscribeJsonFromPubsub(VehicleRegistrationSubscriptionIoId, config.vehicleRegistrationSubscription)
-
+        .unzip
     val vehicleRegistrationsRawHistory =
       sc.readFromBigQuery(VehicleRegistrationTableIoId, config.vehicleRegistrationTable)
 
@@ -78,6 +80,7 @@ object TollApplication {
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, TenMinutes)
+
     VehiclesWithExpiredRegistration
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)

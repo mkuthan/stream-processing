@@ -7,7 +7,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeFixture
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationFixture
 
-trait TollApplicationFixtures
+trait TollJobFixtures
     extends TollBoothEntryFixture
     with TollBoothExitFixture
     with TollBoothStatsFixture

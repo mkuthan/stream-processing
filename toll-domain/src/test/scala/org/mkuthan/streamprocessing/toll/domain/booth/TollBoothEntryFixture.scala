@@ -7,7 +7,7 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothEntryFixture {
 
-  final val anyTollBoothEntryRaw = TollBoothEntry.Raw(
+  final val anyTollBoothEntryPayload = TollBoothEntry.Payload(
     id = "1",
     entry_time = "2014-09-10T12:01:00Z",
     license_plate = "JNB 7001",
@@ -20,14 +20,14 @@ trait TollBoothEntryFixture {
     tag = "String"
   )
 
-  final val tollBoothEntryRawInvalid = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
+  final val tollBoothEntryPayloadInvalid = anyTollBoothEntryPayload.copy(entry_time = "invalid time")
 
-  final val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Raw](
-    data = tollBoothEntryRawInvalid,
+  final val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Payload](
+    data = tollBoothEntryPayloadInvalid,
     error = "Invalid format: \"invalid time\""
   )
 
-  final val tollBoothEntryRawWithoutExit = anyTollBoothEntryRaw.copy(license_plate = "other license plate")
+  final val tollBoothEntryPayloadWithoutExit = anyTollBoothEntryPayload.copy(license_plate = "other license plate")
 
   final val anyTollBoothEntry = TollBoothEntry(
     id = TollBoothId("1"),

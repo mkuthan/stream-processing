@@ -4,6 +4,7 @@ import scala.util.control.NonFatal
 
 import org.apache.beam.sdk.metrics.Counter
 
+import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
@@ -23,11 +24,11 @@ case class TollBoothEntry(
 
 object TollBoothEntry {
 
-  type DeadLetterRaw = DeadLetter[Raw]
+  type DeadLetterPayload = DeadLetter[Payload]
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
 
-  final case class Raw(
+  case class Payload(
       id: String,
       entry_time: String,
       license_plate: String,
@@ -40,12 +41,27 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(input: SCollection[Message[Raw]]): (SCollection[TollBoothEntry], SCollection[DeadLetterRaw]) =
+  @BigQueryType.toTable
+  case class Record(
+      id: String,
+      entry_time: Instant,
+      license_plate: String,
+      state: String,
+      make: String,
+      model: String,
+      vehicle_type: String,
+      weight_type: String,
+      toll: String,
+      tag: String
+  )
+
+  def decodePayload(input: SCollection[Message[Payload]])
+      : (SCollection[TollBoothEntry], SCollection[DeadLetterPayload]) =
     input
-      .map(element => fromRaw(element.payload))
+      .map(element => fromPayload(element.payload))
       .unzip
 
-  private def fromRaw(raw: Raw): Either[DeadLetterRaw, TollBoothEntry] =
+  private def fromPayload(raw: Payload): Either[DeadLetterPayload, TollBoothEntry] =
     try {
       val tollBoothEntry = TollBoothEntry(
         id = TollBoothId(raw.id),

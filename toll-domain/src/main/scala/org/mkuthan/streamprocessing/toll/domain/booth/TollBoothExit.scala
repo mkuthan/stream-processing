@@ -4,6 +4,7 @@ import scala.util.control.NonFatal
 
 import org.apache.beam.sdk.metrics.Counter
 
+import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
@@ -22,22 +23,30 @@ final case class TollBoothExit(
 
 object TollBoothExit {
 
-  type DeadLetterRaw = DeadLetter[Raw]
+  type DeadLetterPayload = DeadLetter[Payload]
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothExit]("dlq")
 
-  final case class Raw(
+  case class Payload(
       id: String,
       exit_time: String,
       license_plate: String
   )
 
-  def decode(input: SCollection[Message[Raw]]): (SCollection[TollBoothExit], SCollection[DeadLetterRaw]) =
+  @BigQueryType.toTable
+  case class Record(
+      id: String,
+      exit_time: Instant,
+      license_plate: String
+  )
+
+  def decodePayload(input: SCollection[Message[Payload]])
+      : (SCollection[TollBoothExit], SCollection[DeadLetterPayload]) =
     input
-      .map(element => fromRaw(element.payload))
+      .map(element => fromPayload(element.payload))
       .unzip
 
-  private def fromRaw(raw: Raw): Either[DeadLetterRaw, TollBoothExit] =
+  private def fromPayload(raw: Payload): Either[DeadLetterPayload, TollBoothExit] =
     try {
       val tollBoothExit = TollBoothExit(
         id = TollBoothId(raw.id),

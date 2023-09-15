@@ -15,8 +15,6 @@ import org.joda.time.Duration
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.shared._
-import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
-import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -26,7 +24,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-object TollStreamingApplication {
+object TollStreamingJob extends TollStreamingJobIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
@@ -52,23 +50,23 @@ object TollStreamingApplication {
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
 
-    val config = TollApplicationConfig.parse(args)
+    val config = TollStreamingJobConfig.parse(args)
 
     // receive toll booth entries and toll booth exists
-    val (boothEntriesRaw, boothEntriesRawDlq) =
+    val (boothEntryMessages, boothEntryMessagesDlq) =
       sc.subscribeJsonFromPubsub(EntrySubscriptionIoId, config.entrySubscription)
         .unzip
 
-    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
+    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decodePayload(boothEntryMessages)
     boothEntriesDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
-    val (boothExitsRaw, boothExitsRawDlq) =
+    val (boothExitMessages, boothExitMessagesDlq) =
       sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
         .unzip
 
-    val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
+    val (boothExits, boothExistsDlq) = TollBoothExit.decodePayload(boothExitMessages)
     boothExistsDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
@@ -124,8 +122,8 @@ object TollStreamingApplication {
 
     // dead letters diagnostic
     val ioDiagnostics = sc.unionInGlobalWindow(
-      boothEntriesRawDlq.toDiagnostic(EntrySubscriptionIoId),
-      boothExitsRawDlq.toDiagnostic(ExitSubscriptionIoId),
+      boothEntryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
+      boothExitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
       vehicleRegistrationsRawUpdatesDlq.toDiagnostic(VehicleRegistrationTableIoId),
       tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId),
       totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId)

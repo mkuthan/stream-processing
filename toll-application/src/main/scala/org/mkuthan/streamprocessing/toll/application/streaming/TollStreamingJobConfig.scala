@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application.config
+package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.Args
 
@@ -16,11 +16,11 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-case class TollApplicationConfig(
-    entrySubscription: PubsubSubscription[TollBoothEntry.Raw],
-    entryDlq: StorageBucket[TollBoothEntry.DeadLetterRaw],
-    exitSubscription: PubsubSubscription[TollBoothExit.Raw],
-    exitDlq: StorageBucket[TollBoothExit.DeadLetterRaw],
+case class TollStreamingJobConfig(
+    entrySubscription: PubsubSubscription[TollBoothEntry.Payload],
+    entryDlq: StorageBucket[TollBoothEntry.DeadLetterPayload],
+    exitSubscription: PubsubSubscription[TollBoothExit.Payload],
+    exitDlq: StorageBucket[TollBoothExit.DeadLetterPayload],
     vehicleRegistrationSubscription: PubsubSubscription[VehicleRegistration.Raw],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Raw],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterRaw],
@@ -32,8 +32,8 @@ case class TollApplicationConfig(
     diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
 )
 
-object TollApplicationConfig {
-  def parse(args: Args): TollApplicationConfig = TollApplicationConfig(
+object TollStreamingJobConfig {
+  def parse(args: Args): TollStreamingJobConfig = TollStreamingJobConfig(
     entrySubscription = PubsubSubscription(args.required("entrySubscription")),
     entryDlq = StorageBucket(args.required("entryDlq")),
     exitSubscription = PubsubSubscription(args.required("exitSubscription")),

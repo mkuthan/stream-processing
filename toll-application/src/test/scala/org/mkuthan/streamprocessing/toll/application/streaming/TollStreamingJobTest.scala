@@ -11,8 +11,7 @@ import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
-import org.mkuthan.streamprocessing.toll.application.io._
-import org.mkuthan.streamprocessing.toll.application.TollApplicationFixtures
+import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -22,15 +21,16 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-class TollStreamingApplicationTest extends AnyFlatSpec with Matchers
+class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
-    with TollApplicationFixtures {
+    with TollJobFixtures
+    with TollStreamingJobIo {
 
   // TODO: move to the infra module, but where?
   type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
-  "Toll application" should "run" in {
-    JobTest[TollStreamingApplication.type]
+  "Toll job" should "run in the streaming mode" in {
+    JobTest[TollStreamingJob.type]
       .args(
         "--entrySubscription=projects/any-id/subscriptions/entry-subscription",
         "--entryDlq=entry_dlq",
@@ -47,13 +47,13 @@ class TollStreamingApplicationTest extends AnyFlatSpec with Matchers
         "--diagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
-      .inputStream[PubsubResult[TollBoothEntry.Raw]](
-        CustomIO[PubsubResult[TollBoothEntry.Raw]](EntrySubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Raw]]
+      .inputStream[PubsubResult[TollBoothEntry.Payload]](
+        CustomIO[PubsubResult[TollBoothEntry.Payload]](EntrySubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Payload]]
           .addElementsAtTime(
-            anyTollBoothEntryRaw.entry_time,
-            Right(Message(anyTollBoothEntryRaw)),
-            Right(Message(tollBoothEntryRawInvalid)),
+            anyTollBoothEntryPayload.entry_time,
+            Right(Message(anyTollBoothEntryPayload)),
+            Right(Message(tollBoothEntryPayloadInvalid)),
             Left(PubsubDeadLetter(
               "corrupted".getBytes,
               Map(),
@@ -62,16 +62,16 @@ class TollStreamingApplicationTest extends AnyFlatSpec with Matchers
           )
           .advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[DeadLetter[TollBoothEntry.Raw]](EntryDlqBucketIoId.id)) { results =>
+      .output(CustomIO[DeadLetter[TollBoothEntry.Payload]](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingError)
       }
       .inputStream(
-        CustomIO[PubsubResult[TollBoothExit.Raw]](ExitSubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[TollBoothExit.Raw]]
+        CustomIO[PubsubResult[TollBoothExit.Payload]](ExitSubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[TollBoothExit.Payload]]
           .addElementsAtTime(
-            anyTollBoothExitRaw.exit_time,
-            Right(Message(anyTollBoothExitRaw)),
-            Right(Message(tollBoothExitRawInvalid)),
+            anyTollBoothExitPayload.exit_time,
+            Right(Message(anyTollBoothExitPayload)),
+            Right(Message(tollBoothExitPayloadInvalid)),
             Left(PubsubDeadLetter(
               "corrupted".getBytes,
               Map(),
@@ -79,7 +79,7 @@ class TollStreamingApplicationTest extends AnyFlatSpec with Matchers
             ))
           ).advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[DeadLetter[TollBoothExit.Raw]](ExitDlqBucketIoId.id)) { results =>
+      .output(CustomIO[DeadLetter[TollBoothExit.Payload]](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingError)
       }
       // receive vehicle registrations

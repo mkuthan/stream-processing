@@ -14,24 +14,24 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
   behavior of "TollBoothEntry"
 
-  it should "decode valid TollBoothEntry into raw" in runWithScioContext { sc =>
-    val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Raw]]
-      .addElementsAtWatermarkTime(Message(anyTollBoothEntryRaw))
+  it should "decode valid payload into TollBoothEntry" in runWithScioContext { sc =>
+    val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
+      .addElementsAtWatermarkTime(Message(anyTollBoothEntryPayload))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.testUnbounded(inputs))
+    val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
 
     results should containSingleValue(anyTollBoothEntry)
     dlq should beEmpty
   }
 
-  it should "put invalid TollBoothEntry into DLQ" in {
+  it should "put invalid payload into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Raw]]
-        .addElementsAtWatermarkTime(Message(tollBoothEntryRawInvalid))
+      val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
+        .addElementsAtWatermarkTime(Message(tollBoothEntryPayloadInvalid))
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.testUnbounded(inputs))
+      val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
 
       results should beEmpty
       dlq should containSingleValue(tollBoothEntryDecodingError)

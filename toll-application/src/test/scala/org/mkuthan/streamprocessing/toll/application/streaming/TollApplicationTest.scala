@@ -25,6 +25,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollApplicationFixtures {
 
+  // TODO: move to the infra module, but where?
   type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
   "Toll application" should "run" in {
@@ -49,7 +50,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubResult[TollBoothEntry.Raw]](EntrySubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Raw]]
           .addElementsAtTime(
-            tollBoothEntryTime,
+            anyTollBoothEntryRaw.entry_time,
             Right(Message(anyTollBoothEntryRaw)),
             Right(Message(tollBoothEntryRawInvalid)),
             Left(PubsubDeadLetter(
@@ -68,7 +69,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubResult[TollBoothExit.Raw]](ExitSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[TollBoothExit.Raw]]
           .addElementsAtTime(
-            tollBoothExitTime,
+            anyTollBoothExitRaw.exit_time,
             Right(Message(anyTollBoothExitRaw)),
             Right(Message(tollBoothExitRawInvalid)),
             Left(PubsubDeadLetter(

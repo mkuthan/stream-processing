@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.shared.scio.syntax
 
+import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -30,5 +31,18 @@ class SCollectionOpsTest extends AnyFlatSpec
       )
 
     results should containInAnyOrder(Seq("one", "two", "three"))
+  }
+
+  it should "map with timestamp" in runWithScioContext { sc =>
+    val instant = Instant.parse("2023-09-15T18:19:00Z")
+    val element = "any element"
+    val collection = boundedTestCollectionOf[String]
+      .addElementsAtTime(instant, element)
+      .build()
+
+    val results = sc.testBounded(collection)
+      .mapWithTimestamp { case (e, i) => e + i.toString }
+
+    results should containSingleValue(s"$element$instant")
   }
 }

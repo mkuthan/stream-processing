@@ -11,7 +11,7 @@ class SCollectionEitherOpsTest extends AnyFlatSpec
     with TestScioContext
     with SCollectionSyntax {
 
-  behavior of "SCollection syntax"
+  behavior of "SCollectionEither syntax"
 
   it should "unzip Either" in runWithScioContext { sc =>
     val collection = boundedTestCollectionOf[Either[String, String]]

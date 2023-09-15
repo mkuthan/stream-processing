@@ -4,6 +4,7 @@ import scala.annotation.unused
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryStorageApiInsertError
 import org.apache.beam.sdk.transforms.DoFn
 import org.apache.beam.sdk.transforms.DoFn.Element
 import org.apache.beam.sdk.transforms.DoFn.OutputReceiver
@@ -13,12 +14,10 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 
-import com.google.api.services.bigquery.model.TableRow
-
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 
 private[bigquery] object BigQueryDeadLetterEncoderDoFn {
-  private type In = (TableRow, String)
+  private type In = BigQueryStorageApiInsertError
   private type Out[T] = BigQueryDeadLetter[T]
 }
 
@@ -35,11 +34,9 @@ private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder:
   def processElement(
       @Element element: In,
       output: OutputReceiver[Out[T]]
-  ): Unit =
-    element match {
-      case (tableRow, error) =>
-        val row = bigQueryType.fromTableRow(tableRow)
-        val deadLetter = BigQueryDeadLetter(id, row, error)
-        output.output(deadLetter)
-    }
+  ): Unit = {
+    val row = bigQueryType.fromTableRow(element.getRow)
+    val deadLetter = BigQueryDeadLetter(id, row, element.getErrorMessage)
+    output.output(deadLetter)
+  }
 }

@@ -4,7 +4,7 @@ import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.shared.common.SumByKey
+import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
 case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
   private lazy val keyFields = this match {

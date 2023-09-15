@@ -44,6 +44,7 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
 
         val (messages, _) =
           sc.subscribeJsonFromPubsub(IoIdentifier[SampleClass]("any-id"), PubsubSubscription[SampleClass](subscription))
+            .unzip
 
         val sink = InMemorySink(messages)
 
@@ -70,6 +71,7 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
 
         val (_, dlq) =
           sc.subscribeJsonFromPubsub(IoIdentifier[SampleClass]("any-id"), PubsubSubscription[SampleClass](subscription))
+            .unzip
 
         val sink = InMemorySink(dlq)
 
@@ -101,7 +103,7 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
           IoIdentifier[SampleClass]("any-id"),
           subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
-        )
+        ).unzip
 
         val messagesSink = InMemorySink(messages)
 
@@ -130,7 +132,7 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
           IoIdentifier[SampleClass]("any-id"),
           subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
-        )
+        ).unzip
 
         val messagesSink = InMemorySink(messages.withTimestamp)
 

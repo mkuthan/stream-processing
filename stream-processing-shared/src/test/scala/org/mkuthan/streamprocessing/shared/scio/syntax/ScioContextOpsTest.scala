@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.scio
+package org.mkuthan.streamprocessing.shared.scio.syntax
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.test.scio.boundedTestCollectionOf
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
-class SContextSyntaxTest extends AnyFlatSpec
+class ScioContextOpsTest extends AnyFlatSpec
     with Matchers
     with TestScioContext
     with ScioContextSyntax {

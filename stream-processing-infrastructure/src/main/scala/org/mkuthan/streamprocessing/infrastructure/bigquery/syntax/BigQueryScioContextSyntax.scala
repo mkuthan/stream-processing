@@ -22,6 +22,8 @@ private[syntax] trait BigQueryScioContextSyntax {
 
   implicit class BigQueryScioContextOps(private val self: ScioContext) {
 
+    import com.spotify.scio.BetterScioContext._
+
     def queryFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
         id: IoIdentifier[T],
         query: BigQueryQuery[T],
@@ -34,10 +36,11 @@ private[syntax] trait BigQueryScioContextSyntax {
 
       val bigQueryType = BigQueryType[T]
 
-      self
-        .customInput(id.id, io)
-        .withName(s"$id/Deserialize")
-        .map(bigQueryType.fromTableRow)
+      self.betterCustomInput(id.id) { in =>
+        self.wrap(in.apply("Query", io))
+          .withName("Deserialize")
+          .map(bigQueryType.fromTableRow)
+      }
     }
 
     def readFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
@@ -52,10 +55,11 @@ private[syntax] trait BigQueryScioContextSyntax {
 
       val bigQueryType = BigQueryType[T]
 
-      self
-        .customInput(id.id, io)
-        .withName(s"$id/Deserialize")
-        .map(bigQueryType.fromTableRow)
+      self.betterCustomInput(id.id) { in =>
+        self.wrap(in.apply("Read", io))
+          .withName("Deserialize")
+          .map(bigQueryType.fromTableRow)
+      }
     }
   }
 

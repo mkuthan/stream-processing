@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.DiagnosticConfiguration
-import org.mkuthan.streamprocessing.shared.common.SumByKey
+import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
 private[syntax] trait DiagnosticSCollectionSyntax {
 

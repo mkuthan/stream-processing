@@ -9,6 +9,7 @@ import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.TestDataManager
 import com.spotify.scio.values.SCollection
 
+// https://github.com/spotify/scio/issues/4995
 object BetterScioContext {
 
   implicit class BetterScioContextOps(val self: ScioContext) {

@@ -41,11 +41,6 @@ private[syntax] trait BigQueryScioContextSyntax {
           .withName("Deserialize")
           .map(bigQueryType.fromTableRow)
       }
-
-//      self
-//        .customInput(id.id, io)
-//        .withName(s"$id/Deserialize")
-//        .map(bigQueryType.fromTableRow)
     }
 
     def readFromBigQuery[T <: HasAnnotation: Coder: ClassTag: TypeTag](
@@ -65,11 +60,6 @@ private[syntax] trait BigQueryScioContextSyntax {
           .withName("Deserialize")
           .map(bigQueryType.fromTableRow)
       }
-
-//      self
-//        .customInput(id.id, io)
-//        .withName(s"$id/Deserialize")
-//        .map(bigQueryType.fromTableRow)
     }
   }
 

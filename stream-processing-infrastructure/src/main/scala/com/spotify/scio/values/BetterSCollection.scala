@@ -9,6 +9,7 @@ import com.spotify.scio.io.CustomIO
 import com.spotify.scio.io.EmptyTap
 import com.spotify.scio.testing.TestDataManager
 
+// https://github.com/spotify/scio/issues/4995
 object BetterSCollection {
 
   implicit class BetterSCollectionOps[T](val self: SCollection[T]) {

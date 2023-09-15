@@ -49,20 +49,6 @@ private[syntax] trait PubsubScioContextSyntax {
             }
           }
       }
-
-//      val messagesOrDeserializationErrors = self
-//        .customInput(id.id, io)
-//        .withName(s"$id/Decode").map { msg =>
-//          val payload = msg.getPayload
-//          val attributes = Utils.readAttributes(msg.getAttributeMap)
-//
-//          JsonSerde.readJsonFromBytes[T](msg.getPayload) match {
-//            case Success(deserialized) =>
-//              Right(Message(deserialized, attributes))
-//            case Failure(ex) =>
-//              Left(PubsubDeadLetter[T](id, payload, attributes, ex.getMessage))
-//          }
-//        }
     }
   }
 }

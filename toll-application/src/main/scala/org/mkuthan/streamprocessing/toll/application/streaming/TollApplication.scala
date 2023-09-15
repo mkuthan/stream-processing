@@ -7,6 +7,7 @@ import org.joda.time.Duration
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.shared._
+import org.mkuthan.streamprocessing.shared.scio.FixedWindowConfiguration
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -22,6 +23,10 @@ object TollApplication {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
+  private val DeadLetterConfiguration = FixedWindowConfiguration()
+    .withWindowDuration(TenMinutes)
+    .withMaxRecords(1_000_000)
+
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
 
@@ -33,14 +38,18 @@ object TollApplication {
         .unzip
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
-    boothEntriesDlq.writeDeadLetterToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
+    boothEntriesDlq
+      .withFixedWindow(DeadLetterConfiguration)
+      .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) =
       sc.subscribeJsonFromPubsub(ExitSubscriptionIoId, config.exitSubscription)
         .unzip
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
-    boothExistsDlq.writeDeadLetterToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
+    boothExistsDlq
+      .withFixedWindow(DeadLetterConfiguration)
+      .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     // receive vehicle registrations
     val (vehicleRegistrationsRawUpdates, vehicleRegistrationsRawUpdatesDlq) =
@@ -53,10 +62,9 @@ object TollApplication {
       VehicleRegistration.unionHistoryWithUpdates(vehicleRegistrationsRawHistory, vehicleRegistrationsRawUpdates)
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration.decode(vehicleRegistrationsRaw)
-    vehicleRegistrationsDlq.writeDeadLetterToStorageAsJson(
-      VehicleRegistrationDlqBucketIoId,
-      config.vehicleRegistrationDlq
-    )
+    vehicleRegistrationsDlq
+      .withFixedWindow(DeadLetterConfiguration)
+      .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
     val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)

@@ -8,6 +8,7 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
+import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.io._
@@ -60,8 +61,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           )
           .advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[String](EntryDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothEntryDecodingErrorString)
+      .output(CustomIO[DeadLetter[TollBoothEntry.Raw]](EntryDlqBucketIoId.id)) { results =>
+        results should containSingleValue(tollBoothEntryDecodingError)
       }
       .inputStream(
         CustomIO[PubsubResult[TollBoothExit.Raw]](ExitSubscriptionIoId.id),
@@ -78,8 +79,8 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             ))
           ).advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[String](ExitDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothExitDecodingErrorString)
+      .output(CustomIO[DeadLetter[TollBoothExit.Raw]](ExitDlqBucketIoId.id)) { results =>
+        results should containSingleValue(tollBoothExitDecodingError)
       }
       // receive vehicle registrations
       .inputStream(

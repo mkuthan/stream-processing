@@ -41,7 +41,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(table.id)
 
-      var deadLetters = self.context.empty[BigQueryDeadLetter[T]]
+      var deadLetters = self.context.empty[BigQueryDeadLetter[T]]()
 
       val _ = self.betterSaveAsCustomOutput(id.id) { in =>
         val writeResult = in
@@ -50,28 +50,12 @@ private[syntax] trait BigQuerySCollectionSyntax {
           .internal.apply("Write", io)
 
         val errors = in.context.wrap(writeResult.getFailedStorageApiInserts)
-          .withName("Extract errors")
-          .map(failedRow => (failedRow.getRow, failedRow.getErrorMessage))
-
-        deadLetters = errors.applyTransform("Create dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
+        deadLetters = errors.applyTransform("Errors", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
 
         writeResult
       }
 
       deadLetters
-
-//      self.transform(id.id) { in =>
-//        val results = in
-//          .withName("Serialize")
-//          .map(bigQueryType.toTableRow)
-//          .internal.apply("Write to BQ", io)
-//
-//        val errors = self.context.wrap(results.getFailedStorageApiInserts)
-//          .withName("Extract errors")
-//          .map(failedRow => (failedRow.getRow, failedRow.getErrorMessage))
-//
-//        errors.applyTransform("Create dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
-//      }
     }
 
     def writeBoundedToBigQuery(
@@ -90,11 +74,6 @@ private[syntax] trait BigQuerySCollectionSyntax {
           .map(bigQueryType.toTableRow)
           .internal.apply("Write", io)
       }
-
-//      val _ = self
-//        .withName(s"$id/Serialize")
-//        .map(bigQueryType.toTableRow)
-//        .saveAsCustomOutput(id.id, io)
     }
   }
 

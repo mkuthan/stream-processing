@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.dlq
+package org.mkuthan.streamprocessing.shared.scio
 
 import org.apache.beam.sdk.transforms.windowing.AfterFirst
 import org.apache.beam.sdk.transforms.windowing.AfterPane
@@ -11,37 +11,26 @@ import com.spotify.scio.values.WindowOptions
 
 import org.joda.time.Duration
 
-import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
-import org.mkuthan.streamprocessing.infrastructure.storage.Prefix
-
-case class DlqConfiguration(
-    prefix: Prefix = Prefix.Empty,
-    numShards: NumShards = NumShards.RunnerSpecific,
+case class FixedWindowConfiguration(
     windowDuration: Duration = Duration.standardMinutes(10),
     maxRecords: Int = 1_000_000,
     allowedLateness: Duration = Duration.ZERO
 ) {
-  import DlqConfiguration._
+  import FixedWindowConfiguration._
 
   lazy val windowOptions: WindowOptions = createWindowOptions(allowedLateness, maxRecords)
 
-  def withPrefix(prefix: Prefix): DlqConfiguration =
-    copy(prefix = prefix)
-
-  def withNumShards(numShards: NumShards): DlqConfiguration =
-    copy(numShards = numShards)
-
-  def withWindowDuration(duration: Duration): DlqConfiguration =
+  def withWindowDuration(duration: Duration): FixedWindowConfiguration =
     copy(windowDuration = duration)
 
-  def withMaxRecords(maxRecords: Int): DlqConfiguration =
+  def withMaxRecords(maxRecords: Int): FixedWindowConfiguration =
     copy(maxRecords = maxRecords)
 
-  def withAllowedLateness(duration: Duration): DlqConfiguration =
+  def withAllowedLateness(duration: Duration): FixedWindowConfiguration =
     copy(allowedLateness = duration)
 }
 
-object DlqConfiguration {
+object FixedWindowConfiguration {
   private def createWindowOptions(allowedLateness: Duration, elementCount: Int): WindowOptions =
     WindowOptions(
       trigger = Repeatedly.forever(

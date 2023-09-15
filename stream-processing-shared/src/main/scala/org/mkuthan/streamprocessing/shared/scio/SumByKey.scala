@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.common
+package org.mkuthan.streamprocessing.shared.scio
 
 import com.twitter.algebird.Semigroup
 

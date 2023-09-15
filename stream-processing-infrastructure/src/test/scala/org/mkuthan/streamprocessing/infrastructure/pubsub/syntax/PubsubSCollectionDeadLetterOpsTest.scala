@@ -17,22 +17,20 @@ class PubsubSCollectionDeadLetterOpsTest extends AnyFlatSpec
 
   "Pubsub SCollection DeadLetter syntax" should "map unbounded dead letter into diagnostic" in runWithScioContext {
     sc =>
-      val id1 = IoIdentifier[SampleClass]("id 1")
-      val id2 = IoIdentifier[SampleClass]("id 2")
-      val error = "any error"
+      val id = IoIdentifier[SampleClass]("any id")
 
-      val deadLetter1 = PubsubDeadLetter(id1, SampleJson1, SampleMap1, error)
-      val deadLetter2 = PubsubDeadLetter(id2, SampleJson1, SampleMap1, error)
+      val deadLetter1 = PubsubDeadLetter[SampleClass](SampleJson1, SampleMap1, "error 1")
+      val deadLetter2 = PubsubDeadLetter[SampleClass](SampleJson1, SampleMap1, "error 2")
 
       val deadLetters = unboundedTestCollectionOf[PubsubDeadLetter[SampleClass]]
         .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
         .advanceWatermarkToInfinity()
 
-      val results = sc.testUnbounded(deadLetters).toDiagnostic()
+      val results = sc.testUnbounded(deadLetters).toDiagnostic(id)
 
       results should containInAnyOrder(Seq(
-        IoDiagnostic(id1.id, error),
-        IoDiagnostic(id2.id, error)
+        IoDiagnostic(id.id, "error 1"),
+        IoDiagnostic(id.id, "error 2")
       ))
   }
 }

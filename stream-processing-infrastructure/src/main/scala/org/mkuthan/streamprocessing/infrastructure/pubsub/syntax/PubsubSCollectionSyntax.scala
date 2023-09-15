@@ -44,23 +44,13 @@ private[syntax] trait PubsubSCollectionSyntax {
           }
           .internal.apply("Publish", io)
       }
-
-//      val serializedMessages = self
-//        .withName(s"$id/Serialize")
-//        .map { msg =>
-//          val payload = JsonSerde.writeJsonAsBytes[T](msg.payload)
-//          val attributes = Utils.writeAttributes(msg.attributes)
-//          new BeamPubsubMessage(payload, attributes)
-//        }
-//
-//      val _ = serializedMessages.saveAsCustomOutput(id.id, io)
     }
   }
 
   implicit class SCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[PubsubDeadLetter[T]]
   ) {
-    def toDiagnostic(): SCollection[IoDiagnostic] =
-      self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
+    def toDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
+      self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
   }
 }

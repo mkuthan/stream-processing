@@ -124,11 +124,11 @@ object TollApplication {
 
     // dead letters diagnostic
     val ioDiagnostics = sc.unionInGlobalWindow(
-      boothEntriesRawDlq.toDiagnostic(),
-      boothExitsRawDlq.toDiagnostic(),
-      vehicleRegistrationsRawUpdatesDlq.toDiagnostic(),
-      tollBoothStatsDlq.toDiagnostic(),
-      totalVehicleTimesDlq.toDiagnostic()
+      boothEntriesRawDlq.toDiagnostic(EntrySubscriptionIoId),
+      boothExitsRawDlq.toDiagnostic(ExitSubscriptionIoId),
+      vehicleRegistrationsRawUpdatesDlq.toDiagnostic(VehicleRegistrationTableIoId),
+      tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId),
+      totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId)
     )
 
     ioDiagnostics

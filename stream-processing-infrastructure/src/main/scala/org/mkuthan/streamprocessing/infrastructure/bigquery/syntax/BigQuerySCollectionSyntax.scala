@@ -50,7 +50,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
           .internal.apply("Write", io)
 
         val errors = in.context.wrap(writeResult.getFailedStorageApiInserts)
-        deadLetters = errors.applyTransform("Errors", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
+        deadLetters = errors.applyTransform("Errors", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
 
         writeResult
       }
@@ -80,8 +80,8 @@ private[syntax] trait BigQuerySCollectionSyntax {
   implicit class BigQuerySCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[BigQueryDeadLetter[T]]
   ) {
-    def toDiagnostic(): SCollection[IoDiagnostic] =
-      self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
+    def toDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
+      self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
   }
 
 }

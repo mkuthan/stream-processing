@@ -21,7 +21,7 @@ private[bigquery] object BigQueryDeadLetterEncoderDoFn {
   private type Out[T] = BigQueryDeadLetter[T]
 }
 
-private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder: ClassTag: TypeTag](id: IoIdentifier[T])
+private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder: ClassTag: TypeTag]
     extends DoFn[BigQueryDeadLetterEncoderDoFn.In, BigQueryDeadLetterEncoderDoFn.Out[T]] {
 
   import BigQueryDeadLetterEncoderDoFn._
@@ -36,7 +36,7 @@ private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder:
       output: OutputReceiver[Out[T]]
   ): Unit = {
     val row = bigQueryType.fromTableRow(element.getRow)
-    val deadLetter = BigQueryDeadLetter(id, row, element.getErrorMessage)
+    val deadLetter = BigQueryDeadLetter(row, element.getErrorMessage)
     output.output(deadLetter)
   }
 }

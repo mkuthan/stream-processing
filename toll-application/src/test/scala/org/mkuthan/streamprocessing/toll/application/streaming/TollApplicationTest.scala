@@ -54,7 +54,6 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             Right(Message(anyTollBoothEntryRaw)),
             Right(Message(tollBoothEntryRawInvalid)),
             Left(PubsubDeadLetter(
-              EntrySubscriptionIoId,
               "corrupted".getBytes,
               Map(),
               "some error"
@@ -73,7 +72,6 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             Right(Message(anyTollBoothExitRaw)),
             Right(Message(tollBoothExitRawInvalid)),
             Left(PubsubDeadLetter(
-              ExitSubscriptionIoId,
               "corrupted".getBytes,
               Map(),
               "some error"
@@ -118,8 +116,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
       // calculate vehicles with expired registrations
       .output(CustomIO[Message[VehiclesWithExpiredRegistration.Raw]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          results.debug(prefix = "DUPA")
-          // results should containSingleValue(anyVehicleWithExpiredRegistrationRaw)
+          results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
       }
       .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Raw](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id

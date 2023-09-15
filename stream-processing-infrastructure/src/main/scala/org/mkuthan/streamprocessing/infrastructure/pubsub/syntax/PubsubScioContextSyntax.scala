@@ -45,7 +45,7 @@ private[syntax] trait PubsubScioContextSyntax {
               case Success(deserialized) =>
                 Right(Message(deserialized, attributes))
               case Failure(ex) =>
-                Left(PubsubDeadLetter[T](id, payload, attributes, ex.getMessage))
+                Left(PubsubDeadLetter[T](payload, attributes, ex.getMessage))
             }
           }
       }

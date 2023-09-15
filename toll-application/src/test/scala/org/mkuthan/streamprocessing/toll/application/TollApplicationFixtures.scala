@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.application.streaming
+package org.mkuthan.streamprocessing.toll.application
 
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture

@@ -10,4 +10,4 @@ package org.mkuthan.streamprocessing.toll
  * See:
  * https://learn.microsoft.com/en-us/azure/stream-analytics/stream-analytics-build-an-iot-solution-using-stream-analytics
  */
-package object application {}
+package object application

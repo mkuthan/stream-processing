@@ -12,6 +12,7 @@ import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.io._
+import org.mkuthan.streamprocessing.toll.application.TollApplicationFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -21,7 +22,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-class TollApplicationTest extends AnyFlatSpec with Matchers
+class TollStreamingApplicationTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollApplicationFixtures {
 
@@ -29,7 +30,7 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
   type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
   "Toll application" should "run" in {
-    JobTest[TollApplication.type]
+    JobTest[TollStreamingApplication.type]
       .args(
         "--entrySubscription=projects/any-id/subscriptions/entry-subscription",
         "--entryDlq=entry_dlq",

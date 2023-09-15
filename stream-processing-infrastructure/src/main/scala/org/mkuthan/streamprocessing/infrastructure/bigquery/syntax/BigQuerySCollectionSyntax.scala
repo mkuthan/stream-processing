@@ -18,8 +18,8 @@ import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.bigquery.FileLoadsConfiguration
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageWriteConfiguration
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 
 private[syntax] trait BigQuerySCollectionSyntax {
 

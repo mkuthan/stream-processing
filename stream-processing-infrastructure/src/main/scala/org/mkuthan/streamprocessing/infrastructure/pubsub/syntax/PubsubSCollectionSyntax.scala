@@ -8,8 +8,8 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonWriteConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic

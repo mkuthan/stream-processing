@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.diagnostic
+package org.mkuthan.streamprocessing.infrastructure.common
 
 import com.spotify.scio.bigquery.types.BigQueryType
 

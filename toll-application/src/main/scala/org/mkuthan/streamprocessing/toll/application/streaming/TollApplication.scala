@@ -1,13 +1,20 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
+import org.apache.beam.sdk.transforms.windowing.AfterFirst
+import org.apache.beam.sdk.transforms.windowing.AfterPane
+import org.apache.beam.sdk.transforms.windowing.AfterWatermark
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.transforms.windowing.Window
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
+import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.shared._
-import org.mkuthan.streamprocessing.shared.scio.FixedWindowConfiguration
 import org.mkuthan.streamprocessing.toll.application.config.TollApplicationConfig
 import org.mkuthan.streamprocessing.toll.application.io._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -23,9 +30,24 @@ object TollApplication {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
-  private val DeadLetterConfiguration = FixedWindowConfiguration()
-    .withWindowDuration(TenMinutes)
-    .withMaxRecords(1_000_000)
+  private val DeadLetterWindowOptions = WindowOptions(
+    trigger = Repeatedly.forever(
+      AfterFirst.of(
+        AfterWatermark.pastEndOfWindow(),
+        AfterPane.elementCountAtLeast(1_000_000)
+      )
+    ),
+    allowedLateness = Duration.ZERO,
+    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+  )
+
+  private val DiagnosticWindowOptions = WindowOptions(
+    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
+    allowedLateness = Duration.ZERO,
+    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+  )
 
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
@@ -39,7 +61,7 @@ object TollApplication {
 
     val (boothEntries, boothEntriesDlq) = TollBoothEntry.decode(boothEntriesRaw)
     boothEntriesDlq
-      .withFixedWindow(DeadLetterConfiguration)
+      .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val (boothExitsRaw, boothExitsRawDlq) =
@@ -48,7 +70,7 @@ object TollApplication {
 
     val (boothExits, boothExistsDlq) = TollBoothExit.decode(boothExitsRaw)
     boothExistsDlq
-      .withFixedWindow(DeadLetterConfiguration)
+      .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     // receive vehicle registrations
@@ -63,7 +85,7 @@ object TollApplication {
 
     val (vehicleRegistrations, vehicleRegistrationsDlq) = VehicleRegistration.decode(vehicleRegistrationsRaw)
     vehicleRegistrationsDlq
-      .withFixedWindow(DeadLetterConfiguration)
+      .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
@@ -79,11 +101,10 @@ object TollApplication {
       .encode(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
 
-    totalVehicleTimesDiagnostic.writeUnboundedDiagnosticToBigQuery(
-      TotalVehicleTimeDiagnosticTableIoId,
-      config.totalVehicleTimeDiagnosticTable,
-      TotalVehicleTimeDiagnostic.toRaw
-    )
+    totalVehicleTimesDiagnostic
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRaw)
+      .writeUnboundedToBigQuery(TotalVehicleTimeDiagnosticTableIoId, config.totalVehicleTimeDiagnosticTable)
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
@@ -93,11 +114,13 @@ object TollApplication {
       .encode(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    vehiclesWithExpiredRegistrationDiagnostic.writeUnboundedDiagnosticToBigQuery(
-      VehiclesWithExpiredRegistrationDiagnosticTableIoId,
-      config.vehiclesWithExpiredRegistrationDiagnosticTable,
-      VehiclesWithExpiredRegistrationDiagnostic.toRaw
-    )
+    vehiclesWithExpiredRegistrationDiagnostic
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRaw)
+      .writeUnboundedToBigQuery(
+        VehiclesWithExpiredRegistrationDiagnosticTableIoId,
+        config.vehiclesWithExpiredRegistrationDiagnosticTable
+      )
 
     // dead letters diagnostic
     val ioDiagnostics = sc.unionInGlobalWindow(
@@ -108,11 +131,10 @@ object TollApplication {
       totalVehicleTimesDlq.toDiagnostic()
     )
 
-    ioDiagnostics.writeUnboundedDiagnosticToBigQuery(
-      DiagnosticTableIoId,
-      config.diagnosticTable,
-      IoDiagnostic.toRaw
-    )
+    ioDiagnostics
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .mapWithTimestamp(IoDiagnostic.toRaw)
+      .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }

@@ -9,7 +9,10 @@ import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
 
-import org.mkuthan.streamprocessing.shared.scio.FixedWindowConfiguration
+import org.joda.time.Duration
+import org.joda.time.Instant
+
+import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
 private[syntax] trait SCollectionSyntax {
 
@@ -28,8 +31,12 @@ private[syntax] trait SCollectionSyntax {
       }
     }
 
-    def withFixedWindow(configuration: FixedWindowConfiguration = FixedWindowConfiguration()): SCollection[T] =
-      self.withFixedWindows(duration = configuration.windowDuration, options = configuration.windowOptions)
+    def mapWithTimestamp[U: Coder](mapFn: (T, Instant) => U): SCollection[U] =
+      self.transform { in =>
+        in
+          .withTimestamp
+          .map { case (element, timestamp) => mapFn(element, timestamp) }
+      }
   }
 
   implicit class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
@@ -47,6 +54,20 @@ private[syntax] trait SCollectionSyntax {
 
       (rightOutput, sideOutputs(leftOutput))
     }
+  }
+
+  implicit class SCollectionSumByKeyOps[T: Coder: SumByKey](private val self: SCollection[T]) {
+    def sumByKeyInFixedWindow(
+        windowDuration: Duration,
+        windowOptions: WindowOptions = WindowOptions()
+    ): SCollection[T] =
+      self.transform { in =>
+        in
+          .withFixedWindows(duration = windowDuration, options = windowOptions)
+          .keyBy(SumByKey[T].key)
+          .sumByKey(SumByKey[T].semigroup)
+          .values
+      }
   }
 
 }

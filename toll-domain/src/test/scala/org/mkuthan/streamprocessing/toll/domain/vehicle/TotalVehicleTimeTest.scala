@@ -25,7 +25,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
   behavior of "TotalVehicleTime"
 
-  it should "calculate TotalVehicleTime" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTime using session window" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -34,16 +34,16 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
-    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
-      .advanceWatermarkToInfinity()
+      .build()
 
-    val boothExits = unboundedTestCollectionOf[TollBoothExit]
+    val boothExits = boundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
-      .advanceWatermarkToInfinity()
+      .build()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
@@ -70,16 +70,16 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
     val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
 
-    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
-      .advanceWatermarkToInfinity()
+      .build()
 
-    val boothExits = unboundedTestCollectionOf[TollBoothExit]
+    val boothExits = boundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
-      .advanceWatermarkToInfinity()
+      .build()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(boothExits), FiveMinutes)
+      calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
 
     results should beEmpty
 
@@ -91,13 +91,46 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode into Raw" in runWithScioContext { sc =>
-    val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
-    val inputs = unboundedTestCollectionOf[TotalVehicleTime]
-      .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
-      .advanceWatermarkToInfinity()
+  it should "calculate TotalVehicleTime using global window" in runWithScioContext { sc =>
+    val tollBoothId = TollBoothId("1")
+    val licensePlate = LicensePlate("AB 123")
+    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
+    val exitTime = Instant.parse("2014-09-10T12:04:03Z")
 
-    val results = encode(sc.testUnbounded(inputs))
+    val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
+    val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
+
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtMinimumTime(tollBoothEntry)
+      .build()
+
+    val boothExits = boundedTestCollectionOf[TollBoothExit]
+      .addElementsAtMinimumTime(tollBoothExit)
+      .build()
+
+    val (results, diagnostic) =
+      calculateInGlobalWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits))
+
+    results should containSingleValue(
+      anyTotalVehicleTime.copy(
+        tollBoothId = tollBoothId,
+        licensePlate = licensePlate,
+        entryTime = entryTime,
+        exitTime = exitTime,
+        duration = Duration.standardSeconds(62)
+      )
+    )
+
+    diagnostic should beEmpty
+  }
+
+  it should "encode into record" in runWithScioContext { sc =>
+    val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
+    val inputs = boundedTestCollectionOf[TotalVehicleTime]
+      .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
+      .build()
+
+    val results = encode(sc.testBounded(inputs))
     results should containSingleValue(anyTotalVehicleTimeRecord.copy(record_timestamp = recordTimestamp))
   }
 }

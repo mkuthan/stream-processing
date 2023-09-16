@@ -31,6 +31,7 @@ object BoundedTestCollection extends InstantSyntax {
       Builder(timestampedElements)
     }
 
+    // TODO: it seems that advanceWatermarkToInfinity would be a good name too
     def build(): BoundedTestCollection[T] = {
       import scala.jdk.CollectionConverters._
 

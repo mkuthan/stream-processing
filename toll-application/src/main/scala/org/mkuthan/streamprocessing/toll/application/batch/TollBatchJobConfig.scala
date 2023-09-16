@@ -16,9 +16,9 @@ case class TollBatchJobConfig(
     effectiveDate: LocalDate,
     entryTable: BigQueryTable[TollBoothEntry.Record],
     exitTable: BigQueryTable[TollBoothExit.Record],
-    entryStatsPartition: BigQueryPartition[TollBoothStats.Record],
-    totalVehicleTimePartition: BigQueryPartition[TotalVehicleTime.Record],
-    totalVehicleTimeDiagnosticPartition: BigQueryPartition[TotalVehicleTimeDiagnostic.Raw]
+    entryStatsHourlyPartition: BigQueryPartition[TollBoothStats.Record],
+    entryStatsDailyPartition: BigQueryPartition[TollBoothStats.Record],
+    totalVehicleTimePartition: BigQueryPartition[TotalVehicleTime.Record]
 )
 
 object TollBatchJobConfig {
@@ -28,10 +28,9 @@ object TollBatchJobConfig {
       effectiveDate = effectiveDate,
       entryTable = BigQueryTable(args.required("entryTable")),
       exitTable = BigQueryTable(args.required("exitTable")),
-      entryStatsPartition = BigQueryPartition.daily(args.required("entryStatsTable"), effectiveDate),
-      totalVehicleTimePartition = BigQueryPartition.daily(args.required("totalVehicleTimeTable"), effectiveDate),
-      totalVehicleTimeDiagnosticPartition =
-        BigQueryPartition.daily(args.required("totalVehicleTimeDiagnosticTable"), effectiveDate)
+      entryStatsHourlyPartition = BigQueryPartition.daily(args.required("entryStatsHourlyTable"), effectiveDate),
+      entryStatsDailyPartition = BigQueryPartition.daily(args.required("entryStatsDailyTable"), effectiveDate),
+      totalVehicleTimePartition = BigQueryPartition.daily(args.required("totalVehicleTimeDailyTable"), effectiveDate)
     )
   }
 }

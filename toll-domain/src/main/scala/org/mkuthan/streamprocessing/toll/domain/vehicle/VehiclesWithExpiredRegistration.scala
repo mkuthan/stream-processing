@@ -6,13 +6,13 @@ import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.SideOutput
 import com.spotify.scio.values.WindowOptions
 
 import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.common.Message
+import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -55,27 +55,22 @@ object VehiclesWithExpiredRegistration {
       .keyBy(_.licensePlate)
       .withGlobalWindow(sideInputWindowOptions)
 
-    val diagnostic = SideOutput[VehiclesWithExpiredRegistrationDiagnostic]()
-
-    val (results, sideOutputs) = boothEntriesByLicensePlate
+    val results = boothEntriesByLicensePlate
       .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
       .values
       .distinct
-      .withSideOutputs(diagnostic)
-      .flatMap {
-        case ((boothEntry, Some(vehicleRegistration)), _) if vehicleRegistration.expired =>
-          Some(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
-        case ((boothEntry, Some(vehicleRegistration)), ctx) if !vehicleRegistration.expired =>
+      .map {
+        case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
+          Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
+        case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
           val diagnosticReason = "Vehicle registration is not expired"
-          ctx.output(diagnostic, VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
-          None
-        case ((boothEntry, None), ctx) =>
+          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
+        case (boothEntry, None) =>
           val diagnosticReason = "Missing vehicle registration"
-          ctx.output(diagnostic, VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
-          None
+          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
       }
 
-    (results, sideOutputs(diagnostic))
+    results.unzip
   }
 
   def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Raw]] =

@@ -16,14 +16,14 @@ trait TollBoothIo {
   val ExitTableIoId: IoIdentifier[TollBoothExit.Record] =
     IoIdentifier[TollBoothExit.Record]("exit-table-id")
 
-  val EntryStatsTableIoId: IoIdentifier[TollBoothStats.Record] =
-    IoIdentifier[TollBoothStats.Record]("entry-stats-table-id")
+  val EntryStatsHourlyTableIoId: IoIdentifier[TollBoothStats.Record] =
+    IoIdentifier[TollBoothStats.Record]("entry-stats-hourly-table-id")
+
+  val EntryStatsDailyTableIoId: IoIdentifier[TollBoothStats.Record] =
+    IoIdentifier[TollBoothStats.Record]("entry-stats-daily-table-id")
 }
 
 trait VehicleIo {
-  val TotalVehicleTimeTableIoId: IoIdentifier[TotalVehicleTime.Record] =
-    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-table-id")
-
-  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Raw] =
-    IoIdentifier[TotalVehicleTimeDiagnostic.Raw]("total-vehicle-time-diagnostic-table-id")
+  val TotalVehicleTimeDailyTableIoId: IoIdentifier[TotalVehicleTime.Record] =
+    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-daily-table-id")
 }

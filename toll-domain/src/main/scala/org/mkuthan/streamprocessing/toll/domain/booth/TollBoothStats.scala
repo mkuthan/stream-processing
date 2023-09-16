@@ -3,9 +3,11 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 
-import com.twitter.algebird.Semigroup
 import org.joda.time.Duration
 import org.joda.time.Instant
+
+import org.mkuthan.streamprocessing.shared.scio.syntax._
+import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
 case class TollBoothStats(
     id: TollBoothId,
@@ -32,27 +34,21 @@ object TollBoothStats {
       last_entry_time: Instant
   )
 
-  private object TollBoothStatsSemigroup extends Semigroup[TollBoothStats] {
-    override def plus(x: TollBoothStats, y: TollBoothStats): TollBoothStats = {
-      require(x.id == y.id)
-
-      TollBoothStats(
-        id = x.id,
+  implicit val TollBoothStatsSumByKey: SumByKey[TollBoothStats] = SumByKey.create(
+    keyFn = _.id.id,
+    plusFn = (x, y) =>
+      x.copy(
         count = x.count + y.count,
         totalToll = x.totalToll + y.totalToll,
         firstEntryTime = if (x.before(y)) x.firstEntryTime else y.firstEntryTime,
         lastEntryTime = if (x.after(y)) x.lastEntryTime else y.lastEntryTime
       )
-    }
-  }
+  )
 
   def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothStats] =
     input
-      .keyBy(_.id)
-      .mapValues(fromBoothEntry)
-      .withFixedWindows(duration)
-      .sumByKey(TollBoothStatsSemigroup)
-      .values
+      .map(fromBoothEntry)
+      .sumByKeyInFixedWindow(duration)
 
   def encode(input: SCollection[TollBoothStats]): SCollection[Record] =
     input.withTimestamp.map { case (r, t) =>

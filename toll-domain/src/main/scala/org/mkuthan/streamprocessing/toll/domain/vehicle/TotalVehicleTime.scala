@@ -2,11 +2,11 @@ package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.SideOutput
 
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -44,23 +44,24 @@ object TotalVehicleTime {
       .keyBy(exit => (exit.id, exit.licensePlate))
       .withSessionWindows(gapDuration)
 
-    val diagnostic = SideOutput[TotalVehicleTimeDiagnostic]()
-    val (results, sideOutputs) = boothEntriesById
-      .leftOuterJoin(boothExistsById)
-      .values
-      .withSideOutputs(diagnostic)
-      .flatMap {
-        case ((boothEntry, Some(boothExit)), _) =>
-          Some(toTotalVehicleTime(boothEntry, boothExit))
-        case ((boothEntry, None), ctx) =>
-          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          ctx.output(diagnostic, TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
-          None
-      }
-    (results, sideOutputs(diagnostic))
+    calculate(boothEntriesById, boothExistsById)
+  }
+
+  // TODO: or in fixed/calendar one day window
+  def calculateInGlobalWindow(
+      boothEntries: SCollection[TollBoothEntry],
+      boothExits: SCollection[TollBoothExit]
+  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
+    val boothEntriesById = boothEntries
+      .keyBy(entry => (entry.id, entry.licensePlate))
+    val boothExistsById = boothExits
+      .keyBy(exit => (exit.id, exit.licensePlate))
+
+    calculate(boothEntriesById, boothExistsById)
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Record] =
+    // TODO: it doesn't work for batch in global window
     input.withTimestamp.map { case (r, t) =>
       Record(
         record_timestamp = t,
@@ -81,5 +82,23 @@ object TotalVehicleTime {
       exitTime = boothExit.exitTime,
       duration = Duration.millis(diff)
     )
+  }
+
+  private def calculate(
+      boothEntriesById: SCollection[((TollBoothId, LicensePlate), TollBoothEntry)],
+      boothExistsById: SCollection[((TollBoothId, LicensePlate), TollBoothExit)]
+  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
+    val results = boothEntriesById
+      .leftOuterJoin(boothExistsById)
+      .values
+      .map {
+        case (boothEntry, Some(boothExit)) =>
+          Right(toTotalVehicleTime(boothEntry, boothExit))
+        case (boothEntry, None) =>
+          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
+          Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
+      }
+
+    results.unzip
   }
 }

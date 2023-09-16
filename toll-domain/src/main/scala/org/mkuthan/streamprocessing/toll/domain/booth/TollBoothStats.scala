@@ -23,7 +23,7 @@ case class TollBoothStats(
 object TollBoothStats {
 
   @BigQueryType.toTable
-  case class Raw(
+  case class Record(
       record_timestamp: Instant,
       id: String,
       count: Int,
@@ -54,9 +54,9 @@ object TollBoothStats {
       .sumByKey(TollBoothStatsSemigroup)
       .values
 
-  def encode(input: SCollection[TollBoothStats]): SCollection[Raw] =
+  def encode(input: SCollection[TollBoothStats]): SCollection[Record] =
     input.withTimestamp.map { case (r, t) =>
-      Raw(
+      Record(
         record_timestamp = t,
         id = r.id.id,
         count = r.count,

@@ -26,6 +26,8 @@ object TollBoothEntry {
 
   type DeadLetterPayload = DeadLetter[Payload]
 
+  val PartitioningColumnName = "entry_time"
+
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
 
   case class Payload(
@@ -51,28 +53,42 @@ object TollBoothEntry {
       model: String,
       vehicle_type: String,
       weight_type: String,
-      toll: String,
+      toll: BigDecimal,
       tag: String
   )
 
-  def decodePayload(input: SCollection[Message[Payload]])
-      : (SCollection[TollBoothEntry], SCollection[DeadLetterPayload]) =
+  def decodePayload(
+      input: SCollection[Message[Payload]]
+  ): (SCollection[TollBoothEntry], SCollection[DeadLetterPayload]) =
     input
-      .map(element => fromPayload(element.payload))
+      .map(message => fromPayload(message.payload))
       .unzip
 
-  private def fromPayload(raw: Payload): Either[DeadLetterPayload, TollBoothEntry] =
+  def decodeRecord(input: SCollection[Record]): SCollection[TollBoothEntry] =
+    input
+      .map(record => fromRecord(record))
+      .timestampBy(boothExit => boothExit.entryTime)
+
+  private def fromPayload(payload: Payload): Either[DeadLetterPayload, TollBoothEntry] =
     try {
       val tollBoothEntry = TollBoothEntry(
-        id = TollBoothId(raw.id),
-        entryTime = Instant.parse(raw.entry_time),
-        licensePlate = LicensePlate(raw.license_plate),
-        toll = BigDecimal(raw.toll)
+        id = TollBoothId(payload.id),
+        entryTime = Instant.parse(payload.entry_time),
+        licensePlate = LicensePlate(payload.license_plate),
+        toll = BigDecimal(payload.toll)
       )
       Right(tollBoothEntry)
     } catch {
       case NonFatal(ex) =>
         DlqCounter.inc()
-        Left(DeadLetter(raw, ex.getMessage))
+        Left(DeadLetter(payload, ex.getMessage))
     }
+
+  private def fromRecord(record: Record): TollBoothEntry =
+    TollBoothEntry(
+      id = TollBoothId(record.id),
+      entryTime = record.entry_time,
+      licensePlate = LicensePlate(record.license_plate),
+      toll = record.toll
+    )
 }

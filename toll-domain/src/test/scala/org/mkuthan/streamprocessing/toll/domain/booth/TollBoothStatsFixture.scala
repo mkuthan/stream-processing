@@ -4,7 +4,7 @@ import org.joda.time.Instant
 
 trait TollBoothStatsFixture {
 
-  val anyTollBoothStats = TollBoothStats(
+  final val anyTollBoothStats = TollBoothStats(
     id = TollBoothId("1"),
     totalToll = BigDecimal(7),
     count = 1,
@@ -12,12 +12,12 @@ trait TollBoothStatsFixture {
     lastEntryTime = Instant.parse("2014-09-10T12:01:00.000Z")
   )
 
-  val anyTollBoothStatsRaw = TollBoothStats.Raw(
+  final val anyTollBoothStatsRecord = TollBoothStats.Record(
     record_timestamp = Instant.parse("2014-09-10T12:09:59.999Z"), // end of fixed window
-    id = "1",
-    total_toll = BigDecimal(7),
-    count = 1,
-    first_entry_time = Instant.parse("2014-09-10T12:01:00.000Z"),
-    last_entry_time = Instant.parse("2014-09-10T12:01:00.000Z")
+    id = anyTollBoothStats.id.id,
+    total_toll = anyTollBoothStats.totalToll,
+    count = anyTollBoothStats.count,
+    first_entry_time = anyTollBoothStats.firstEntryTime,
+    last_entry_time = anyTollBoothStats.lastEntryTime
   )
 }

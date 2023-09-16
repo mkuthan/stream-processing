@@ -23,7 +23,7 @@ final case class TotalVehicleTime(
 object TotalVehicleTime {
 
   @BigQueryType.toTable
-  case class Raw(
+  case class Record(
       record_timestamp: Instant,
       license_plate: String,
       toll_booth_id: String,
@@ -60,9 +60,9 @@ object TotalVehicleTime {
     (results, sideOutputs(diagnostic))
   }
 
-  def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =
+  def encode(input: SCollection[TotalVehicleTime]): SCollection[Record] =
     input.withTimestamp.map { case (r, t) =>
-      Raw(
+      Record(
         record_timestamp = t,
         license_plate = r.licensePlate.number,
         toll_booth_id = r.tollBoothId.id,

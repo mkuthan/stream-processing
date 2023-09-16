@@ -103,12 +103,12 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // calculate tool booth stats
-      .output(CustomIO[TollBoothStats.Raw](EntryStatsTableIoId.id)) { results =>
-        results should containSingleValue(anyTollBoothStatsRaw)
+      .output(CustomIO[TollBoothStats.Record](EntryStatsTableIoId.id)) { results =>
+        results should containSingleValue(anyTollBoothStatsRecord)
       }
       // calculate total vehicle times
-      .output(CustomIO[TotalVehicleTime.Raw](TotalVehicleTimeTableIoId.id)) { results =>
-        results should containSingleValue(anyTotalVehicleTimeRaw)
+      .output(CustomIO[TotalVehicleTime.Record](TotalVehicleTimeTableIoId.id)) { results =>
+        results should containSingleValue(anyTotalVehicleTimeRecord)
       }
       .output(CustomIO[TotalVehicleTimeDiagnostic.Raw](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
         // TODO

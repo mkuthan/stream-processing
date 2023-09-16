@@ -14,8 +14,8 @@ trait VehiclesWithExpiredRegistrationFixture {
     entryTime = Instant.parse("2014-09-10T12:01:00.000Z")
   )
 
-  final val anyVehicleWithExpiredRegistrationRaw = VehiclesWithExpiredRegistration.Raw(
-    created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
+  final val anyVehicleWithExpiredRegistrationRecord = VehiclesWithExpiredRegistration.Record(
+    created_at = Instant.EPOCH,
     license_plate = "JNB 7001",
     toll_booth_id = "1",
     vehicle_registration_id = "1",

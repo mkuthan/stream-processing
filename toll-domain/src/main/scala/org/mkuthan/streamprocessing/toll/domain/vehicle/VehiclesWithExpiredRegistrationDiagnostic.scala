@@ -16,7 +16,7 @@ case class VehiclesWithExpiredRegistrationDiagnostic(tollBothId: TollBoothId, re
 
 object VehiclesWithExpiredRegistrationDiagnostic {
   @BigQueryType.toTable
-  case class Raw(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
+  case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
 
   implicit val sumByKey: SumByKey[VehiclesWithExpiredRegistrationDiagnostic] =
     SumByKey.create(
@@ -24,8 +24,8 @@ object VehiclesWithExpiredRegistrationDiagnostic {
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
-  def toRaw(diagnostic: VehiclesWithExpiredRegistrationDiagnostic, createdAt: Instant): Raw =
-    Raw(
+  def toRecord(diagnostic: VehiclesWithExpiredRegistrationDiagnostic, createdAt: Instant): Record =
+    Record(
       created_at = createdAt,
       toll_both_id = diagnostic.tollBothId.id,
       reason = diagnostic.reason,

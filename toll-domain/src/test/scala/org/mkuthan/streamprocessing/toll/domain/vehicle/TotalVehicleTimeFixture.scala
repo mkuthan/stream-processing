@@ -17,7 +17,7 @@ trait TotalVehicleTimeFixture {
   )
 
   final val anyTotalVehicleTimeRecord = TotalVehicleTime.Record(
-    record_timestamp = Instant.parse("2014-09-10T12:12:59.999Z"), // end of session window
+    created_at = Instant.EPOCH,
     toll_booth_id = anyTotalVehicleTime.tollBoothId.id,
     license_plate = anyTotalVehicleTime.licensePlate.number,
     entry_time = anyTotalVehicleTime.entryTime,

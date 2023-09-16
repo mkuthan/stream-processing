@@ -59,10 +59,10 @@ object TollBatchJob extends TollBatchJobIo {
 
     // calculate total vehicle times
     val (totalVehicleTimes, _) =
-      TotalVehicleTime.calculateInGlobalWindow(boothEntries, boothExits)
+      TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, OneHour)
     TotalVehicleTime
       .encode(totalVehicleTimes)
-      .writeBoundedToBigQuery(TotalVehicleTimeDailyTableIoId, config.totalVehicleTimePartition)
+      .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
 
     val _ = sc.run()
   }

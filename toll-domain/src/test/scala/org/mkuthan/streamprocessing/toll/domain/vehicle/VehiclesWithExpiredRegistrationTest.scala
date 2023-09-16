@@ -109,10 +109,10 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "encode into Raw" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[VehiclesWithExpiredRegistration]
-      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at, anyVehicleWithExpiredRegistration)
+      .addElementsAtTime(anyVehicleWithExpiredRegistrationRecord.created_at, anyVehicleWithExpiredRegistration)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testUnbounded(inputs))
-    results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
+    results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRecord))
   }
 }

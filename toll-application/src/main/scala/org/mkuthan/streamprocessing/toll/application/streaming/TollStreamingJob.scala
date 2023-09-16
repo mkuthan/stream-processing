@@ -101,7 +101,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     totalVehicleTimesDiagnostic
       .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
-      .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRaw)
+      .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRecord)
       .writeUnboundedToBigQuery(TotalVehicleTimeDiagnosticTableIoId, config.totalVehicleTimeDiagnosticTable)
 
     // calculate vehicles with expired registrations
@@ -114,7 +114,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     vehiclesWithExpiredRegistrationDiagnostic
       .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
-      .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRaw)
+      .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRecord)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticTable

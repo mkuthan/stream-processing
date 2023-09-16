@@ -21,26 +21,29 @@ case class VehicleRegistration(
 
 object VehicleRegistration {
 
-  type DeadLetterRaw = DeadLetter[Raw]
+  type DeadLetterRecord = DeadLetter[Record]
 
   val DlqCounter: Counter = ScioMetrics.counter[VehicleRegistration]("dlq")
 
   @BigQueryType.toTable
-  final case class Raw(
+  final case class Record(
       id: String,
       license_plate: String,
       expired: Int
   )
 
-  def decode(input: SCollection[Raw]): (SCollection[VehicleRegistration], SCollection[DeadLetterRaw]) =
+  def decode(input: SCollection[Record]): (SCollection[VehicleRegistration], SCollection[DeadLetterRecord]) =
     input
       .map(element => fromRaw(element))
       .unzip
 
-  def unionHistoryWithUpdates(history: SCollection[Raw], updates: SCollection[Message[Raw]]): SCollection[Raw] =
+  def unionHistoryWithUpdates(
+      history: SCollection[Record],
+      updates: SCollection[Message[Record]]
+  ): SCollection[Record] =
     history.unionInGlobalWindow(updates.map(_.payload))
 
-  private def fromRaw(raw: Raw): Either[DeadLetterRaw, VehicleRegistration] =
+  private def fromRaw(raw: Record): Either[DeadLetterRecord, VehicleRegistration] =
     try {
       require(raw.expired >= 0, s"Field 'expired' must be positive but was '${raw.expired}'")
       val vehicleRegistration = VehicleRegistration(

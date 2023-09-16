@@ -24,7 +24,7 @@ object TotalVehicleTime {
 
   @BigQueryType.toTable
   case class Record(
-      record_timestamp: Instant,
+      created_at: Instant,
       license_plate: String,
       toll_booth_id: String,
       entry_time: Instant,
@@ -44,27 +44,25 @@ object TotalVehicleTime {
       .keyBy(exit => (exit.id, exit.licensePlate))
       .withSessionWindows(gapDuration)
 
-    calculate(boothEntriesById, boothExistsById)
-  }
+    val results = boothEntriesById
+      .leftOuterJoin(boothExistsById)
+      .values
+      .map {
+        case (boothEntry, Some(boothExit)) =>
+          Right(toTotalVehicleTime(boothEntry, boothExit))
+        case (boothEntry, None) =>
+          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
+          Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
+      }
 
-  // TODO: or in fixed/calendar one day window
-  def calculateInGlobalWindow(
-      boothEntries: SCollection[TollBoothEntry],
-      boothExits: SCollection[TollBoothExit]
-  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
-    val boothEntriesById = boothEntries
-      .keyBy(entry => (entry.id, entry.licensePlate))
-    val boothExistsById = boothExits
-      .keyBy(exit => (exit.id, exit.licensePlate))
-
-    calculate(boothEntriesById, boothExistsById)
+    results.unzip
   }
 
   def encode(input: SCollection[TotalVehicleTime]): SCollection[Record] =
     // TODO: it doesn't work for batch in global window
     input.withTimestamp.map { case (r, t) =>
       Record(
-        record_timestamp = t,
+        created_at = t,
         license_plate = r.licensePlate.number,
         toll_booth_id = r.tollBoothId.id,
         entry_time = r.entryTime,
@@ -82,23 +80,5 @@ object TotalVehicleTime {
       exitTime = boothExit.exitTime,
       duration = Duration.millis(diff)
     )
-  }
-
-  private def calculate(
-      boothEntriesById: SCollection[((TollBoothId, LicensePlate), TollBoothEntry)],
-      boothExistsById: SCollection[((TollBoothId, LicensePlate), TollBoothExit)]
-  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
-    val results = boothEntriesById
-      .leftOuterJoin(boothExistsById)
-      .values
-      .map {
-        case (boothEntry, Some(boothExit)) =>
-          Right(toTotalVehicleTime(boothEntry, boothExit))
-        case (boothEntry, None) =>
-          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
-      }
-
-    results.unzip
   }
 }

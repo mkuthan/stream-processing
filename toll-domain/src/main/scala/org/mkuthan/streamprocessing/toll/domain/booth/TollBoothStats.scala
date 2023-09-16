@@ -16,9 +16,9 @@ case class TollBoothStats(
     firstEntryTime: Instant,
     lastEntryTime: Instant
 ) {
-  def before(other: TollBoothStats): Boolean =
+  private def before(other: TollBoothStats): Boolean =
     firstEntryTime.isBefore(other.firstEntryTime)
-  def after(other: TollBoothStats): Boolean =
+  private def after(other: TollBoothStats): Boolean =
     lastEntryTime.isAfter(other.lastEntryTime)
 }
 
@@ -26,7 +26,7 @@ object TollBoothStats {
 
   @BigQueryType.toTable
   case class Record(
-      record_timestamp: Instant,
+      created_at: Instant,
       id: String,
       count: Int,
       total_toll: BigDecimal,
@@ -51,9 +51,9 @@ object TollBoothStats {
       .sumByKeyInFixedWindow(duration)
 
   def encode(input: SCollection[TollBoothStats]): SCollection[Record] =
-    input.withTimestamp.map { case (r, t) =>
+    input.mapWithTimestamp { case (r, t) =>
       Record(
-        record_timestamp = t,
+        created_at = t,
         id = r.id.id,
         count = r.count,
         total_toll = r.totalToll,

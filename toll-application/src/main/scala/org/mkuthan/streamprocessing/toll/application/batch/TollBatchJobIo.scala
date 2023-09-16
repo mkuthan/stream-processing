@@ -5,7 +5,6 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 
 trait TollBatchJobIo extends TollBoothIo with VehicleIo
 
@@ -24,6 +23,6 @@ trait TollBoothIo {
 }
 
 trait VehicleIo {
-  val TotalVehicleTimeDailyTableIoId: IoIdentifier[TotalVehicleTime.Record] =
-    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-daily-table-id")
+  val TotalVehicleTimeOneHourGapTableIoId: IoIdentifier[TotalVehicleTime.Record] =
+    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-one-hour-gap-table-id")
 }

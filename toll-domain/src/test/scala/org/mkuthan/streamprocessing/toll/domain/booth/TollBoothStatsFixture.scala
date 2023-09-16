@@ -13,7 +13,7 @@ trait TollBoothStatsFixture {
   )
 
   final val anyTollBoothStatsRecord = TollBoothStats.Record(
-    record_timestamp = Instant.parse("2014-09-10T12:09:59.999Z"), // end of fixed window
+    created_at = Instant.EPOCH,
     id = anyTollBoothStats.id.id,
     total_toll = anyTollBoothStats.totalToll,
     count = anyTollBoothStats.count,

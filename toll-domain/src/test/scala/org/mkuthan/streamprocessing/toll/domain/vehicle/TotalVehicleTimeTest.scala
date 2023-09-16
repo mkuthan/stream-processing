@@ -91,39 +91,6 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "calculate TotalVehicleTime using global window" in runWithScioContext { sc =>
-    val tollBoothId = TollBoothId("1")
-    val licensePlate = LicensePlate("AB 123")
-    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
-    val exitTime = Instant.parse("2014-09-10T12:04:03Z")
-
-    val tollBoothEntry = anyTollBoothEntry.copy(id = tollBoothId, licensePlate = licensePlate, entryTime = entryTime)
-    val tollBoothExit = anyTollBoothExit.copy(id = tollBoothId, licensePlate = licensePlate, exitTime = exitTime)
-
-    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtMinimumTime(tollBoothEntry)
-      .build()
-
-    val boothExits = boundedTestCollectionOf[TollBoothExit]
-      .addElementsAtMinimumTime(tollBoothExit)
-      .build()
-
-    val (results, diagnostic) =
-      calculateInGlobalWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits))
-
-    results should containSingleValue(
-      anyTotalVehicleTime.copy(
-        tollBoothId = tollBoothId,
-        licensePlate = licensePlate,
-        entryTime = entryTime,
-        exitTime = exitTime,
-        duration = Duration.standardSeconds(62)
-      )
-    )
-
-    diagnostic should beEmpty
-  }
-
   it should "encode into record" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = boundedTestCollectionOf[TotalVehicleTime]
@@ -131,6 +98,6 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .build()
 
     val results = encode(sc.testBounded(inputs))
-    results should containSingleValue(anyTotalVehicleTimeRecord.copy(record_timestamp = recordTimestamp))
+    results should containSingleValue(anyTotalVehicleTimeRecord.copy(created_at = recordTimestamp))
   }
 }

@@ -14,9 +14,9 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   behavior of "VehicleRegistration"
 
-  it should "decode valid VehicleRegistration into raw" in runWithScioContext { sc =>
-    val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-      .addElementsAtWatermarkTime(anyVehicleRegistrationRaw)
+  it should "decode valid record into VehicleRegistration" in runWithScioContext { sc =>
+    val inputs = unboundedTestCollectionOf[VehicleRegistration.Record]
+      .addElementsAtWatermarkTime(anyVehicleRegistrationRecord)
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decode(sc.testUnbounded(inputs))
@@ -25,10 +25,10 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     dlq should beEmpty
   }
 
-  it should "put invalid VehicleRegistration into DLQ" in {
+  it should "put invalid record into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-        .addElementsAtWatermarkTime(vehicleRegistrationRawInvalid)
+      val inputs = unboundedTestCollectionOf[VehicleRegistration.Record]
+        .addElementsAtWatermarkTime(vehicleRegistrationRecordInvalid)
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decode(sc.testUnbounded(inputs))
@@ -42,13 +42,13 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
   }
 
   it should "union history with updates" in runWithScioContext { sc =>
-    val vehicleRegistrationHistory = anyVehicleRegistrationRaw.copy(id = "history")
-    val history = boundedTestCollectionOf[VehicleRegistration.Raw]
+    val vehicleRegistrationHistory = anyVehicleRegistrationRecord.copy(id = "history")
+    val history = boundedTestCollectionOf[VehicleRegistration.Record]
       .addElementsAtMinimumTime(vehicleRegistrationHistory)
       .build()
 
-    val vehicleRegistrationUpdate = anyVehicleRegistrationRaw.copy(id = "update")
-    val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Raw]]
+    val vehicleRegistrationUpdate = anyVehicleRegistrationRecord.copy(id = "update")
+    val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Record]]
       .addElementsAtWatermarkTime(Message(vehicleRegistrationUpdate))
       .advanceWatermarkToInfinity()
 

@@ -19,13 +19,13 @@ trait DiagnosticIo {
 }
 
 trait RegistrationIo {
-  val VehicleRegistrationTableIoId: IoIdentifier[VehicleRegistration.Raw] =
-    IoIdentifier[VehicleRegistration.Raw]("toll.vehicle_registration")
-  val VehicleRegistrationSubscriptionIoId: IoIdentifier[VehicleRegistration.Raw] =
-    IoIdentifier[VehicleRegistration.Raw]("vehicle-registration-subscription-id")
+  val VehicleRegistrationTableIoId: IoIdentifier[VehicleRegistration.Record] =
+    IoIdentifier[VehicleRegistration.Record]("toll.vehicle_registration")
+  val VehicleRegistrationSubscriptionIoId: IoIdentifier[VehicleRegistration.Record] =
+    IoIdentifier[VehicleRegistration.Record]("vehicle-registration-subscription-id")
 
-  val VehicleRegistrationDlqBucketIoId: IoIdentifier[VehicleRegistration.DeadLetterRaw] =
-    IoIdentifier[VehicleRegistration.DeadLetterRaw]("vehicle-registration-dlq-bucket-id")
+  val VehicleRegistrationDlqBucketIoId: IoIdentifier[VehicleRegistration.DeadLetterRecord] =
+    IoIdentifier[VehicleRegistration.DeadLetterRecord]("vehicle-registration-dlq-bucket-id")
 }
 
 trait TollBoothIo {
@@ -44,17 +44,18 @@ trait TollBoothIo {
 }
 
 trait VehicleIo {
-  val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Raw] =
-    IoIdentifier[VehiclesWithExpiredRegistration.Raw]("vehicles-with-expired-registration-topic-id")
+  val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Record] =
+    IoIdentifier[VehiclesWithExpiredRegistration.Record]("vehicles-with-expired-registration-topic-id")
 
-  val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Raw] =
-    IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Raw](
+  val VehiclesWithExpiredRegistrationDiagnosticTableIoId
+      : IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record] =
+    IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record](
       "vehicles-with-expired-registration-diagnostic-table-id"
     )
 
   val TotalVehicleTimeTableIoId: IoIdentifier[TotalVehicleTime.Record] =
     IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-table-id")
 
-  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Raw] =
-    IoIdentifier[TotalVehicleTimeDiagnostic.Raw]("total-vehicle-time-diagnostic-table-id")
+  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Record] =
+    IoIdentifier[TotalVehicleTimeDiagnostic.Record]("total-vehicle-time-diagnostic-table-id")
 }

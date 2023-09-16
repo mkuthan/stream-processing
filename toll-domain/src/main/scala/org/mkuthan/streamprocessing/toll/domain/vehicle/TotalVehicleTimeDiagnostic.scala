@@ -16,7 +16,7 @@ case class TotalVehicleTimeDiagnostic(tollBothId: TollBoothId, reason: String, c
 
 object TotalVehicleTimeDiagnostic {
   @BigQueryType.toTable
-  case class Raw(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
+  case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
 
   implicit val sumByKey: SumByKey[TotalVehicleTimeDiagnostic] =
     SumByKey.create(
@@ -24,8 +24,8 @@ object TotalVehicleTimeDiagnostic {
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
-  def toRaw(diagnostic: TotalVehicleTimeDiagnostic, createdAt: Instant): Raw =
-    Raw(
+  def toRecord(diagnostic: TotalVehicleTimeDiagnostic, createdAt: Instant): Record =
+    Record(
       created_at = createdAt,
       toll_both_id = diagnostic.tollBothId.id,
       reason = diagnostic.reason,

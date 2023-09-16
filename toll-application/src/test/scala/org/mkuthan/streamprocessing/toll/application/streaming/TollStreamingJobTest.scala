@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.toll.application.streaming
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
 
+import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -84,18 +85,18 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       }
       // receive vehicle registrations
       .inputStream(
-        CustomIO[PubsubResult[VehicleRegistration.Raw]](VehicleRegistrationSubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Raw]]
+        CustomIO[PubsubResult[VehicleRegistration.Record]](VehicleRegistrationSubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Record]]
           // TODO: add event time to vehicle registration messages
-          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationRaw)))
+          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationRecord)))
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
       )
       .input(
-        CustomIO[VehicleRegistration.Raw](VehicleRegistrationTableIoId.id),
+        CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id),
         Seq(
           // TODO: define another vehicle registration(s) for reading historical data
-          anyVehicleRegistrationRaw
+          anyVehicleRegistrationRecord
         )
       )
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
@@ -104,22 +105,30 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       }
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsTableIoId.id)) { results =>
-        results should containSingleValue(anyTollBoothStatsRecord)
+        results should containSingleValue(
+          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:09:59.999Z"))
+        )
       }
       // calculate total vehicle times
       .output(CustomIO[TotalVehicleTime.Record](TotalVehicleTimeTableIoId.id)) { results =>
-        results should containSingleValue(anyTotalVehicleTimeRecord)
+        results should containSingleValue(
+          anyTotalVehicleTimeRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
+        )
       }
-      .output(CustomIO[TotalVehicleTimeDiagnostic.Raw](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
         // TODO
         results should beEmpty
       }
       // calculate vehicles with expired registrations
-      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Raw]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
+      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Record]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
+          results should containSingleValue(
+            Message(anyVehicleWithExpiredRegistrationRecord.copy(created_at =
+              Instant.parse("2014-09-10T12:09:59.999Z")
+            ))
+          )
       }
-      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Raw](
+      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>

@@ -29,7 +29,7 @@ final case class VehiclesWithExpiredRegistration(
 object VehiclesWithExpiredRegistration {
 
   @BigQueryType.toTable
-  case class Raw(
+  case class Record(
       created_at: Instant,
       toll_booth_id: String,
       entry_time: Instant,
@@ -73,9 +73,9 @@ object VehiclesWithExpiredRegistration {
     results.unzip
   }
 
-  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Raw]] =
-    input.withTimestamp.map { case (r, t) =>
-      val payload = Raw(
+  def encode(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Record]] =
+    input.mapWithTimestamp { case (r, t) =>
+      val payload = Record(
         created_at = t,
         toll_booth_id = r.tollBoothId.id,
         entry_time = r.entryTime,

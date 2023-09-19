@@ -15,7 +15,7 @@ object BetterSCollection {
   implicit class BetterSCollectionOps[T](val self: SCollection[T]) {
     def betterSaveAsCustomOutput[O <: POutput](name: String)(transformFn: SCollection[T] => O): ClosedTap[Nothing] = {
       if (self.context.isTest) {
-        TestDataManager.getOutput(self.context.testId.get)(CustomIO[T](name))(self)
+        TestDataManager.getOutput(self.context.testId.getOrElse(""))(CustomIO[T](name))(self)
       } else {
         self.applyInternal(
           name,

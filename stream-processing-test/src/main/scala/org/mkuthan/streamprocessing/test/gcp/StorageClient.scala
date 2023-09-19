@@ -75,11 +75,13 @@ object StorageClient extends GcpProjectId with LazyLogging {
   def readObjectLines(bucketName: String, objectName: String): Iterable[String] = {
     logger.debug("Read lines from: 'gs://{}/{}'", bucketName, objectName)
 
-    Using.Manager { use =>
+    val lines = Using.Manager { use =>
       val is = use(storage.objects().get(bucketName, objectName).executeMediaAsInputStream())
       val reader = use(new BufferedReader(new BufferedReader(new InputStreamReader(is))))
 
       reader.lines().iterator().asScala.toSeq
-    }.get
+    }
+
+    lines.getOrElse(Seq.empty)
   }
 }

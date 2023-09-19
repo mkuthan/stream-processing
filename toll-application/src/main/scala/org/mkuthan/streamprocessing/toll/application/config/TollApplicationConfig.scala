@@ -3,7 +3,7 @@ package org.mkuthan.streamprocessing.toll.application.config
 import com.spotify.scio.Args
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket

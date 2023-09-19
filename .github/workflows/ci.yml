@@ -7,12 +7,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  scalafmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: sbt scalafmtCheckAll
+
+  scapegoat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: sbt scapegoat
+      - uses: actions/upload-artifact@v3
+        with:
+          name: scapegoat-report
+          path: '**/scapegoat-report/*.html'
 
   test:
     runs-on: ubuntu-latest
@@ -29,6 +40,6 @@ jobs:
 
   required-checks:
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [scalafmt, scapegoat, test]
     steps:
       - run: exit 0

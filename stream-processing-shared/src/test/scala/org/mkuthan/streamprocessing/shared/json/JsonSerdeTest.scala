@@ -50,7 +50,7 @@ class JsonSerdeTest extends AnyFlatSpec
 
   behavior of "JsonSerde"
 
-  it should "serialize and deserialize sample type" in {
+  it should "serialize and deserialize sample type using string" in {
     forAll { sample: SampleClass =>
       val serialized = writeJsonAsString(sample)
       val deserialized = readJsonFromString[SampleClass](serialized)
@@ -58,10 +58,25 @@ class JsonSerdeTest extends AnyFlatSpec
     }
   }
 
-  it should "serialize and deserialize parametrized type" in {
+  it should "serialize and deserialize sample type using bytes" in {
+    forAll { sample: SampleClass =>
+      val serialized = writeJsonAsBytes(sample)
+      val deserialized = readJsonFromBytes[SampleClass](serialized)
+      deserialized.success.value shouldMatchTo sample
+    }
+  }
+
+  it should "serialize and deserialize parametrized type using string" in {
     val parametrized = ParametrizedClass("field")
     val serialized = writeJsonAsString(parametrized)
     val deserialized = readJsonFromString[ParametrizedClass[String]](serialized)
+    deserialized.success.value shouldMatchTo parametrized
+  }
+
+  it should "serialize and deserialize parametrized type using bytes" in {
+    val parametrized = ParametrizedClass("field")
+    val serialized = writeJsonAsBytes(parametrized)
+    val deserialized = readJsonFromBytes[ParametrizedClass[String]](serialized)
     deserialized.success.value shouldMatchTo parametrized
   }
 

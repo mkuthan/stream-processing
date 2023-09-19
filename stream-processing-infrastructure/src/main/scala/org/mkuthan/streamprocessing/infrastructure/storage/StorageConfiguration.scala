@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.infrastructure.storage
 
 case class StorageConfiguration(
     prefix: Prefix = Prefix.Empty,
-    suffix: Suffix = Suffix.Empty,
+    suffix: Suffix = Suffix.Json,
     numShards: NumShards = NumShards.RunnerSpecific
 ) {
   def withPrefix(prefix: Prefix): StorageConfiguration =

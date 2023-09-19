@@ -18,14 +18,16 @@ import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.bigquery.FileLoadsConfiguration
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageWriteConfiguration
+import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-import org.mkuthan.streamprocessing.infrastructure.diagnostic.IoDiagnostic
 
 private[syntax] trait BigQuerySCollectionSyntax {
 
   implicit class BigQuerySCollectionOps[T <: HasAnnotation: Coder: ClassTag: TypeTag](
       private val self: SCollection[T]
   ) {
+
+    import com.spotify.scio.values.BetterSCollection._
 
     private val bigQueryType = BigQueryType[T]
 
@@ -39,18 +41,21 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(table.id)
 
-      self.transform(id.id) { in =>
-        val results = in
+      var deadLetters = self.context.empty[BigQueryDeadLetter[T]]()
+
+      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+        val writeResult = in
           .withName("Serialize")
           .map(bigQueryType.toTableRow)
-          .internal.apply("Write to BQ", io)
+          .internal.apply("Write", io)
 
-        val errors = self.context.wrap(results.getFailedStorageApiInserts)
-          .withName("Extract errors")
-          .map(failedRow => (failedRow.getRow, failedRow.getErrorMessage))
+        val errors = in.context.wrap(writeResult.getFailedStorageApiInserts)
+        deadLetters = errors.applyTransform("Errors", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
 
-        errors.applyTransform("Create dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T](id)))
+        writeResult
       }
+
+      deadLetters
     }
 
     def writeBoundedToBigQuery(
@@ -63,18 +68,20 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(partition.id)
 
-      val _ = self
-        .withName(s"$id/Serialize")
-        .map(bigQueryType.toTableRow)
-        .saveAsCustomOutput(id.id, io)
+      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+        in
+          .withName("Serialize")
+          .map(bigQueryType.toTableRow)
+          .internal.apply("Write", io)
+      }
     }
   }
 
   implicit class BigQuerySCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[BigQueryDeadLetter[T]]
   ) {
-    def toDiagnostic(): SCollection[IoDiagnostic] =
-      self.map(deadLetter => IoDiagnostic(deadLetter.id.id, deadLetter.error))
+    def toDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
+      self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
   }
 
 }

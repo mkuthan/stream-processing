@@ -4,7 +4,7 @@ import com.spotify.scio.bigquery.types.BigQueryType
 
 import org.joda.time.Instant
 
-import org.mkuthan.streamprocessing.shared.common.SumByKey
+import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 case class TotalVehicleTimeDiagnostic(tollBothId: TollBoothId, reason: String, count: Long = 1L) {

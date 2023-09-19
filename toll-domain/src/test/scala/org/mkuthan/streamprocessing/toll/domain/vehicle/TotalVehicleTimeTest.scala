@@ -97,7 +97,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
       .build()
 
-    val results = encode(sc.testBounded(inputs))
+    val results = encodeRecord(sc.testBounded(inputs))
     results should containSingleValue(anyTotalVehicleTimeRecord.copy(created_at = recordTimestamp))
   }
 }

@@ -13,11 +13,11 @@ trait TollBoothExitFixture {
     license_plate = "JNB 7001"
   )
 
-  final val tollBoothExitPayloadInvalid = anyTollBoothExitPayload.copy(exit_time = "invalid time")
+  final val tollBoothExitPayloadInvalid = anyTollBoothExitPayload.copy(id = "")
 
   final val tollBoothExitDecodingError = DeadLetter[TollBoothExit.Payload](
     data = tollBoothExitPayloadInvalid,
-    error = "Invalid format: \"invalid time\""
+    error = "requirement failed: Toll booth id is empty"
   )
 
   final val anyTollBoothExitRecord = TollBoothExit.Record(

@@ -26,6 +26,7 @@ object TollBoothEntry {
 
   type DeadLetterPayload = DeadLetter[Payload]
 
+  val TimestampAttribute = "entry_time"
   val PartitioningColumnName = "entry_time"
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
@@ -57,11 +58,11 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decodePayload(
+  def decodeMessage(
       input: SCollection[Message[Payload]]
   ): (SCollection[TollBoothEntry], SCollection[DeadLetterPayload]) =
     input
-      .map(message => fromPayload(message.payload))
+      .map(message => fromMessage(message))
       .unzip
 
   def decodeRecord(input: SCollection[Record]): SCollection[TollBoothEntry] =
@@ -69,7 +70,8 @@ object TollBoothEntry {
       .map(record => fromRecord(record))
       .timestampBy(boothExit => boothExit.entryTime)
 
-  private def fromPayload(payload: Payload): Either[DeadLetterPayload, TollBoothEntry] =
+  private def fromMessage(message: Message[Payload]): Either[DeadLetterPayload, TollBoothEntry] = {
+    val payload = message.payload
     try {
       val tollBoothEntry = TollBoothEntry(
         id = TollBoothId(payload.id),
@@ -83,6 +85,7 @@ object TollBoothEntry {
         DlqCounter.inc()
         Left(DeadLetter(payload, ex.getMessage))
     }
+  }
 
   private def fromRecord(record: Record): TollBoothEntry =
     TollBoothEntry(

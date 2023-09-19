@@ -55,6 +55,11 @@ object RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(s"TIMESTAMP_TRUNC($columnName, DAY) = '$localDate'")
   }
+
+  case class PartitionDateRestriction(localDate: LocalDate) extends RowRestriction {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] =
+      read.withRowRestriction(s"_PARTITIONDATE = '$localDate'")
+  }
 }
 
 sealed trait SelectedFields extends BigQueryReadParam

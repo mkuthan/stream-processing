@@ -20,11 +20,11 @@ trait TollBoothEntryFixture {
     tag = "String"
   )
 
-  final val tollBoothEntryPayloadInvalid = anyTollBoothEntryPayload.copy(entry_time = "invalid time")
+  final val tollBoothEntryPayloadInvalid = anyTollBoothEntryPayload.copy(id = "")
 
   final val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Payload](
     data = tollBoothEntryPayloadInvalid,
-    error = "Invalid format: \"invalid time\""
+    error = "requirement failed: Toll booth id is empty"
   )
 
   final val tollBoothEntryPayloadWithoutExit = anyTollBoothEntryPayload.copy(license_plate = "other license plate")

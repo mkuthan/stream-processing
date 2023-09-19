@@ -14,27 +14,30 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
   behavior of "TollBoothExit"
 
-  it should "decode valid payload into TollBoothExit" in runWithScioContext { sc =>
+  it should "decode valid message into TollBoothExit" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Payload]]
-      .addElementsAtWatermarkTime(Message(anyTollBoothExitPayload))
+      .addElementsAtTime(anyTollBoothExitPayload.exit_time, Message(anyTollBoothExitPayload))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
+    val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
-    results should containSingleValue(anyTollBoothExit)
+    results.withTimestamp should containSingleValueAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
     dlq should beEmpty
   }
 
-  it should "put invalid payload into DLQ" in {
+  it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Payload]]
-        .addElementsAtWatermarkTime(Message(tollBoothExitPayloadInvalid))
+        .addElementsAtTime(tollBoothExitPayloadInvalid.exit_time, Message(tollBoothExitPayloadInvalid))
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
+      val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
-      dlq should containSingleValue(tollBoothExitDecodingError)
+      dlq.withTimestamp should containSingleValueAtTime(
+        tollBoothExitPayloadInvalid.exit_time,
+        tollBoothExitDecodingError
+      )
     }
 
     val result = run.waitUntilDone()
@@ -48,7 +51,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
     val results = decodeRecord(sc.testBounded(inputs))
 
-    results should containSingleValue(anyTollBoothExit)
+    results.withTimestamp should containSingleValueAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
   }
 
 }

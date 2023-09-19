@@ -21,13 +21,13 @@ case class TollStreamingJobConfig(
     entryDlq: StorageBucket[TollBoothEntry.DeadLetterPayload],
     exitSubscription: PubsubSubscription[TollBoothExit.Payload],
     exitDlq: StorageBucket[TollBoothExit.DeadLetterPayload],
-    vehicleRegistrationSubscription: PubsubSubscription[VehicleRegistration.Record],
+    vehicleRegistrationSubscription: PubsubSubscription[VehicleRegistration.Payload],
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Record],
-    vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterRecord],
+    vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterPayload],
     entryStatsTable: BigQueryTable[TollBoothStats.Record],
     totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Record],
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic.Record],
-    vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Record],
+    vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Payload],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic.Record],
     diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
 )

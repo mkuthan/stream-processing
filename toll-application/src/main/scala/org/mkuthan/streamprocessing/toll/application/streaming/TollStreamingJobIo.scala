@@ -15,47 +15,45 @@ trait TollStreamingJobIo extends DiagnosticIo with RegistrationIo with TollBooth
 
 trait DiagnosticIo {
   val DiagnosticTableIoId: IoIdentifier[IoDiagnostic.Raw] =
-    IoIdentifier[IoDiagnostic.Raw]("diagnostic-table-id")
+    IoIdentifier("diagnostic-table-id")
 }
 
 trait RegistrationIo {
   val VehicleRegistrationTableIoId: IoIdentifier[VehicleRegistration.Record] =
-    IoIdentifier[VehicleRegistration.Record]("toll.vehicle_registration")
-  val VehicleRegistrationSubscriptionIoId: IoIdentifier[VehicleRegistration.Record] =
-    IoIdentifier[VehicleRegistration.Record]("vehicle-registration-subscription-id")
+    IoIdentifier("toll.vehicle_registration")
+  val VehicleRegistrationSubscriptionIoId: IoIdentifier[VehicleRegistration.Payload] =
+    IoIdentifier("vehicle-registration-subscription-id")
 
-  val VehicleRegistrationDlqBucketIoId: IoIdentifier[VehicleRegistration.DeadLetterRecord] =
-    IoIdentifier[VehicleRegistration.DeadLetterRecord]("vehicle-registration-dlq-bucket-id")
+  val VehicleRegistrationDlqBucketIoId: IoIdentifier[VehicleRegistration.DeadLetterPayload] =
+    IoIdentifier("vehicle-registration-dlq-bucket-id")
 }
 
 trait TollBoothIo {
   val EntrySubscriptionIoId: IoIdentifier[TollBoothEntry.Payload] =
-    IoIdentifier[TollBoothEntry.Payload]("entry-subscription-id")
+    IoIdentifier("entry-subscription-id")
   val EntryDlqBucketIoId: IoIdentifier[TollBoothEntry.DeadLetterPayload] =
-    IoIdentifier[TollBoothEntry.DeadLetterPayload]("entry-dlq-bucket-id")
+    IoIdentifier("entry-dlq-bucket-id")
 
   val ExitSubscriptionIoId: IoIdentifier[TollBoothExit.Payload] =
-    IoIdentifier[TollBoothExit.Payload]("exit-subscription-id")
+    IoIdentifier("exit-subscription-id")
   val ExitDlqBucketIoId: IoIdentifier[TollBoothExit.DeadLetterPayload] =
-    IoIdentifier[TollBoothExit.DeadLetterPayload]("exit-dlq-bucket-id")
+    IoIdentifier("exit-dlq-bucket-id")
 
   val EntryStatsTableIoId: IoIdentifier[TollBoothStats.Record] =
-    IoIdentifier[TollBoothStats.Record]("entry-stats-table-id")
+    IoIdentifier("entry-stats-table-id")
 }
 
 trait VehicleIo {
-  val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Record] =
-    IoIdentifier[VehiclesWithExpiredRegistration.Record]("vehicles-with-expired-registration-topic-id")
+  val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Payload] =
+    IoIdentifier("vehicles-with-expired-registration-topic-id")
 
   val VehiclesWithExpiredRegistrationDiagnosticTableIoId
       : IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record] =
-    IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record](
-      "vehicles-with-expired-registration-diagnostic-table-id"
-    )
+    IoIdentifier("vehicles-with-expired-registration-diagnostic-table-id")
 
   val TotalVehicleTimeTableIoId: IoIdentifier[TotalVehicleTime.Record] =
-    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-table-id")
+    IoIdentifier("total-vehicle-time-table-id")
 
   val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Record] =
-    IoIdentifier[TotalVehicleTimeDiagnostic.Record]("total-vehicle-time-diagnostic-table-id")
+    IoIdentifier("total-vehicle-time-diagnostic-table-id")
 }

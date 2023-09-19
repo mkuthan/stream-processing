@@ -14,27 +14,30 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
   behavior of "TollBoothEntry"
 
-  it should "decode valid payload into TollBoothEntry" in runWithScioContext { sc =>
+  it should "decode valid message into TollBoothEntry" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-      .addElementsAtWatermarkTime(Message(anyTollBoothEntryPayload))
+      .addElementsAtTime(anyTollBoothEntryPayload.entry_time, Message(anyTollBoothEntryPayload))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
+    val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
-    results should containSingleValue(anyTollBoothEntry)
+    results.withTimestamp should containSingleValueAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
     dlq should beEmpty
   }
 
-  it should "put invalid payload into DLQ" in {
+  it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-        .addElementsAtWatermarkTime(Message(tollBoothEntryPayloadInvalid))
+        .addElementsAtTime(tollBoothEntryPayloadInvalid.entry_time, Message(tollBoothEntryPayloadInvalid))
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decodePayload(sc.testUnbounded(inputs))
+      val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
-      dlq should containSingleValue(tollBoothEntryDecodingError)
+      dlq.withTimestamp should containSingleValueAtTime(
+        tollBoothEntryPayloadInvalid.entry_time,
+        tollBoothEntryDecodingError
+      )
     }
 
     val result = run.waitUntilDone()
@@ -48,7 +51,7 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
     val results = decodeRecord(sc.testBounded(inputs))
 
-    results should containSingleValue(anyTollBoothEntry)
+    results.withTimestamp should containSingleValueAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
   }
 
 }

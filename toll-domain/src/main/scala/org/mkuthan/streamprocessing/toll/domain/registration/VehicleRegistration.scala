@@ -8,6 +8,10 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
+import org.joda.time.DateTimeZone
+import org.joda.time.Instant
+import org.joda.time.LocalDate
+
 import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
@@ -15,46 +19,83 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 case class VehicleRegistration(
     id: VehicleRegistrationId,
+    registrationTime: Instant,
     licensePlate: LicensePlate,
     expired: Boolean
 )
 
 object VehicleRegistration {
 
-  type DeadLetterRecord = DeadLetter[Record]
+  type DeadLetterPayload = DeadLetter[Payload]
+
+  val TimestampAttribute = "registration_time"
 
   val DlqCounter: Counter = ScioMetrics.counter[VehicleRegistration]("dlq")
 
+  case class Payload(
+      id: String,
+      registration_time: String,
+      license_plate: String,
+      expired: String
+  )
+
   @BigQueryType.toTable
-  final case class Record(
+  case class Record(
       id: String,
       license_plate: String,
       expired: Int
   )
 
-  def decode(input: SCollection[Record]): (SCollection[VehicleRegistration], SCollection[DeadLetterRecord]) =
+  def decodeMessage(input: SCollection[Message[Payload]])
+      : (SCollection[VehicleRegistration], SCollection[DeadLetter[Payload]]) =
     input
-      .map(element => fromRaw(element))
+      .map(message => fromMessage(message))
       .unzip
 
-  def unionHistoryWithUpdates(
-      history: SCollection[Record],
-      updates: SCollection[Message[Record]]
-  ): SCollection[Record] =
-    history.unionInGlobalWindow(updates.map(_.payload))
+  def decodeRecord(input: SCollection[Record], partitionDate: LocalDate): SCollection[VehicleRegistration] =
+    input
+      .map(record => fromRecord(record, partitionDate))
+      .timestampBy(registration => registration.registrationTime)
 
-  private def fromRaw(raw: Record): Either[DeadLetterRecord, VehicleRegistration] =
+  def unionHistoryWithUpdates(
+      history: SCollection[VehicleRegistration],
+      updates: SCollection[VehicleRegistration]
+  ): SCollection[VehicleRegistration] =
+    history
+      .unionInGlobalWindow(updates)
+
+  private def fromMessage(message: Message[Payload]): Either[DeadLetter[Payload], VehicleRegistration] = {
+    val payload = message.payload
     try {
-      require(raw.expired >= 0, s"Field 'expired' must be positive but was '${raw.expired}'")
+      val expired = payload.expired.toInt
+
+      validateExpired(expired)
+
       val vehicleRegistration = VehicleRegistration(
-        id = VehicleRegistrationId(raw.id),
-        licensePlate = LicensePlate(raw.license_plate),
-        expired = raw.expired != 0
+        id = VehicleRegistrationId(payload.id),
+        registrationTime = Instant.parse(payload.registration_time),
+        licensePlate = LicensePlate(payload.license_plate),
+        expired = expired != 0
       )
       Right(vehicleRegistration)
     } catch {
       case NonFatal(ex) =>
         DlqCounter.inc()
-        Left(DeadLetter(raw, ex.getMessage))
+        Left(DeadLetter(payload, ex.getMessage))
     }
+  }
+
+  private def fromRecord(record: Record, partitionDate: LocalDate): VehicleRegistration = {
+    validateExpired(record.expired)
+
+    VehicleRegistration(
+      id = VehicleRegistrationId(record.id),
+      registrationTime = partitionDate.toDateTimeAtStartOfDay(DateTimeZone.UTC).toInstant,
+      licensePlate = LicensePlate(record.license_plate),
+      expired = record.expired != 0
+    )
+  }
+
+  private def validateExpired(expired: Int): Unit =
+    require(expired >= 0, s"Field 'expired' must be positive but was '$expired'")
 }

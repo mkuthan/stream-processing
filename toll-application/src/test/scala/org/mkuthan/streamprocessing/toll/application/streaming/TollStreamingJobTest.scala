@@ -85,10 +85,10 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       }
       // receive vehicle registrations
       .inputStream(
-        CustomIO[PubsubResult[VehicleRegistration.Record]](VehicleRegistrationSubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Record]]
+        CustomIO[PubsubResult[VehicleRegistration.Payload]](VehicleRegistrationSubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
           // TODO: add event time to vehicle registration messages
-          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationRecord)))
+          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationPayload)))
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
       )
@@ -120,13 +120,13 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // calculate vehicles with expired registrations
-      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Record]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
+      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Payload]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          results should containSingleValue(
-            Message(anyVehicleWithExpiredRegistrationRecord.copy(created_at =
-              Instant.parse("2014-09-10T12:09:59.999Z")
-            ))
-          )
+          val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+          results should containInAnyOrder(Seq(
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationPayload.id),
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
+          ))
       }
       .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id

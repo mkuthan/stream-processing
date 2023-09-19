@@ -58,7 +58,7 @@ object TotalVehicleTime {
     results.unzip
   }
 
-  def encode(input: SCollection[TotalVehicleTime]): SCollection[Record] =
+  def encodeRecord(input: SCollection[TotalVehicleTime]): SCollection[Record] =
     // TODO: it doesn't work for batch in global window
     input.withTimestamp.map { case (r, t) =>
       Record(

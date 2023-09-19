@@ -10,19 +10,19 @@ trait TollBatchJobIo extends TollBoothIo with VehicleIo
 
 trait TollBoothIo {
   val EntryTableIoId: IoIdentifier[TollBoothEntry.Record] =
-    IoIdentifier[TollBoothEntry.Record]("entry-table-id")
+    IoIdentifier("entry-table-id")
 
   val ExitTableIoId: IoIdentifier[TollBoothExit.Record] =
-    IoIdentifier[TollBoothExit.Record]("exit-table-id")
+    IoIdentifier("exit-table-id")
 
   val EntryStatsHourlyTableIoId: IoIdentifier[TollBoothStats.Record] =
-    IoIdentifier[TollBoothStats.Record]("entry-stats-hourly-table-id")
+    IoIdentifier("entry-stats-hourly-table-id")
 
   val EntryStatsDailyTableIoId: IoIdentifier[TollBoothStats.Record] =
-    IoIdentifier[TollBoothStats.Record]("entry-stats-daily-table-id")
+    IoIdentifier("entry-stats-daily-table-id")
 }
 
 trait VehicleIo {
   val TotalVehicleTimeOneHourGapTableIoId: IoIdentifier[TotalVehicleTime.Record] =
-    IoIdentifier[TotalVehicleTime.Record]("total-vehicle-time-one-hour-gap-table-id")
+    IoIdentifier("total-vehicle-time-one-hour-gap-table-id")
 }

@@ -5,7 +5,6 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
@@ -30,7 +29,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val licencePlate = LicensePlate("License Plate 1")
 
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = true)
+    val vehicleRegistration = anyVehicleRegistrationUpdate.copy(licensePlate = licencePlate, expired = true)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(entryTime, tollBoothEntry)
@@ -58,7 +57,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     val licencePlate = LicensePlate("License Plate 1")
 
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = false)
+    val vehicleRegistration = anyVehicleRegistrationUpdate.copy(licensePlate = licencePlate, expired = false)
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(entryTime, tollBoothEntry)
@@ -84,7 +83,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   it should "emit diagnostic for missing VehicleRegistration" in runWithScioContext { sc =>
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
     val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = LicensePlate("License Plate 1"))
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = LicensePlate("License Plate 2"))
+    val vehicleRegistration = anyVehicleRegistrationUpdate.copy(licensePlate = LicensePlate("License Plate 2"))
 
     val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(entryTime, tollBoothEntry)
@@ -107,12 +106,14 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode into Raw" in runWithScioContext { sc =>
+  it should "encode into message" in runWithScioContext { sc =>
+    val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+
     val inputs = unboundedTestCollectionOf[VehiclesWithExpiredRegistration]
-      .addElementsAtTime(anyVehicleWithExpiredRegistrationRecord.created_at, anyVehicleWithExpiredRegistration)
+      .addElementsAtTime(createdAt, anyVehicleWithExpiredRegistration)
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.testUnbounded(inputs))
-    results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRecord))
+    val results = encodeMessage(sc.testUnbounded(inputs))
+    results should containSingleValue(anyVehicleWithExpiredRegistrationMessage(createdAt))
   }
 }

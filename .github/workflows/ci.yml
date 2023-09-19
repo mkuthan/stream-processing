@@ -23,7 +23,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: scapegoat-report
-          path: '**/scapegoat-report/code-coverage.html'
+          path: '**/scapegoat-report/*.html'
 
   test:
     runs-on: ubuntu-latest

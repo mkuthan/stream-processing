@@ -59,7 +59,6 @@ object TotalVehicleTime {
   }
 
   def encodeRecord(input: SCollection[TotalVehicleTime]): SCollection[Record] =
-    // TODO: it doesn't work for batch in global window
     input.withTimestamp.map { case (r, t) =>
       Record(
         created_at = t,

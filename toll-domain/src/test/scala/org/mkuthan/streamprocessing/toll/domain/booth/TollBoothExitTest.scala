@@ -47,7 +47,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
   it should "decode valid record into TollBoothExit" in runWithScioContext { sc =>
     val inputs = boundedTestCollectionOf[TollBoothExit.Record]
       .addElementsAtMinimumTime(anyTollBoothExitRecord)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = decodeRecord(sc.testBounded(inputs))
 

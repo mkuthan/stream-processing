@@ -47,7 +47,7 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
   it should "decode valid record into TollBoothEntry" in runWithScioContext { sc =>
     val inputs = boundedTestCollectionOf[TollBoothEntry.Record]
       .addElementsAtMinimumTime(anyTollBoothEntryRecord)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = decodeRecord(sc.testBounded(inputs))
 

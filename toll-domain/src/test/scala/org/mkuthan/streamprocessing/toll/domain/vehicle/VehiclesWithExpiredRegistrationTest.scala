@@ -2,15 +2,14 @@ package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import org.joda.time.Duration
 import org.joda.time.Instant
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     with TestScioContext
@@ -115,5 +114,16 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
 
     val results = encodeMessage(sc.testUnbounded(inputs))
     results should containSingleValue(anyVehicleWithExpiredRegistrationMessage(createdAt))
+  }
+
+  it should "encode into record" in runWithScioContext { sc =>
+    val createdAt = Instant.parse("2014-09-10T23:59:59.999Z")
+
+    val inputs = boundedTestCollectionOf[VehiclesWithExpiredRegistration]
+      .addElementsAtTime(createdAt, anyVehicleWithExpiredRegistration)
+      .advanceWatermarkToInfinity()
+
+    val results = encodeRecord(sc.testBounded(inputs))
+    results should containSingleValue(anyVehicleWithExpiredRegistrationRecord(createdAt))
   }
 }

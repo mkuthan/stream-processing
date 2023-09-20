@@ -47,7 +47,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
       .addElementsAtTime(tollBoothEntry1.entryTime, tollBoothEntry1)
       .addElementsAtTime(tollBoothEntry2.entryTime, tollBoothEntry2)
       .addElementsAtTime(tollBoothEntry3.entryTime, tollBoothEntry3)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = calculateInFixedWindow(sc.testBounded(inputs), FiveMinutes)
 

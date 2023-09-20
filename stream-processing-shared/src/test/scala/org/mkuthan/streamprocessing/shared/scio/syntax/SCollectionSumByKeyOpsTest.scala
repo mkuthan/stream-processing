@@ -35,7 +35,7 @@ class SCollectionSumByKeyOpsTest extends AnyFlatSpec
       .addElementsAtTime("12:01:00", sample2)
       .addElementsAtTime("12:02:00", sample1)
       .addElementsAtTime("12:10:00", sample2)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = sc.testBounded(collection).sumByKeyInFixedWindow(Duration.standardMinutes(10))
 

@@ -36,11 +36,11 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
     val boothEntries = boundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val boothExits = boundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
       calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
@@ -72,11 +72,11 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
 
     val boothEntries = boundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry.entryTime, tollBoothEntry)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val boothExits = boundedTestCollectionOf[TollBoothExit]
       .addElementsAtTime(tollBoothExit.exitTime, tollBoothExit)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
       calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
@@ -95,7 +95,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = boundedTestCollectionOf[TotalVehicleTime]
       .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
     results should containSingleValue(anyTotalVehicleTimeRecord.copy(created_at = recordTimestamp))

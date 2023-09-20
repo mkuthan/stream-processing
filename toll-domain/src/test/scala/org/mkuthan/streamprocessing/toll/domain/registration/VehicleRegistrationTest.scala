@@ -52,7 +52,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
     val history = boundedTestCollectionOf[VehicleRegistration.Record]
       .addElementsAtMinimumTime(anyVehicleRegistrationRecord)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = decodeRecord(sc.testBounded(history), partitionDate)
 
@@ -62,7 +62,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
   it should "union history with updates" in runWithScioContext { sc =>
     val history = boundedTestCollectionOf[VehicleRegistration]
       .addElementsAtTime(anyVehicleRegistrationHistory.registrationTime, anyVehicleRegistrationHistory)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val updates = unboundedTestCollectionOf[VehicleRegistration]
       .addElementsAtTime(anyVehicleRegistrationUpdate.registrationTime, anyVehicleRegistrationUpdate)

@@ -95,7 +95,7 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
         val ioDiagnostics = boundedTestCollectionOf[IoDiagnostic]
           .addElementsAtTime("2023-06-15T12:01:00Z", ioDiagnostic1, ioDiagnostic1, ioDiagnostic2)
           .addElementsAtTime("2023-06-15T12:02:00Z", ioDiagnostic1, ioDiagnostic2)
-          .build()
+          .advanceWatermarkToInfinity()
 
         sc
           .testBounded(ioDiagnostics)

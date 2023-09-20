@@ -10,7 +10,7 @@ jobs:
   automerge:
     runs-on: ubuntu-latest
 
-    if: ${{ github.actor == 'mkuthan-scala-steward' }}
+    if: ${{ github.actor == 'mkuthan-scala-steward[bot]' }}
 
     steps:
       - name: Enable auto-merge for Scala Steward PRs

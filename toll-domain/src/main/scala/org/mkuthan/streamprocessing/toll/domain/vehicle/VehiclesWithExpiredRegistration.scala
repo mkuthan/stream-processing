@@ -97,6 +97,17 @@ object VehiclesWithExpiredRegistration {
       Message(payload, attributes)
     }
 
+  def encodeRecord(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Record] =
+    input.mapWithTimestamp { case (r, t) =>
+      Record(
+        created_at = t,
+        vehicle_registration_id = r.vehicleRegistrationId.id,
+        toll_booth_id = r.tollBoothId.id,
+        entry_time = r.entryTime,
+        license_plate = r.licensePlate.number
+      )
+    }
+
   private def toVehiclesWithExpiredRegistration(
       boothEntry: TollBoothEntry,
       vehicleRegistration: VehicleRegistration

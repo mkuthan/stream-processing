@@ -3,6 +3,8 @@ import sbt._
 import Dependencies._
 import Settings._
 
+addCommandAlias("check", "clean; scalafmt; scapegoat; testOnly -- -l org.scalatest.tags.Slow")
+
 lazy val root = (project in file("."))
   .settings(
     name := "stream-processing",

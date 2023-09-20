@@ -2,17 +2,17 @@ package org.mkuthan.streamprocessing.toll.application.batch
 
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
-
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
 import org.mkuthan.streamprocessing.test.scio.JobTestScioContext
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
 class TollBatchJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
@@ -25,6 +25,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         "--effectiveDate=2023-09-15",
         "--entryTable=toll.entry",
         "--exitTable=toll.exit",
+        "--vehicleRegistrationTable=toll.vehicle_registration",
         "--entryStatsHourlyTable=toll.entry_stats_hourly",
         "--entryStatsDailyTable=toll.entry_stats_daily",
         "--totalVehicleTimeOneHourGapTable=toll.total_vehicle_time_one_hour_gap"
@@ -32,6 +33,8 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
       // read toll booth entries and toll booth exists
       .input(CustomIO[TollBoothEntry.Record](EntryTableIoId.id), Seq(anyTollBoothEntryRecord))
       .input(CustomIO[TollBoothExit.Record](ExitTableIoId.id), Seq(anyTollBoothExitRecord))
+      // read vehicle registrations
+      .input(CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRecord))
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsHourlyTableIoId.id)) { results =>
         results should containSingleValue(
@@ -48,6 +51,14 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         results should containSingleValue(
           anyTotalVehicleTimeRecord.copy(created_at = Instant.parse("2014-09-10T13:02:59.999Z"))
         )
+      }
+      // calculate vehicles with expired registrations
+      .output(CustomIO[VehiclesWithExpiredRegistration.Record](VehiclesWithExpiredRegistrationDailyTableIoId.id)) {
+        results =>
+          val createdAt = Instant.parse("2014-09-10T23:59:59.999Z")
+          results should containInAnyOrder(Seq(
+            anyVehicleWithExpiredRegistrationRecord(createdAt, anyVehicleRegistrationRecord.id)
+          ))
       }
       .run()
   }

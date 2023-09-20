@@ -6,11 +6,14 @@ import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction
+import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction.PartitionDateRestriction
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageReadConfiguration
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
 object TollBatchJob extends TollBatchJobIo {
 
@@ -27,24 +30,32 @@ object TollBatchJob extends TollBatchJobIo {
     val boothEntryRecords = sc.readFromBigQuery(
       EntryTableIoId,
       config.entryTable,
-      StorageReadConfiguration()
-        .withRowRestriction(
-          RowRestriction.DateColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
-        )
+      StorageReadConfiguration().withRowRestriction(
+        RowRestriction.DateColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
+      )
     )
     val boothEntries = TollBoothEntry.decodeRecord(boothEntryRecords)
 
     val boothExitRecords = sc.readFromBigQuery(
       ExitTableIoId,
       config.exitTable,
-      StorageReadConfiguration()
-        .withRowRestriction(
-          RowRestriction.DateColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
-        )
+      StorageReadConfiguration().withRowRestriction(
+        RowRestriction.DateColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
+      )
     )
     val boothExits = TollBoothExit.decodeRecord(boothExitRecords)
 
-    // read vehicle registrations (TODO)
+    // read vehicle registrations
+    val vehicleRegistrationRecords =
+      sc.readFromBigQuery(
+        VehicleRegistrationTableIoId,
+        config.vehicleRegistrationTable,
+        StorageReadConfiguration().withRowRestriction(
+          PartitionDateRestriction(config.effectiveDate)
+        )
+      )
+
+    val vehicleRegistrations = VehicleRegistration.decodeRecord(vehicleRegistrationRecords, config.effectiveDate)
 
     // calculate tool booth stats
     val boothStatsHourly = TollBoothStats.calculateInFixedWindow(boothEntries, OneHour)
@@ -64,7 +75,15 @@ object TollBatchJob extends TollBatchJobIo {
       .encodeRecord(totalVehicleTimes)
       .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
 
-    // calculate vehicles with expired registrations (TODO)
+    // calculate vehicles with expired registrations
+    val (vehiclesWithExpiredRegistration, _) =
+      VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, OneDay)
+    VehiclesWithExpiredRegistration
+      .encodeRecord(vehiclesWithExpiredRegistration)
+      .writeBoundedToBigQuery(
+        VehiclesWithExpiredRegistrationDailyTableIoId,
+        config.vehiclesWithExpiredRegistrationDailyPartition
+      )
 
     val _ = sc.run()
   }

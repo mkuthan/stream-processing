@@ -2,7 +2,11 @@ package org.mkuthan.streamprocessing.toll.application.batch
 
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
+
 import org.joda.time.Instant
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import org.mkuthan.streamprocessing.test.scio.JobTestScioContext
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -13,8 +17,6 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 
 class TollBatchJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext

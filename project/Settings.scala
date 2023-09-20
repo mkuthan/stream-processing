@@ -8,7 +8,7 @@ import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 
 object Settings {
   val commonSettings = Seq(
-    scalaVersion := "2.13.11",
+    scalaVersion := "2.13.12",
     scalacOptions := Seq(
       "-deprecation", // Emit warning and location for usages of deprecated APIs
       "-feature", // Emit warning and location for usages of features that should be imported explicitly

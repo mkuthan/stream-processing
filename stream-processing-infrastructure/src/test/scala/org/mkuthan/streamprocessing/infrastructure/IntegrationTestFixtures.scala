@@ -32,10 +32,10 @@ trait IntegrationTestFixtures extends JodaTimeArbitrary {
     )
   }
 
-  val SampleClassBigQueryType = BigQueryType[SampleClass]
+  val SampleClassBigQueryType: BigQueryType[SampleClass] = BigQueryType[SampleClass]
   val SampleClassBigQuerySchema = SampleClassBigQueryType.schema
 
-  val SampleObject1 = SampleClass(
+  val SampleObject1: SampleClass = SampleClass(
     stringField = "complex 1",
     optionalStringField = Some("complex 1"),
     intField = 1,
@@ -44,9 +44,9 @@ trait IntegrationTestFixtures extends JodaTimeArbitrary {
     localDateField = LocalDate.parse("2014-09-10")
   )
 
-  val SampleJson1 = JsonSerde.writeJsonAsBytes(SampleObject1)
+  val SampleJson1: Array[Byte] = JsonSerde.writeJsonAsBytes(SampleObject1)
 
-  val SampleObject2 = SampleClass(
+  val SampleObject2: SampleClass = SampleClass(
     stringField = "complex 2",
     optionalStringField = None,
     intField = 2,
@@ -55,12 +55,12 @@ trait IntegrationTestFixtures extends JodaTimeArbitrary {
     localDateField = LocalDate.parse("2014-09-10")
   )
 
-  val SampleJson2 = JsonSerde.writeJsonAsBytes(SampleObject2)
+  val SampleJson2: Array[Byte] = JsonSerde.writeJsonAsBytes(SampleObject2)
 
-  val InvalidJson = "invalid json".getBytes(StandardCharsets.UTF_8)
+  val InvalidJson: Array[Byte] = "invalid json".getBytes(StandardCharsets.UTF_8)
 
-  val SampleMap1 = Map("key1" -> "value1")
-  val SampleMap2 = Map("key2" -> "value2")
+  val SampleMap1: Map[String, String] = Map("key1" -> "value1")
+  val SampleMap2: Map[String, String] = Map("key2" -> "value2")
 }
 
 object IntegrationTestFixtures {

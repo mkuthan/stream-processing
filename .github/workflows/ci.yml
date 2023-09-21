@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: sbt scalafixAll --check       
+      - run: sbt "scalafixAll --check"   
           
   test:
     runs-on: ubuntu-latest

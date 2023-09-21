@@ -9,7 +9,7 @@ trait VehicleRegistrationFixture {
 
   final val anyVehicleRegistrationPayload = VehicleRegistration.Payload(
     id = "1",
-    registration_time = "2014-09-10T12:03:00Z",
+    registration_time = "2014-09-10T11:59:00Z", // before toll booth entry
     license_plate = "JNB 7001",
     expired = "1"
   )
@@ -36,7 +36,7 @@ trait VehicleRegistrationFixture {
 
   final val anyVehicleRegistrationHistory = VehicleRegistration(
     id = VehicleRegistrationId(anyVehicleRegistrationRecord.id),
-    registrationTime = Instant.parse("2014-09-09T00:00:00.000Z"),
+    registrationTime = Instant.parse("2014-09-09T00:00:00.000Z"), // the previous day
     licensePlate = LicensePlate(anyVehicleRegistrationRecord.license_plate),
     expired = anyVehicleRegistrationRecord.expired == 1
   )

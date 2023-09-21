@@ -26,7 +26,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
   "Toll job" should "run in the batch mode" in {
     JobTest[TollBatchJob.type]
       .args(
-        "--effectiveDate=2023-09-15",
+        "--effectiveDate=2014-09-10",
         "--entryTable=toll.entry",
         "--exitTable=toll.exit",
         "--vehicleRegistrationTable=toll.vehicle_registration",

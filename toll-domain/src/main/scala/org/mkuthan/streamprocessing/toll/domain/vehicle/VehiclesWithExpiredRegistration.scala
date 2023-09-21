@@ -1,7 +1,8 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
-import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime
+import org.apache.beam.sdk.transforms.windowing.AfterWatermark
 import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.transforms.windowing.Window
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 
 import com.spotify.scio.bigquery.types.BigQueryType
@@ -52,23 +53,30 @@ object VehiclesWithExpiredRegistration {
       vehicleRegistrations: SCollection[VehicleRegistration],
       duration: Duration
   ): (SCollection[VehiclesWithExpiredRegistration], SCollection[VehiclesWithExpiredRegistrationDiagnostic]) = {
+    val windowOptions = WindowOptions(
+      trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
+      allowedLateness = Duration.ZERO,
+      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+      onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+    )
+
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
-      .withFixedWindows(duration)
-
-    val sideInputWindowOptions = WindowOptions(
-      trigger = Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane()),
-      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
-    )
+      .withFixedWindows(
+        duration = duration,
+        options = windowOptions
+      )
 
     val vehicleRegistrationByLicensePlate = vehicleRegistrations
       .keyBy(_.licensePlate)
-      .withGlobalWindow(sideInputWindowOptions)
+      .withFixedWindows(
+        duration = Duration.standardDays(2), // historical data from today and the previous day
+        options = windowOptions
+      )
 
     val results = boothEntriesByLicensePlate
       .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
       .values
-      .distinct
       .map {
         case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
           Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
@@ -79,6 +87,7 @@ object VehiclesWithExpiredRegistration {
           val diagnosticReason = "Missing vehicle registration"
           Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
       }
+      .distinct // materialize window
 
     results.unzip
   }

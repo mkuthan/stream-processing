@@ -9,21 +9,25 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 
 trait VehiclesWithExpiredRegistrationFixture {
   private val defaultRegistrationId = "1"
+  private val defaultLicencePlate = "JNB 7001"
+  private val defaultTollBoothId = "1"
+  private val defaultEntryTime = "2014-09-10T12:01:00.000Z"
 
-  final val anyVehicleWithExpiredRegistration = VehiclesWithExpiredRegistration(
-    vehicleRegistrationId = VehicleRegistrationId(defaultRegistrationId),
-    licensePlate = LicensePlate("JNB 7001"),
-    tollBoothId = TollBoothId("1"),
-    entryTime = Instant.parse("2014-09-10T12:01:00.000Z")
+  final def anyVehicleWithExpiredRegistration(id: VehicleRegistrationId =
+    VehicleRegistrationId(defaultRegistrationId)) = VehiclesWithExpiredRegistration(
+    vehicleRegistrationId = id,
+    licensePlate = LicensePlate(defaultLicencePlate),
+    tollBoothId = TollBoothId(defaultTollBoothId),
+    entryTime = Instant.parse(defaultEntryTime)
   )
 
   final def anyVehicleWithExpiredRegistrationRecord(createdAt: Instant, id: String = defaultRegistrationId) =
     VehiclesWithExpiredRegistration.Record(
       created_at = createdAt,
       vehicle_registration_id = id,
-      license_plate = anyVehicleWithExpiredRegistration.licensePlate.number,
-      toll_booth_id = anyVehicleWithExpiredRegistration.tollBoothId.id,
-      entry_time = anyVehicleWithExpiredRegistration.entryTime
+      license_plate = defaultLicencePlate,
+      toll_booth_id = defaultTollBoothId,
+      entry_time = Instant.parse(defaultEntryTime)
     )
 
   final def anyVehicleWithExpiredRegistrationMessage(createdAt: Instant, id: String = defaultRegistrationId) =
@@ -31,9 +35,9 @@ trait VehiclesWithExpiredRegistrationFixture {
       VehiclesWithExpiredRegistration.Payload(
         created_at = createdAt.toString,
         vehicle_registration_id = id,
-        license_plate = anyVehicleWithExpiredRegistration.licensePlate.number,
-        toll_booth_id = anyVehicleWithExpiredRegistration.tollBoothId.id,
-        entry_time = anyVehicleWithExpiredRegistration.entryTime.toString
+        license_plate = defaultLicencePlate,
+        toll_booth_id = defaultTollBoothId,
+        entry_time = defaultEntryTime
       ),
       Map(VehiclesWithExpiredRegistration.TimestampAttribute -> createdAt.toString)
     )

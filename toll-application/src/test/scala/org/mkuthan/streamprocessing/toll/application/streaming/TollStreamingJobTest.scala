@@ -33,6 +33,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
   "Toll job" should "run in the streaming mode" in {
     JobTest[TollStreamingJob.type]
       .args(
+        "--effectiveDate=2014-09-10",
         "--entrySubscription=projects/any-id/subscriptions/entry-subscription",
         "--entryDlq=entry_dlq",
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
@@ -87,15 +88,16 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       .inputStream(
         CustomIO[PubsubResult[VehicleRegistration.Payload]](VehicleRegistrationSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
-          // TODO: add event time to vehicle registration messages
-          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationPayload)))
+          .addElementsAtTime(
+            anyVehicleRegistrationPayload.registration_time,
+            Right(Message(anyVehicleRegistrationPayload))
+          )
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
       )
       .input(
         CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id),
         Seq(
-          // TODO: define another vehicle registration(s) for reading historical data
           anyVehicleRegistrationRecord
         )
       )

@@ -93,7 +93,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     val (vehicleRegistrationUpdates, vehicleRegistrationsDlq) =
       VehicleRegistration.decodeMessage(vehicleRegistrationMessages)
 
-    val partitionDate = LocalDate.now().minusDays(1)
+    val partitionDate = config.effectiveDate.minusDays(1)
     val vehicleRegistrationRecords =
       sc.readFromBigQuery(
         VehicleRegistrationTableIoId,

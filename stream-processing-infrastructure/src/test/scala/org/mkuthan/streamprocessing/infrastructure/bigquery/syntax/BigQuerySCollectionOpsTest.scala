@@ -177,8 +177,6 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
             BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
           )
 
-        results.debug()
-
         val resultsSink = InMemorySink(results)
 
         val run = sc.run()

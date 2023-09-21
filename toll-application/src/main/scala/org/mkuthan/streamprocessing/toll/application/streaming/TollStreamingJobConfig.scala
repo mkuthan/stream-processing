@@ -2,6 +2,8 @@ package org.mkuthan.streamprocessing.toll.application.streaming
 
 import com.spotify.scio.Args
 
+import org.joda.time.LocalDate
+
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
@@ -17,6 +19,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegis
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 case class TollStreamingJobConfig(
+    effectiveDate: LocalDate,
     entrySubscription: PubsubSubscription[TollBoothEntry.Payload],
     entryDlq: StorageBucket[TollBoothEntry.DeadLetterPayload],
     exitSubscription: PubsubSubscription[TollBoothExit.Payload],
@@ -33,20 +36,25 @@ case class TollStreamingJobConfig(
 )
 
 object TollStreamingJobConfig {
-  def parse(args: Args): TollStreamingJobConfig = TollStreamingJobConfig(
-    entrySubscription = PubsubSubscription(args.required("entrySubscription")),
-    entryDlq = StorageBucket(args.required("entryDlq")),
-    exitSubscription = PubsubSubscription(args.required("exitSubscription")),
-    exitDlq = StorageBucket(args.required("exitDlq")),
-    vehicleRegistrationSubscription = PubsubSubscription(args.required("vehicleRegistrationSubscription")),
-    vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
-    vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
-    entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
-    totalVehicleTimeTable = BigQueryTable(args.required("totalVehicleTimeTable")),
-    totalVehicleTimeDiagnosticTable = BigQueryTable(args.required("totalVehicleTimeDiagnosticTable")),
-    vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
-    vehiclesWithExpiredRegistrationDiagnosticTable =
-      BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),
-    diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
-  )
+  def parse(args: Args): TollStreamingJobConfig = {
+    val effectiveDate = args.optional("effectiveDate").map(LocalDate.parse).getOrElse(LocalDate.now())
+
+    TollStreamingJobConfig(
+      effectiveDate = effectiveDate,
+      entrySubscription = PubsubSubscription(args.required("entrySubscription")),
+      entryDlq = StorageBucket(args.required("entryDlq")),
+      exitSubscription = PubsubSubscription(args.required("exitSubscription")),
+      exitDlq = StorageBucket(args.required("exitDlq")),
+      vehicleRegistrationSubscription = PubsubSubscription(args.required("vehicleRegistrationSubscription")),
+      vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
+      vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
+      entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
+      totalVehicleTimeTable = BigQueryTable(args.required("totalVehicleTimeTable")),
+      totalVehicleTimeDiagnosticTable = BigQueryTable(args.required("totalVehicleTimeDiagnosticTable")),
+      vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
+      vehiclesWithExpiredRegistrationDiagnosticTable =
+        BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),
+      diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
+    )
+  }
 }

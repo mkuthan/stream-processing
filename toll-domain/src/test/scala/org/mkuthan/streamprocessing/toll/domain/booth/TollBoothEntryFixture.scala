@@ -7,7 +7,7 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothEntryFixture {
 
-  final val anyTollBoothEntryRaw = TollBoothEntry.Raw(
+  final val anyTollBoothEntryPayload = TollBoothEntry.Payload(
     id = "1",
     entry_time = "2014-09-10T12:01:00Z",
     license_plate = "JNB 7001",
@@ -20,19 +20,32 @@ trait TollBoothEntryFixture {
     tag = "String"
   )
 
-  final val tollBoothEntryRawInvalid = anyTollBoothEntryRaw.copy(entry_time = "invalid time")
+  final val tollBoothEntryPayloadInvalid = anyTollBoothEntryPayload.copy(id = "")
 
-  final val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Raw](
-    data = tollBoothEntryRawInvalid,
-    error = "Invalid format: \"invalid time\""
+  final val tollBoothEntryDecodingError = DeadLetter[TollBoothEntry.Payload](
+    data = tollBoothEntryPayloadInvalid,
+    error = "requirement failed: Toll booth id is empty"
   )
 
-  final val tollBoothEntryRawWithoutExit = anyTollBoothEntryRaw.copy(license_plate = "other license plate")
+  final val tollBoothEntryPayloadWithoutExit = anyTollBoothEntryPayload.copy(license_plate = "other license plate")
+
+  final val anyTollBoothEntryRecord = TollBoothEntry.Record(
+    id = anyTollBoothEntryPayload.id,
+    entry_time = Instant.parse(anyTollBoothEntryPayload.entry_time),
+    license_plate = anyTollBoothEntryPayload.license_plate,
+    state = anyTollBoothEntryPayload.state,
+    make = anyTollBoothEntryPayload.make,
+    model = anyTollBoothEntryPayload.model,
+    vehicle_type = anyTollBoothEntryPayload.vehicle_type,
+    weight_type = anyTollBoothEntryPayload.weight_type,
+    toll = BigDecimal(anyTollBoothEntryPayload.toll),
+    tag = anyTollBoothEntryPayload.tag
+  )
 
   final val anyTollBoothEntry = TollBoothEntry(
-    id = TollBoothId("1"),
-    entryTime = Instant.parse("2014-09-10T12:01:00Z"),
-    toll = BigDecimal(7),
-    licensePlate = LicensePlate("JNB 7001")
+    id = TollBoothId(anyTollBoothEntryPayload.id),
+    entryTime = Instant.parse(anyTollBoothEntryPayload.entry_time),
+    toll = BigDecimal(anyTollBoothEntryPayload.toll),
+    licensePlate = LicensePlate(anyTollBoothEntryPayload.license_plate)
   )
 }

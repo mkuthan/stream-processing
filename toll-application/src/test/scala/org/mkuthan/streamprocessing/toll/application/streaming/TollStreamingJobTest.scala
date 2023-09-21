@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.toll.application.streaming
 import com.spotify.scio.io.CustomIO
 import com.spotify.scio.testing.JobTest
 
+import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +12,7 @@ import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
-import org.mkuthan.streamprocessing.toll.application.io._
+import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -21,16 +22,18 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-class TollApplicationTest extends AnyFlatSpec with Matchers
+class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
-    with TollApplicationFixtures {
+    with TollJobFixtures
+    with TollStreamingJobIo {
 
   // TODO: move to the infra module, but where?
   type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
-  "Toll application" should "run" in {
-    JobTest[TollApplication.type]
+  "Toll job" should "run in the streaming mode" in {
+    JobTest[TollStreamingJob.type]
       .args(
+        "--effectiveDate=2014-09-10",
         "--entrySubscription=projects/any-id/subscriptions/entry-subscription",
         "--entryDlq=entry_dlq",
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
@@ -46,13 +49,13 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         "--diagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
-      .inputStream[PubsubResult[TollBoothEntry.Raw]](
-        CustomIO[PubsubResult[TollBoothEntry.Raw]](EntrySubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Raw]]
+      .inputStream[PubsubResult[TollBoothEntry.Payload]](
+        CustomIO[PubsubResult[TollBoothEntry.Payload]](EntrySubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Payload]]
           .addElementsAtTime(
-            anyTollBoothEntryRaw.entry_time,
-            Right(Message(anyTollBoothEntryRaw)),
-            Right(Message(tollBoothEntryRawInvalid)),
+            anyTollBoothEntryPayload.entry_time,
+            Right(Message(anyTollBoothEntryPayload)),
+            Right(Message(tollBoothEntryPayloadInvalid)),
             Left(PubsubDeadLetter(
               "corrupted".getBytes,
               Map(),
@@ -61,16 +64,16 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
           )
           .advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[DeadLetter[TollBoothEntry.Raw]](EntryDlqBucketIoId.id)) { results =>
+      .output(CustomIO[DeadLetter[TollBoothEntry.Payload]](EntryDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothEntryDecodingError)
       }
       .inputStream(
-        CustomIO[PubsubResult[TollBoothExit.Raw]](ExitSubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[TollBoothExit.Raw]]
+        CustomIO[PubsubResult[TollBoothExit.Payload]](ExitSubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[TollBoothExit.Payload]]
           .addElementsAtTime(
-            anyTollBoothExitRaw.exit_time,
-            Right(Message(anyTollBoothExitRaw)),
-            Right(Message(tollBoothExitRawInvalid)),
+            anyTollBoothExitPayload.exit_time,
+            Right(Message(anyTollBoothExitPayload)),
+            Right(Message(tollBoothExitPayloadInvalid)),
             Left(PubsubDeadLetter(
               "corrupted".getBytes,
               Map(),
@@ -78,23 +81,24 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
             ))
           ).advanceWatermarkToInfinity().testStream
       )
-      .output(CustomIO[DeadLetter[TollBoothExit.Raw]](ExitDlqBucketIoId.id)) { results =>
+      .output(CustomIO[DeadLetter[TollBoothExit.Payload]](ExitDlqBucketIoId.id)) { results =>
         results should containSingleValue(tollBoothExitDecodingError)
       }
       // receive vehicle registrations
       .inputStream(
-        CustomIO[PubsubResult[VehicleRegistration.Raw]](VehicleRegistrationSubscriptionIoId.id),
-        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Raw]]
-          // TODO: add event time to vehicle registration messages
-          .addElementsAtWatermarkTime(Right(Message(anyVehicleRegistrationRaw)))
+        CustomIO[PubsubResult[VehicleRegistration.Payload]](VehicleRegistrationSubscriptionIoId.id),
+        unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
+          .addElementsAtTime(
+            anyVehicleRegistrationPayload.registration_time,
+            Right(Message(anyVehicleRegistrationPayload))
+          )
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
       )
       .input(
-        CustomIO[VehicleRegistration.Raw](VehicleRegistrationTableIoId.id),
+        CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id),
         Seq(
-          // TODO: define another vehicle registration(s) for reading historical data
-          anyVehicleRegistrationRaw
+          anyVehicleRegistrationRecord
         )
       )
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
@@ -102,23 +106,31 @@ class TollApplicationTest extends AnyFlatSpec with Matchers
         results should beEmpty
       }
       // calculate tool booth stats
-      .output(CustomIO[TollBoothStats.Raw](EntryStatsTableIoId.id)) { results =>
-        results should containSingleValue(anyTollBoothStatsRaw)
+      .output(CustomIO[TollBoothStats.Record](EntryStatsTableIoId.id)) { results =>
+        results should containSingleValue(
+          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:09:59.999Z"))
+        )
       }
       // calculate total vehicle times
-      .output(CustomIO[TotalVehicleTime.Raw](TotalVehicleTimeTableIoId.id)) { results =>
-        results should containSingleValue(anyTotalVehicleTimeRaw)
+      .output(CustomIO[TotalVehicleTime.Record](TotalVehicleTimeTableIoId.id)) { results =>
+        results should containSingleValue(
+          anyTotalVehicleTimeRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
+        )
       }
-      .output(CustomIO[TotalVehicleTimeDiagnostic.Raw](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
         // TODO
         results should beEmpty
       }
       // calculate vehicles with expired registrations
-      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Raw]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
+      .output(CustomIO[Message[VehiclesWithExpiredRegistration.Payload]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
+          val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+          results should containInAnyOrder(Seq(
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationPayload.id),
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
+          ))
       }
-      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Raw](
+      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>

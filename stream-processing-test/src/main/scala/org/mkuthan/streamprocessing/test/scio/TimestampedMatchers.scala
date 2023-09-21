@@ -64,7 +64,16 @@ trait TimestampedMatchers extends InstantSyntax {
       time: String,
       value: T
   ): SingleMatcher[SCollection[(T, Instant)], (T, Instant)] =
-    containSingleValue((value, time.toInstant))
+    containSingleValueAtTime(time.toInstant, value)
+
+  /**
+   * Assert that the SCollection contains a single provided element at given time.
+   */
+  def containSingleValueAtTime[T: Coder: Eq](
+      time: Instant,
+      value: T
+  ): SingleMatcher[SCollection[(T, Instant)], (T, Instant)] =
+    containSingleValue((value, time))
 
   /**
    * Assert that the SCollection contains the provided elements at given time.

@@ -34,7 +34,7 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         val sampleObjects = boundedTestCollectionOf[SampleClass]
           .addElementsAtMinimumTime(SampleObject1, SampleObject2)
-          .build()
+          .advanceWatermarkToInfinity()
 
         sc
           .testBounded(sampleObjects)
@@ -61,7 +61,7 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
         val localDateTime = LocalDateTime.parse("2023-06-15T14:00:00")
         val sampleObjects = boundedTestCollectionOf[SampleClass]
           .addElementsAtMinimumTime(SampleObject1, SampleObject2)
-          .build()
+          .advanceWatermarkToInfinity()
 
         sc
           .testBounded(sampleObjects)
@@ -88,7 +88,7 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
         val localDate = LocalDate.parse("2023-06-15")
         val sampleObjects = boundedTestCollectionOf[SampleClass]
           .addElementsAtMinimumTime(SampleObject1, SampleObject2)
-          .build()
+          .advanceWatermarkToInfinity()
 
         sc
           .testBounded(sampleObjects)
@@ -115,7 +115,7 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
         val invalidObject = SampleObject1.copy(instantField = Instant.ofEpochMilli(Long.MaxValue))
         val sampleObjects = boundedTestCollectionOf[SampleClass]
           .addElementsAtMinimumTime(invalidObject)
-          .build()
+          .advanceWatermarkToInfinity()
 
         sc
           .testBounded(sampleObjects)
@@ -176,8 +176,6 @@ class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
             IoIdentifier[SampleClass]("any-id"),
             BigQueryTable[SampleClass](s"$projectId:$datasetName.$tableName")
           )
-
-        results.debug()
 
         val resultsSink = InMemorySink(results)
 

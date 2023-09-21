@@ -16,7 +16,7 @@ class SCollectionEitherOpsTest extends AnyFlatSpec
   it should "unzip Either" in runWithScioContext { sc =>
     val collection = boundedTestCollectionOf[Either[String, String]]
       .addElementsAtMinimumTime(Right("r1"), Left("l1"), Right("r2"), Left("l2"), Right("r3"))
-      .build()
+      .advanceWatermarkToInfinity()
 
     val (right, left) = sc
       .testBounded(collection)

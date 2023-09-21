@@ -15,11 +15,11 @@ class ScioContextOpsTest extends AnyFlatSpec
 
   it should "union in global window" in runWithScioContext { sc =>
     val collection1 = boundedTestCollectionOf[String]
-      .addElementsAtMinimumTime("one").build()
+      .addElementsAtMinimumTime("one").advanceWatermarkToInfinity()
     val collection2 = boundedTestCollectionOf[String]
-      .addElementsAtMinimumTime("two", "three").build()
+      .addElementsAtMinimumTime("two", "three").advanceWatermarkToInfinity()
     val collection3 = boundedTestCollectionOf[String]
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = sc.unionInGlobalWindow(
       sc.testBounded(collection1).withGlobalWindow(),

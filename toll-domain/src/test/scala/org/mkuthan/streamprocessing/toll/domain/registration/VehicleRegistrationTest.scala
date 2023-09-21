@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.toll.domain.registration
 
+import org.joda.time.LocalDate
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -14,24 +15,29 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   behavior of "VehicleRegistration"
 
-  it should "decode valid VehicleRegistration into raw" in runWithScioContext { sc =>
-    val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-      .addElementsAtWatermarkTime(anyVehicleRegistrationRaw)
+  it should "decode valid message into VehicleRegistration" in runWithScioContext { sc =>
+    val input = unboundedTestCollectionOf[Message[VehicleRegistration.Payload]]
+      .addElementsAtTime(anyVehicleRegistrationPayload.registration_time, Message(anyVehicleRegistrationPayload))
       .advanceWatermarkToInfinity()
 
-    val (results, dlq) = decode(sc.testUnbounded(inputs))
+    val (results, dlq) = decodeMessage(sc.testUnbounded(input))
 
-    results should containSingleValue(anyVehicleRegistration)
+    results should containInAnyOrder(Seq(
+      anyVehicleRegistrationUpdate
+    ))
     dlq should beEmpty
   }
 
-  it should "put invalid VehicleRegistration into DLQ" in {
+  it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
-      val inputs = unboundedTestCollectionOf[VehicleRegistration.Raw]
-        .addElementsAtWatermarkTime(vehicleRegistrationRawInvalid)
+      val input = unboundedTestCollectionOf[Message[VehicleRegistration.Payload]]
+        .addElementsAtTime(
+          vehicleRegistrationPayloadInvalid.registration_time,
+          Message(vehicleRegistrationPayloadInvalid)
+        )
         .advanceWatermarkToInfinity()
 
-      val (results, dlq) = decode(sc.testUnbounded(inputs))
+      val (results, dlq) = decodeMessage(sc.testUnbounded(input))
 
       results should beEmpty
       dlq should containSingleValue(vehicleRegistrationDecodingError)
@@ -41,19 +47,30 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     result.counter(VehicleRegistration.DlqCounter).attempted shouldBe 1
   }
 
-  it should "union history with updates" in runWithScioContext { sc =>
-    val vehicleRegistrationHistory = anyVehicleRegistrationRaw.copy(id = "history")
-    val history = boundedTestCollectionOf[VehicleRegistration.Raw]
-      .addElementsAtMinimumTime(vehicleRegistrationHistory)
-      .build()
+  it should "decode historical record into VehicleRegistration" in runWithScioContext { sc =>
+    val partitionDate = LocalDate.parse("2014-09-09")
 
-    val vehicleRegistrationUpdate = anyVehicleRegistrationRaw.copy(id = "update")
-    val updates = unboundedTestCollectionOf[Message[VehicleRegistration.Raw]]
-      .addElementsAtWatermarkTime(Message(vehicleRegistrationUpdate))
+    val history = boundedTestCollectionOf[VehicleRegistration.Record]
+      .addElementsAtMinimumTime(anyVehicleRegistrationRecord)
       .advanceWatermarkToInfinity()
 
-    val result = unionHistoryWithUpdates(sc.testBounded(history), sc.testUnbounded(updates))
+    val results = decodeRecord(sc.testBounded(history), partitionDate)
 
-    result should containInAnyOrder(Seq(vehicleRegistrationHistory, vehicleRegistrationUpdate))
+    results should containSingleValue(anyVehicleRegistrationHistory)
   }
+
+  it should "union history with updates" in runWithScioContext { sc =>
+    val history = boundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtTime(anyVehicleRegistrationHistory.registrationTime, anyVehicleRegistrationHistory)
+      .advanceWatermarkToInfinity()
+
+    val updates = unboundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtTime(anyVehicleRegistrationUpdate.registrationTime, anyVehicleRegistrationUpdate)
+      .advanceWatermarkToInfinity()
+
+    val results = VehicleRegistration.unionHistoryWithUpdates(sc.testBounded(history), sc.testUnbounded(updates))
+
+    results should containInAnyOrder(Seq(anyVehicleRegistrationHistory, anyVehicleRegistrationUpdate))
+  }
+
 }

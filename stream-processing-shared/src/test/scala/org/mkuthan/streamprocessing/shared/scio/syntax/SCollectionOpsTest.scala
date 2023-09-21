@@ -16,11 +16,11 @@ class SCollectionOpsTest extends AnyFlatSpec
 
   it should "union in global window" in runWithScioContext { sc =>
     val collection1 = boundedTestCollectionOf[String]
-      .addElementsAtMinimumTime("one").build()
+      .addElementsAtMinimumTime("one").advanceWatermarkToInfinity()
     val collection2 = boundedTestCollectionOf[String]
-      .addElementsAtMinimumTime("two", "three").build()
+      .addElementsAtMinimumTime("two", "three").advanceWatermarkToInfinity()
     val collection3 = boundedTestCollectionOf[String]
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = sc
       .testBounded(collection1)
@@ -38,7 +38,7 @@ class SCollectionOpsTest extends AnyFlatSpec
     val element = "any element"
     val collection = boundedTestCollectionOf[String]
       .addElementsAtTime(instant, element)
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = sc.testBounded(collection)
       .mapWithTimestamp { case (e, i) => e + i.toString }

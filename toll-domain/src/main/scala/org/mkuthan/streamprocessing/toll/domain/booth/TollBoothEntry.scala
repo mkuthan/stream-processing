@@ -4,6 +4,7 @@ import scala.util.control.NonFatal
 
 import org.apache.beam.sdk.metrics.Counter
 
+import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioMetrics
 
@@ -23,11 +24,14 @@ case class TollBoothEntry(
 
 object TollBoothEntry {
 
-  type DeadLetterRaw = DeadLetter[Raw]
+  type DeadLetterPayload = DeadLetter[Payload]
+
+  val TimestampAttribute = "entry_time"
+  val PartitioningColumnName = "entry_time"
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothEntry]("dlq")
 
-  final case class Raw(
+  case class Payload(
       id: String,
       entry_time: String,
       license_plate: String,
@@ -40,23 +44,54 @@ object TollBoothEntry {
       tag: String
   )
 
-  def decode(input: SCollection[Message[Raw]]): (SCollection[TollBoothEntry], SCollection[DeadLetterRaw]) =
+  @BigQueryType.toTable
+  case class Record(
+      id: String,
+      entry_time: Instant,
+      license_plate: String,
+      state: String,
+      make: String,
+      model: String,
+      vehicle_type: String,
+      weight_type: String,
+      toll: BigDecimal,
+      tag: String
+  )
+
+  def decodeMessage(
+      input: SCollection[Message[Payload]]
+  ): (SCollection[TollBoothEntry], SCollection[DeadLetterPayload]) =
     input
-      .map(element => fromRaw(element.payload))
+      .map(message => fromMessage(message))
       .unzip
 
-  private def fromRaw(raw: Raw): Either[DeadLetterRaw, TollBoothEntry] =
+  def decodeRecord(input: SCollection[Record]): SCollection[TollBoothEntry] =
+    input
+      .map(record => fromRecord(record))
+      .timestampBy(boothExit => boothExit.entryTime)
+
+  private def fromMessage(message: Message[Payload]): Either[DeadLetterPayload, TollBoothEntry] = {
+    val payload = message.payload
     try {
       val tollBoothEntry = TollBoothEntry(
-        id = TollBoothId(raw.id),
-        entryTime = Instant.parse(raw.entry_time),
-        licensePlate = LicensePlate(raw.license_plate),
-        toll = BigDecimal(raw.toll)
+        id = TollBoothId(payload.id),
+        entryTime = Instant.parse(payload.entry_time),
+        licensePlate = LicensePlate(payload.license_plate),
+        toll = BigDecimal(payload.toll)
       )
       Right(tollBoothEntry)
     } catch {
       case NonFatal(ex) =>
         DlqCounter.inc()
-        Left(DeadLetter(raw, ex.getMessage))
+        Left(DeadLetter(payload, ex.getMessage))
     }
+  }
+
+  private def fromRecord(record: Record): TollBoothEntry =
+    TollBoothEntry(
+      id = TollBoothId(record.id),
+      entryTime = record.entry_time,
+      licensePlate = LicensePlate(record.license_plate),
+      toll = record.toll
+    )
 }

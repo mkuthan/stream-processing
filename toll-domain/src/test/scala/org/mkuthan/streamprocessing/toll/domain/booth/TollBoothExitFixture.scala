@@ -7,22 +7,28 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothExitFixture {
 
-  val anyTollBoothExitRaw = TollBoothExit.Raw(
+  final val anyTollBoothExitPayload = TollBoothExit.Payload(
     id = "1",
     exit_time = "2014-09-10T12:03:00Z",
     license_plate = "JNB 7001"
   )
 
-  val tollBoothExitRawInvalid = anyTollBoothExitRaw.copy(exit_time = "invalid time")
+  final val tollBoothExitPayloadInvalid = anyTollBoothExitPayload.copy(id = "")
 
-  val tollBoothExitDecodingError = DeadLetter[TollBoothExit.Raw](
-    data = tollBoothExitRawInvalid,
-    error = "Invalid format: \"invalid time\""
+  final val tollBoothExitDecodingError = DeadLetter[TollBoothExit.Payload](
+    data = tollBoothExitPayloadInvalid,
+    error = "requirement failed: Toll booth id is empty"
   )
 
-  val anyTollBoothExit = TollBoothExit(
-    id = TollBoothId("1"),
-    exitTime = Instant.parse("2014-09-10T12:03:00Z"),
-    licensePlate = LicensePlate("JNB 7001")
+  final val anyTollBoothExitRecord = TollBoothExit.Record(
+    id = anyTollBoothExitPayload.id,
+    exit_time = Instant.parse(anyTollBoothExitPayload.exit_time),
+    license_plate = anyTollBoothExitPayload.license_plate
+  )
+
+  final val anyTollBoothExit = TollBoothExit(
+    id = TollBoothId(anyTollBoothExitPayload.id),
+    exitTime = Instant.parse(anyTollBoothExitPayload.exit_time),
+    licensePlate = LicensePlate(anyTollBoothExitPayload.license_plate)
   )
 }

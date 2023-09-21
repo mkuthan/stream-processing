@@ -40,16 +40,16 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     val tollBoothEntry3 = anyTollBoothEntry.copy(
       id = tollBoothId2,
       entryTime = tollBoothEntry3Time,
-      toll = BigDecimal(3)
+      toll = BigDecimal(4)
     )
 
-    val inputs = unboundedTestCollectionOf[TollBoothEntry]
+    val inputs = boundedTestCollectionOf[TollBoothEntry]
       .addElementsAtTime(tollBoothEntry1.entryTime, tollBoothEntry1)
       .addElementsAtTime(tollBoothEntry2.entryTime, tollBoothEntry2)
       .addElementsAtTime(tollBoothEntry3.entryTime, tollBoothEntry3)
       .advanceWatermarkToInfinity()
 
-    val results = calculateInFixedWindow(sc.testUnbounded(inputs), FiveMinutes)
+    val results = calculateInFixedWindow(sc.testBounded(inputs), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containInAnyOrderAtTime(
@@ -65,7 +65,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
           anyTollBoothStats.copy(
             id = tollBoothId2,
             count = 1,
-            totalToll = BigDecimal(3),
+            totalToll = BigDecimal(4),
             firstEntryTime = tollBoothEntry3Time,
             lastEntryTime = tollBoothEntry3Time
           )
@@ -74,13 +74,13 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode TollBoothStats to raw" in runWithScioContext { sc =>
+  it should "encode into record" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
     val inputs = unboundedTestCollectionOf[TollBoothStats]
       .addElementsAtTime(recordTimestamp, anyTollBoothStats)
       .advanceWatermarkToInfinity()
 
     val results = encode(sc.testUnbounded(inputs))
-    results should containSingleValue(anyTollBoothStatsRaw.copy(record_timestamp = recordTimestamp))
+    results should containSingleValue(anyTollBoothStatsRecord.copy(created_at = recordTimestamp))
   }
 }

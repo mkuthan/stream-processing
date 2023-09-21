@@ -5,7 +5,6 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
@@ -26,27 +25,31 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   behavior of "VehiclesWithExpiredRegistration"
 
   it should "calculate expired VehicleRegistration" in runWithScioContext { sc =>
-    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
-    val licencePlate = LicensePlate("License Plate 1")
-
-    val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = true)
-
-    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtWatermarkTime(vehicleRegistration)
+    val vehicleRegistrations = boundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtTime(
+        anyVehicleRegistrationHistory.registrationTime,
+        anyVehicleRegistrationHistory.copy(expired = true)
+      )
+      .addElementsAtTime(
+        anyVehicleRegistrationUpdate.registrationTime,
+        anyVehicleRegistrationUpdate.copy(expired = true)
+      )
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containSingleValueAtTime(
+      containInAnyOrderAtTime(
         "2014-09-10T12:04:59.999Z",
-        anyVehicleWithExpiredRegistration.copy(entryTime = entryTime, licensePlate = licencePlate)
+        Seq(
+          anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id),
+          anyVehicleWithExpiredRegistration(anyVehicleRegistrationUpdate.id)
+        )
       )
     }
 
@@ -54,24 +57,30 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   }
 
   it should "emit diagnostic for non-expired VehicleRegistration" in runWithScioContext { sc =>
-    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
-    val licencePlate = LicensePlate("License Plate 1")
-
-    val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = licencePlate)
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = licencePlate, expired = false)
-
-    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtWatermarkTime(vehicleRegistration)
+    val vehicleRegistrations = boundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtTime(
+        anyVehicleRegistrationHistory.registrationTime,
+        anyVehicleRegistrationHistory.copy(expired = true)
+      )
+      .addElementsAtTime(
+        anyVehicleRegistrationUpdate.registrationTime,
+        anyVehicleRegistrationUpdate.copy(expired = false)
+      )
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
 
-    results should beEmpty
+    results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+      containSingleValueAtTime(
+        "2014-09-10T12:04:59.999Z",
+        anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id)
+      )
+    }
 
     diagnostics.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
@@ -82,20 +91,25 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   }
 
   it should "emit diagnostic for missing VehicleRegistration" in runWithScioContext { sc =>
-    val entryTime = Instant.parse("2014-09-10T12:03:01Z")
-    val tollBoothEntry = anyTollBoothEntry.copy(entryTime = entryTime, licensePlate = LicensePlate("License Plate 1"))
-    val vehicleRegistration = anyVehicleRegistration.copy(licensePlate = LicensePlate("License Plate 2"))
+    val unknownLicensePlate = LicensePlate("Unknown License Plate")
 
-    val boothEntries = unboundedTestCollectionOf[TollBoothEntry]
-      .addElementsAtTime(entryTime, tollBoothEntry)
+    val boothEntries = boundedTestCollectionOf[TollBoothEntry]
+      .addElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
       .advanceWatermarkToInfinity()
 
-    val vehicleRegistrations = unboundedTestCollectionOf[VehicleRegistration]
-      .addElementsAtWatermarkTime(vehicleRegistration)
+    val vehicleRegistrations = boundedTestCollectionOf[VehicleRegistration]
+      .addElementsAtTime(
+        anyVehicleRegistrationHistory.registrationTime,
+        anyVehicleRegistrationHistory.copy(licensePlate = unknownLicensePlate)
+      )
+      .addElementsAtTime(
+        anyVehicleRegistrationUpdate.registrationTime,
+        anyVehicleRegistrationUpdate.copy(licensePlate = unknownLicensePlate)
+      )
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testUnbounded(boothEntries), sc.testUnbounded(vehicleRegistrations), FiveMinutes)
+      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
 
     results should beEmpty
 
@@ -107,12 +121,25 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     }
   }
 
-  it should "encode into Raw" in runWithScioContext { sc =>
+  it should "encode into message" in runWithScioContext { sc =>
+    val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+
     val inputs = unboundedTestCollectionOf[VehiclesWithExpiredRegistration]
-      .addElementsAtTime(anyVehicleWithExpiredRegistrationRaw.created_at, anyVehicleWithExpiredRegistration)
+      .addElementsAtTime(createdAt, anyVehicleWithExpiredRegistration())
       .advanceWatermarkToInfinity()
 
-    val results = encode(sc.testUnbounded(inputs))
-    results should containSingleValue(Message(anyVehicleWithExpiredRegistrationRaw))
+    val results = encodeMessage(sc.testUnbounded(inputs))
+    results should containSingleValue(anyVehicleWithExpiredRegistrationMessage(createdAt))
+  }
+
+  it should "encode into record" in runWithScioContext { sc =>
+    val createdAt = Instant.parse("2014-09-10T23:59:59.999Z")
+
+    val inputs = boundedTestCollectionOf[VehiclesWithExpiredRegistration]
+      .addElementsAtTime(createdAt, anyVehicleWithExpiredRegistration())
+      .advanceWatermarkToInfinity()
+
+    val results = encodeRecord(sc.testBounded(inputs))
+    results should containSingleValue(anyVehicleWithExpiredRegistrationRecord(createdAt))
   }
 }

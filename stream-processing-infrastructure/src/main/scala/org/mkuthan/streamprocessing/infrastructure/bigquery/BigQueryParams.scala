@@ -5,6 +5,8 @@ import scala.jdk.CollectionConverters._
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 
+import org.joda.time.LocalDate
+
 sealed trait BigQueryReadParam {
   def configure[T](read: TypedRead[T]): TypedRead[T]
 }
@@ -47,6 +49,16 @@ object RowRestriction {
   case class SqlRestriction(sql: String) extends RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(sql)
+  }
+
+  case class DateColumnRestriction(columnName: String, localDate: LocalDate) extends RowRestriction {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] =
+      read.withRowRestriction(s"TIMESTAMP_TRUNC($columnName, DAY) = '$localDate'")
+  }
+
+  case class PartitionDateRestriction(localDate: LocalDate) extends RowRestriction {
+    override def configure[T](read: TypedRead[T]): TypedRead[T] =
+      read.withRowRestriction(s"_PARTITIONDATE = '$localDate'")
   }
 }
 

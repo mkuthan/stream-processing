@@ -31,7 +31,7 @@ object BoundedTestCollection extends InstantSyntax {
       Builder(timestampedElements)
     }
 
-    def build(): BoundedTestCollection[T] = {
+    def advanceWatermarkToInfinity(): BoundedTestCollection[T] = {
       import scala.jdk.CollectionConverters._
 
       val coder = CoderMaterializer.beamWithDefault(Coder[T])

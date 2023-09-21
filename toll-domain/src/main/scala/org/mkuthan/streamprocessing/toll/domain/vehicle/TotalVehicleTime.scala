@@ -2,11 +2,11 @@ package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.SideOutput
 
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -23,8 +23,8 @@ final case class TotalVehicleTime(
 object TotalVehicleTime {
 
   @BigQueryType.toTable
-  case class Raw(
-      record_timestamp: Instant,
+  case class Record(
+      created_at: Instant,
       license_plate: String,
       toll_booth_id: String,
       entry_time: Instant,
@@ -44,26 +44,24 @@ object TotalVehicleTime {
       .keyBy(exit => (exit.id, exit.licensePlate))
       .withSessionWindows(gapDuration)
 
-    val diagnostic = SideOutput[TotalVehicleTimeDiagnostic]()
-    val (results, sideOutputs) = boothEntriesById
+    val results = boothEntriesById
       .leftOuterJoin(boothExistsById)
       .values
-      .withSideOutputs(diagnostic)
-      .flatMap {
-        case ((boothEntry, Some(boothExit)), _) =>
-          Some(toTotalVehicleTime(boothEntry, boothExit))
-        case ((boothEntry, None), ctx) =>
+      .map {
+        case (boothEntry, Some(boothExit)) =>
+          Right(toTotalVehicleTime(boothEntry, boothExit))
+        case (boothEntry, None) =>
           val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          ctx.output(diagnostic, TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
-          None
+          Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
       }
-    (results, sideOutputs(diagnostic))
+
+    results.unzip
   }
 
-  def encode(input: SCollection[TotalVehicleTime]): SCollection[Raw] =
+  def encodeRecord(input: SCollection[TotalVehicleTime]): SCollection[Record] =
     input.withTimestamp.map { case (r, t) =>
-      Raw(
-        record_timestamp = t,
+      Record(
+        created_at = t,
         license_plate = r.licensePlate.number,
         toll_booth_id = r.tollBoothId.id,
         entry_time = r.entryTime,

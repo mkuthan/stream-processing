@@ -15,7 +15,7 @@ class BoundedTestCollectionTest extends AnyFlatSpec with Matchers with TestScioC
       .addElementsAtMinimumTime("first", "second", "third")
       .addElementsAtTime(anyTime, "fourth", "fifth", "sixth")
       .addElementsAtTime(Instant.parse(anyTime), "seventh")
-      .build()
+      .advanceWatermarkToInfinity()
 
     val results = sc.testBounded(boundedTestCollection)
     results.withTimestamp should containInAnyOrderAtTime[String](Seq(

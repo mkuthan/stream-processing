@@ -2,25 +2,45 @@ package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationId
 
 trait VehiclesWithExpiredRegistrationFixture {
-  final val anyVehicleWithExpiredRegistration = VehiclesWithExpiredRegistration(
-    licensePlate = LicensePlate("JNB 7001"),
-    tollBoothId = TollBoothId("1"),
-    vehicleRegistrationId = VehicleRegistrationId("1"),
-    entryTime = Instant.parse("2014-09-10T12:01:00.000Z")
+  private val defaultRegistrationId = "1"
+  private val defaultLicencePlate = "JNB 7001"
+  private val defaultTollBoothId = "1"
+  private val defaultEntryTime = "2014-09-10T12:01:00.000Z"
+
+  final def anyVehicleWithExpiredRegistration(id: VehicleRegistrationId =
+    VehicleRegistrationId(defaultRegistrationId)) = VehiclesWithExpiredRegistration(
+    vehicleRegistrationId = id,
+    licensePlate = LicensePlate(defaultLicencePlate),
+    tollBoothId = TollBoothId(defaultTollBoothId),
+    entryTime = Instant.parse(defaultEntryTime)
   )
 
-  final val anyVehicleWithExpiredRegistrationRaw = VehiclesWithExpiredRegistration.Raw(
-    created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
-    license_plate = "JNB 7001",
-    toll_booth_id = "1",
-    vehicle_registration_id = "1",
-    entry_time = Instant.parse("2014-09-10T12:01:00.000Z")
-  )
+  final def anyVehicleWithExpiredRegistrationRecord(createdAt: Instant, id: String = defaultRegistrationId) =
+    VehiclesWithExpiredRegistration.Record(
+      created_at = createdAt,
+      vehicle_registration_id = id,
+      license_plate = defaultLicencePlate,
+      toll_booth_id = defaultTollBoothId,
+      entry_time = Instant.parse(defaultEntryTime)
+    )
+
+  final def anyVehicleWithExpiredRegistrationMessage(createdAt: Instant, id: String = defaultRegistrationId) =
+    Message(
+      VehiclesWithExpiredRegistration.Payload(
+        created_at = createdAt.toString,
+        vehicle_registration_id = id,
+        license_plate = defaultLicencePlate,
+        toll_booth_id = defaultTollBoothId,
+        entry_time = defaultEntryTime
+      ),
+      Map(VehiclesWithExpiredRegistration.TimestampAttribute -> createdAt.toString)
+    )
 
   final val vehicleWithNotExpiredRegistrationDiagnostic = VehiclesWithExpiredRegistrationDiagnostic(
     tollBothId = TollBoothId("1"),

@@ -14,8 +14,6 @@ import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.coders.Coder
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
-
 private[bigquery] object BigQueryDeadLetterEncoderDoFn {
   private type In = BigQueryStorageApiInsertError
   private type Out[T] = BigQueryDeadLetter[T]

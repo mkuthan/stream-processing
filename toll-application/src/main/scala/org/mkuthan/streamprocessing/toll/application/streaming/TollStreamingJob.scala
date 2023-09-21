@@ -11,7 +11,6 @@ import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
-import org.joda.time.LocalDate
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction.PartitionDateRestriction

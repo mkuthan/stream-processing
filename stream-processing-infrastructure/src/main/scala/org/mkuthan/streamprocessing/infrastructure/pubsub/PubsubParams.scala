@@ -63,7 +63,7 @@ case class MaxBatchBytesSize(value: Int) extends PubsubWriteParam {
 }
 
 object MaxBatchBytesSize {
-  val HighThroughput = MaxBatchBytesSize(8 * 1024 * 1024)
+  val HighThroughput: MaxBatchBytesSize = MaxBatchBytesSize(8 * 1024 * 1024)
 }
 
 case class MaxBatchSize(value: Int) extends PubsubWriteParam {
@@ -74,5 +74,5 @@ case class MaxBatchSize(value: Int) extends PubsubWriteParam {
 }
 
 object MaxBatchSize {
-  val HighThroughput = MaxBatchSize(1000)
+  val HighThroughput: MaxBatchSize = MaxBatchSize(1000)
 }

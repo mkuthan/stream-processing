@@ -1,10 +1,12 @@
-import sbt.*
-import sbt.nio.Keys.*
-import sbt.Keys.*
+import sbt._
+import sbt.nio.Keys.onChangedBuildSource
+import sbt.nio.Keys.ReloadOnSourceChanges
+import sbt.Keys._
 
 import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
+import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object Settings {
   val commonSettings = Seq(
@@ -39,6 +41,10 @@ object Settings {
     excludeDependencies += "commons-logging" % "commons-logging",
     // enable XML report for codecov
     jacocoReportSettings := JacocoReportSettings()
-      .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML)
+      .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML),
+    // scalafix
+    ThisBuild / semanticdbEnabled := true,
+    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
+    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
   )
 }

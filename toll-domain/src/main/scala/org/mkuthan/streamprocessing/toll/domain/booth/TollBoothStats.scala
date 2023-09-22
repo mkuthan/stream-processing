@@ -2,6 +2,7 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
 
 import org.joda.time.Duration
 import org.joda.time.Instant
@@ -45,11 +46,14 @@ object TollBoothStats {
       )
   )
 
-  // TODO: expose windowOptions
-  def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothStats] =
+  def calculateInFixedWindow(
+      input: SCollection[TollBoothEntry],
+      windowDuration: Duration,
+      windowOptions: WindowOptions
+  ): SCollection[TollBoothStats] =
     input
       .map(fromBoothEntry)
-      .sumByKeyInFixedWindow(duration)
+      .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
 
   def encode(input: SCollection[TollBoothStats]): SCollection[Record] =
     input.mapWithTimestamp { case (r, t) =>

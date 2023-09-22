@@ -32,7 +32,7 @@ case class TollStreamingJobConfig(
     totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic.Record],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Payload],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic.Record],
-    diagnosticTable: BigQueryTable[IoDiagnostic.Raw]
+    diagnosticTable: BigQueryTable[IoDiagnostic.Record]
 )
 
 object TollStreamingJobConfig {

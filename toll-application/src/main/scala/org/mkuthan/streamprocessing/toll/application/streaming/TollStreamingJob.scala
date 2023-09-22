@@ -33,6 +33,8 @@ object TollStreamingJob extends TollStreamingJobIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
+  private val DefaultWindowOptions = WindowOptions()
+
   private val DeadLetterWindowOptions = WindowOptions(
     trigger = Repeatedly.forever(
       AfterFirst.of(
@@ -113,7 +115,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
-    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
+    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes, DefaultWindowOptions)
     val tollBoothStatsDlq = TollBoothStats
       .encode(boothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
@@ -147,8 +149,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       )
 
     // dead letters diagnostic
-    // TODO: encapsulate union in IoDiagnostic object
-    val ioDiagnostics = sc.unionInGlobalWindow(
+    val ioDiagnostics = IoDiagnostic.union(
       boothEntryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
       boothExitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
       vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId),
@@ -158,7 +159,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     ioDiagnostics
       .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
-      .mapWithTimestamp(IoDiagnostic.toRaw)
+      .mapWithTimestamp(IoDiagnostic.toRecord)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()

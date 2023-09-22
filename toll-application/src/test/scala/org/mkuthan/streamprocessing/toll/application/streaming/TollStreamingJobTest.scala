@@ -135,7 +135,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           // TODO
           results should beEmpty
       }
-      .output(CustomIO[IoDiagnostic.Raw](DiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[IoDiagnostic.Record](DiagnosticTableIoId.id)) { results =>
         // toll booth entry and toll booth exit
         results should haveSize(2)
       }

@@ -84,11 +84,15 @@ object VehiclesWithExpiredRegistration {
         case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
           Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
         case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
-          val diagnosticReason = "Vehicle registration is not expired"
-          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
+          Left(VehiclesWithExpiredRegistrationDiagnostic(
+            boothEntry.id,
+            VehiclesWithExpiredRegistrationDiagnostic.NotExpired
+          ))
         case (boothEntry, None) =>
-          val diagnosticReason = "Missing vehicle registration"
-          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
+          Left(VehiclesWithExpiredRegistrationDiagnostic(
+            boothEntry.id,
+            VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
+          ))
       }
       // TODO: remove
       .distinct // materialize window

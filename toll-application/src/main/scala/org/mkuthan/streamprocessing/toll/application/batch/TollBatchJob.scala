@@ -1,5 +1,6 @@
 package org.mkuthan.streamprocessing.toll.application.batch
 
+import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
@@ -22,6 +23,8 @@ object TollBatchJob extends TollBatchJobIo {
   private val OneHour = Duration.standardHours(1)
 
   private val OneDay = Duration.standardDays(1)
+
+  private val DefaultWindowOptions = WindowOptions()
 
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
@@ -60,12 +63,12 @@ object TollBatchJob extends TollBatchJobIo {
     val vehicleRegistrations = VehicleRegistration.decodeRecord(vehicleRegistrationRecords, config.effectiveDate)
 
     // calculate tool booth stats
-    val boothStatsHourly = TollBoothStats.calculateInFixedWindow(boothEntries, OneHour)
+    val boothStatsHourly = TollBoothStats.calculateInFixedWindow(boothEntries, OneHour, DefaultWindowOptions)
     TollBoothStats
       .encode(boothStatsHourly)
       .writeBoundedToBigQuery(EntryStatsHourlyTableIoId, config.entryStatsHourlyPartition)
 
-    val boothStatsDaily = TollBoothStats.calculateInFixedWindow(boothEntries, OneDay)
+    val boothStatsDaily = TollBoothStats.calculateInFixedWindow(boothEntries, OneDay, DefaultWindowOptions)
     TollBoothStats
       .encode(boothStatsDaily)
       .writeBoundedToBigQuery(EntryStatsDailyTableIoId, config.entryStatsDailyPartition)

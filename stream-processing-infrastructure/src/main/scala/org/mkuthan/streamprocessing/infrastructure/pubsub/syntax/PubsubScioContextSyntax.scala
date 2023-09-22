@@ -12,11 +12,11 @@ import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonReadConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
 private[syntax] trait PubsubScioContextSyntax {
 

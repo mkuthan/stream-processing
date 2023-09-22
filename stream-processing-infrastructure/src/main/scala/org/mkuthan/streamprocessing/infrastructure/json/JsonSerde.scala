@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.json
+package org.mkuthan.streamprocessing.infrastructure.json
 
 import scala.util.Try
 
@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.JavaTypeable
 
-// TODO: move to infra
 object JsonSerde {
 
   private lazy val ObjectMapper = new ObjectMapper()

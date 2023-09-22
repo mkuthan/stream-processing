@@ -44,11 +44,11 @@ trait VehiclesWithExpiredRegistrationFixture {
 
   final val vehicleWithNotExpiredRegistrationDiagnostic = VehiclesWithExpiredRegistrationDiagnostic(
     tollBothId = TollBoothId("1"),
-    reason = "Vehicle registration is not expired"
+    reason = VehiclesWithExpiredRegistrationDiagnostic.NotExpired
   )
 
   final val vehicleWithMissingRegistrationDiagnostic = VehiclesWithExpiredRegistrationDiagnostic(
     tollBothId = TollBoothId("1"),
-    reason = "Missing vehicle registration"
+    reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
   )
 }

@@ -16,12 +16,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.storage.NumShards
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageConfiguration
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
-import org.mkuthan.streamprocessing.shared.json.JsonSerde
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.test.gcp.StorageContext

@@ -34,7 +34,7 @@ object VehicleRegistration {
 
   case class Payload(
       id: String,
-      registration_time: String,
+      registration_time: String, // TODO: remove and get registration_time from Pubsub attribute
       license_plate: String,
       expired: String
   )

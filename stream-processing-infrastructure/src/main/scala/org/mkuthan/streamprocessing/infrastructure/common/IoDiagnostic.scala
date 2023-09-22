@@ -14,6 +14,7 @@ case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
 }
 
 object IoDiagnostic {
+  // TODO: rename to Record
   @BigQueryType.toTable
   case class Raw(created_at: Instant, id: String, reason: String, count: Long)
 

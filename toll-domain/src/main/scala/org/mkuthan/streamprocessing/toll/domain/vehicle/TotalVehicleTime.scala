@@ -51,6 +51,7 @@ object TotalVehicleTime {
         case (boothEntry, Some(boothExit)) =>
           Right(toTotalVehicleTime(boothEntry, boothExit))
         case (boothEntry, None) =>
+          // TODO: define constants
           val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
           Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
       }

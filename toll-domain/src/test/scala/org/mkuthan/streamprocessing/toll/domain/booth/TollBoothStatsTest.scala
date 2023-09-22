@@ -22,6 +22,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     val tollBoothId1 = TollBoothId("1")
     val tollBoothId2 = TollBoothId("2")
 
+    // TODO: use toInstant from stream-processing-test
     val tollBoothEntry1Time = Instant.parse("2014-09-10T12:01:00.000Z")
     val tollBoothEntry1 = anyTollBoothEntry.copy(
       id = tollBoothId1,
@@ -76,6 +77,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
 
   it should "encode into record" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
+    // TODO: use bounded
     val inputs = unboundedTestCollectionOf[TollBoothStats]
       .addElementsAtTime(recordTimestamp, anyTollBoothStats)
       .advanceWatermarkToInfinity()

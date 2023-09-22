@@ -6,7 +6,6 @@ import org.joda.time.Duration
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction
-import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction.PartitionDateRestriction
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageReadConfiguration
 import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
@@ -54,7 +53,7 @@ object TollBatchJob extends TollBatchJobIo {
         VehicleRegistrationTableIoId,
         config.vehicleRegistrationTable,
         StorageReadConfiguration().withRowRestriction(
-          PartitionDateRestriction(config.effectiveDate)
+          RowRestriction.PartitionDateRestriction(config.effectiveDate)
         )
       )
 

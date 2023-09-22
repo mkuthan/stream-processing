@@ -45,6 +45,7 @@ object TollBoothStats {
       )
   )
 
+  // TODO: expose windowOptions
   def calculateInFixedWindow(input: SCollection[TollBoothEntry], duration: Duration): SCollection[TollBoothStats] =
     input
       .map(fromBoothEntry)

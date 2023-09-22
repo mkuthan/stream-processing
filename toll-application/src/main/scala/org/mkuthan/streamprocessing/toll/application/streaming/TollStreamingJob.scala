@@ -147,6 +147,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       )
 
     // dead letters diagnostic
+    // TODO: encapsulate union in IoDiagnostic object
     val ioDiagnostics = sc.unionInGlobalWindow(
       boothEntryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
       boothExitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),

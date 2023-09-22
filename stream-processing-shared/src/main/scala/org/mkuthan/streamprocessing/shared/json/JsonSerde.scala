@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.JavaTypeable
 
+// TODO: move to infra
 object JsonSerde {
 
   private lazy val ObjectMapper = new ObjectMapper()

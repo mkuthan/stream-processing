@@ -20,13 +20,15 @@ import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
 private[syntax] trait PubsubScioContextSyntax {
 
+  type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
+
   implicit class PubsubScioContextOps(private val self: ScioContext) {
 
     def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
         id: IoIdentifier[T],
         subscription: PubsubSubscription[T],
         configuration: JsonReadConfiguration = JsonReadConfiguration()
-    ): SCollection[Either[PubsubDeadLetter[T], Message[T]]] = {
+    ): SCollection[PubsubResult[T]] = {
       val io = PubsubIO
         .readMessagesWithAttributes()
         .pipe(read => configuration.configure(read))

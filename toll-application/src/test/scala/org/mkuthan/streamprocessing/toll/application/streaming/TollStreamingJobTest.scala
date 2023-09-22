@@ -8,6 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
+import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
@@ -26,9 +27,6 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollJobFixtures
     with TollStreamingJobIo {
-
-  // TODO: move to the infra module, but where?
-  type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
   "Toll job" should "run in the streaming mode" in {
     JobTest[TollStreamingJob.type]

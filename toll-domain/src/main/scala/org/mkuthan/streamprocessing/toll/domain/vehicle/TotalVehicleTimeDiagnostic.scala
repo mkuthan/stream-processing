@@ -15,6 +15,9 @@ case class TotalVehicleTimeDiagnostic(tollBothId: TollBoothId, reason: String, c
 }
 
 object TotalVehicleTimeDiagnostic {
+
+  val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTime"
+
   @BigQueryType.toTable
   case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
 

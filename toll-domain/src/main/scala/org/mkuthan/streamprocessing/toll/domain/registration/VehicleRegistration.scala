@@ -34,7 +34,6 @@ object VehicleRegistration {
 
   case class Payload(
       id: String,
-      registration_time: String,
       license_plate: String,
       expired: String
   )
@@ -66,6 +65,7 @@ object VehicleRegistration {
 
   private def fromMessage(message: Message[Payload]): Either[DeadLetter[Payload], VehicleRegistration] = {
     val payload = message.payload
+    val attributes = message.attributes
     try {
       val expired = payload.expired.toInt
 
@@ -73,7 +73,7 @@ object VehicleRegistration {
 
       val vehicleRegistration = VehicleRegistration(
         id = VehicleRegistrationId(payload.id),
-        registrationTime = Instant.parse(payload.registration_time),
+        registrationTime = Instant.parse(attributes(TimestampAttribute)),
         licensePlate = LicensePlate(payload.license_plate),
         expired = expired != 0
       )

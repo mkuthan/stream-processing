@@ -12,13 +12,15 @@ import com.spotify.scio.values.SCollection
 import com.spotify.scio.ScioContext
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonReadConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
 private[syntax] trait PubsubScioContextSyntax {
+
+  type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
   implicit class PubsubScioContextOps(private val self: ScioContext) {
 
@@ -26,7 +28,7 @@ private[syntax] trait PubsubScioContextSyntax {
         id: IoIdentifier[T],
         subscription: PubsubSubscription[T],
         configuration: JsonReadConfiguration = JsonReadConfiguration()
-    ): SCollection[Either[PubsubDeadLetter[T], Message[T]]] = {
+    ): SCollection[PubsubResult[T]] = {
       val io = PubsubIO
         .readMessagesWithAttributes()
         .pipe(read => configuration.configure(read))

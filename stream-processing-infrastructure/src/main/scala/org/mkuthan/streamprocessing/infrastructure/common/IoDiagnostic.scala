@@ -1,9 +1,11 @@
 package org.mkuthan.streamprocessing.infrastructure.common
 
 import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.values.SCollection
 
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
 case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
@@ -15,7 +17,7 @@ case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
 
 object IoDiagnostic {
   @BigQueryType.toTable
-  case class Raw(created_at: Instant, id: String, reason: String, count: Long)
+  case class Record(created_at: Instant, id: String, reason: String, count: Long)
 
   implicit val sumByKey: SumByKey[IoDiagnostic] =
     SumByKey.create(
@@ -23,8 +25,11 @@ object IoDiagnostic {
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
-  def toRaw[T](diagnostic: IoDiagnostic, createdAt: Instant): Raw =
-    Raw(
+  def union(first: SCollection[IoDiagnostic], others: SCollection[IoDiagnostic]*): SCollection[IoDiagnostic] =
+    first.unionInGlobalWindow(others: _*)
+
+  def toRecord[T](diagnostic: IoDiagnostic, createdAt: Instant): Record =
+    Record(
       created_at = createdAt,
       id = diagnostic.id,
       reason = diagnostic.reason,

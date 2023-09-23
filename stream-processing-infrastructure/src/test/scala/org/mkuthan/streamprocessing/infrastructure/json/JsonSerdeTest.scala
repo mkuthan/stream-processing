@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.json
+package org.mkuthan.streamprocessing.infrastructure.json
 
 import com.softwaremill.diffx.generic.auto._
 import com.softwaremill.diffx.scalatest.DiffShouldMatcher._

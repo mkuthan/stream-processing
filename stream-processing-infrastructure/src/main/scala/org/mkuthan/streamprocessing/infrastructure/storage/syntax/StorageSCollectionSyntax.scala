@@ -9,9 +9,9 @@ import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageConfiguration
-import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
 private[syntax] trait StorageSCollectionSyntax {
   implicit class StorageSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {

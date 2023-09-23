@@ -32,6 +32,15 @@ object TollStreamingJob extends TollStreamingJobIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
+  private val TwoDays = Duration.standardDays(2)
+
+  private val DefaultWindowOptions = WindowOptions(
+    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
+    allowedLateness = Duration.ZERO,
+    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+  )
+
   private val DeadLetterWindowOptions = WindowOptions(
     trigger = Repeatedly.forever(
       AfterFirst.of(
@@ -39,13 +48,6 @@ object TollStreamingJob extends TollStreamingJobIo {
         AfterPane.elementCountAtLeast(1_000_000)
       )
     ),
-    allowedLateness = Duration.ZERO,
-    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
-  )
-
-  private val DiagnosticWindowOptions = WindowOptions(
-    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
     allowedLateness = Duration.ZERO,
     accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
     onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
@@ -112,7 +114,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
-    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes)
+    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes, DefaultWindowOptions)
     val tollBoothStatsDlq = TollBoothStats
       .encode(boothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
@@ -125,20 +127,26 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
 
     totalVehicleTimesDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRecord)
       .writeUnboundedToBigQuery(TotalVehicleTimeDiagnosticTableIoId, config.totalVehicleTimeDiagnosticTable)
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
-      VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, TenMinutes)
+      VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
+        boothEntries,
+        vehicleRegistrations,
+        leftWindowDuration = TenMinutes,
+        rightWindowDuration = TwoDays,
+        windowOptions = DefaultWindowOptions
+      )
 
     VehiclesWithExpiredRegistration
       .encodeMessage(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     vehiclesWithExpiredRegistrationDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRecord)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
@@ -146,7 +154,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       )
 
     // dead letters diagnostic
-    val ioDiagnostics = sc.unionInGlobalWindow(
+    val ioDiagnostics = IoDiagnostic.union(
       boothEntryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
       boothExitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
       vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId),
@@ -155,8 +163,8 @@ object TollStreamingJob extends TollStreamingJobIo {
     )
 
     ioDiagnostics
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
-      .mapWithTimestamp(IoDiagnostic.toRaw)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
+      .mapWithTimestamp(IoDiagnostic.toRecord)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()

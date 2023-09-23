@@ -51,8 +51,7 @@ object TotalVehicleTime {
         case (boothEntry, Some(boothExit)) =>
           Right(toTotalVehicleTime(boothEntry, boothExit))
         case (boothEntry, None) =>
-          val diagnosticReason = "Missing TollBoothExit to calculate TotalVehicleTime"
-          Left(TotalVehicleTimeDiagnostic(boothEntry.id, diagnosticReason))
+          Left(TotalVehicleTimeDiagnostic(boothEntry.id, TotalVehicleTimeDiagnostic.MissingTollBoothExit))
       }
 
     results.unzip

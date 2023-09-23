@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
+import com.spotify.scio.values.WindowOptions
+
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
@@ -21,6 +23,9 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
   import VehiclesWithExpiredRegistration._
 
   private val FiveMinutes = Duration.standardMinutes(5)
+  private val TwoDays = Duration.standardDays(2)
+
+  private val DefaultWindowOptions = WindowOptions()
 
   behavior of "VehiclesWithExpiredRegistration"
 
@@ -41,11 +46,17 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
+      calculateWithTemporalJoin(
+        sc.testBounded(boothEntries),
+        sc.testBounded(vehicleRegistrations),
+        FiveMinutes,
+        TwoDays,
+        DefaultWindowOptions
+      )
 
-    results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    results.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containInAnyOrderAtTime(
-        "2014-09-10T12:04:59.999Z",
+        anyTollBoothEntry.entryTime,
         Seq(
           anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id),
           anyVehicleWithExpiredRegistration(anyVehicleRegistrationUpdate.id)
@@ -73,18 +84,24 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
+      calculateWithTemporalJoin(
+        sc.testBounded(boothEntries),
+        sc.testBounded(vehicleRegistrations),
+        FiveMinutes,
+        TwoDays,
+        DefaultWindowOptions
+      )
 
-    results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    results.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
-        "2014-09-10T12:04:59.999Z",
+        anyTollBoothEntry.entryTime,
         anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id)
       )
     }
 
-    diagnostics.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
-        "2014-09-10T12:04:59.999Z",
+        anyTollBoothEntry.entryTime,
         vehicleWithNotExpiredRegistrationDiagnostic
       )
     }
@@ -109,13 +126,19 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostics) =
-      calculateInFixedWindow(sc.testBounded(boothEntries), sc.testBounded(vehicleRegistrations), FiveMinutes)
+      calculateWithTemporalJoin(
+        sc.testBounded(boothEntries),
+        sc.testBounded(vehicleRegistrations),
+        FiveMinutes,
+        TwoDays,
+        DefaultWindowOptions
+      )
 
     results should beEmpty
 
-    diagnostics.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
+    diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
-        "2014-09-10T12:04:59.999Z",
+        anyTollBoothEntry.entryTime,
         vehicleWithMissingRegistrationDiagnostic
       )
     }

@@ -17,7 +17,10 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
   it should "decode valid message into VehicleRegistration" in runWithScioContext { sc =>
     val input = unboundedTestCollectionOf[Message[VehicleRegistration.Payload]]
-      .addElementsAtTime(anyVehicleRegistrationPayload.registration_time, Message(anyVehicleRegistrationPayload))
+      .addElementsAtTime(
+        anyVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
+        anyVehicleRegistrationMessage
+      )
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(input))
@@ -32,8 +35,8 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     val run = runWithScioContext { sc =>
       val input = unboundedTestCollectionOf[Message[VehicleRegistration.Payload]]
         .addElementsAtTime(
-          vehicleRegistrationPayloadInvalid.registration_time,
-          Message(vehicleRegistrationPayloadInvalid)
+          vehicleRegistrationMessageInvalid.attributes(VehicleRegistration.TimestampAttribute),
+          vehicleRegistrationMessageInvalid
         )
         .advanceWatermarkToInfinity()
 

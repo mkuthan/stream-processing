@@ -87,8 +87,8 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubResult[VehicleRegistration.Payload]](VehicleRegistrationSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
           .addElementsAtTime(
-            anyVehicleRegistrationPayload.registration_time,
-            Right(Message(anyVehicleRegistrationPayload))
+            anyVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
+            Right(anyVehicleRegistrationMessage)
           )
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
@@ -124,7 +124,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         results =>
           val createdAt = Instant.parse("2014-09-10T12:01:00Z") // entry time
           results should containInAnyOrder(Seq(
-            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationPayload.id),
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationMessage.payload.id),
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
           ))
       }

@@ -12,7 +12,7 @@ trait VehicleRegistrationFixture {
   private final val defaultLicensePlate = "JNB 7001"
   private final val defaultExpired = "1"
 
-  final val anyVehicleRegistrationMessage = Message(
+  final val anyVehicleRegistrationMessage: Message[VehicleRegistration.Payload] = Message(
     VehicleRegistration.Payload(
       id = "1",
       license_plate = defaultLicensePlate,
@@ -21,30 +21,31 @@ trait VehicleRegistrationFixture {
     Map(VehicleRegistration.TimestampAttribute -> messageTimestamp)
   )
 
-  final val vehicleRegistrationMessageInvalid = Message(
+  final val vehicleRegistrationMessageInvalid: Message[VehicleRegistration.Payload] = Message(
     anyVehicleRegistrationMessage.payload.copy(license_plate = ""),
     anyVehicleRegistrationMessage.attributes
   )
 
-  final val vehicleRegistrationDecodingError = DeadLetter[VehicleRegistration.Payload](
-    data = vehicleRegistrationMessageInvalid.payload,
-    error = "requirement failed: Licence plate number is empty"
-  )
+  final val vehicleRegistrationDecodingError: DeadLetter[VehicleRegistration.Payload] =
+    DeadLetter[VehicleRegistration.Payload](
+      data = vehicleRegistrationMessageInvalid.payload,
+      error = "requirement failed: Licence plate number is empty"
+    )
 
-  final val anyVehicleRegistrationRecord = VehicleRegistration.Record(
+  final val anyVehicleRegistrationRecord: VehicleRegistration.Record = VehicleRegistration.Record(
     id = "2",
     license_plate = defaultLicensePlate,
     expired = defaultExpired.toInt
   )
 
-  final val anyVehicleRegistrationUpdate = VehicleRegistration(
+  final val anyVehicleRegistrationUpdate: VehicleRegistration = VehicleRegistration(
     id = VehicleRegistrationId(anyVehicleRegistrationMessage.payload.id),
     registrationTime = Instant.parse("2014-09-10T11:59:00Z"), // before toll booth entry
     licensePlate = LicensePlate(defaultLicensePlate),
     expired = defaultExpired == "1"
   )
 
-  final val anyVehicleRegistrationHistory = VehicleRegistration(
+  final val anyVehicleRegistrationHistory: VehicleRegistration = VehicleRegistration(
     id = VehicleRegistrationId(anyVehicleRegistrationRecord.id),
     registrationTime = Instant.parse("2014-09-09T00:00:00.000Z"), // the previous day
     licensePlate = LicensePlate(defaultLicensePlate),

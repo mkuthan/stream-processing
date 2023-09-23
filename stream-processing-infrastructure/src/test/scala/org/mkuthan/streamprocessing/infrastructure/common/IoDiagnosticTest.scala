@@ -30,19 +30,19 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
     with IntegrationTestScioContext
     with BigQueryContext {
 
-  val ioDiagnosticType = BigQueryType[IoDiagnostic.Record]
+  val ioDiagnosticType: BigQueryType[IoDiagnostic.Record] = BigQueryType[IoDiagnostic.Record]
 
-  val anyIoDiagnostic = IoDiagnostic(
+  val anyIoDiagnostic: IoDiagnostic = IoDiagnostic(
     id = "any-id",
     reason = "any reason"
   )
 
-  val ioDiagnostic1 = anyIoDiagnostic.copy(id = "id1")
-  val ioDiagnostic2 = anyIoDiagnostic.copy(id = "id2")
+  val ioDiagnostic1: IoDiagnostic = anyIoDiagnostic.copy(id = "id1")
+  val ioDiagnostic2: IoDiagnostic = anyIoDiagnostic.copy(id = "id2")
 
-  val tenMinutes = Duration.standardMinutes(10)
+  val tenMinutes: Duration = Duration.standardMinutes(10)
 
-  val windowOptions = WindowOptions(
+  val windowOptions: WindowOptions = WindowOptions(
     trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
     allowedLateness = Duration.ZERO,
     accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,

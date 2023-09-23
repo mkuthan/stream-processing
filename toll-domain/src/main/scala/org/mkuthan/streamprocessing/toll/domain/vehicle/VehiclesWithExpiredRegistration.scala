@@ -1,10 +1,5 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
-import org.apache.beam.sdk.transforms.windowing.AfterWatermark
-import org.apache.beam.sdk.transforms.windowing.Repeatedly
-import org.apache.beam.sdk.transforms.windowing.Window
-import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
-
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions

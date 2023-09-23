@@ -14,14 +14,17 @@ trait VehiclesWithExpiredRegistrationFixture {
   private val defaultEntryTime = "2014-09-10T12:01:00.000Z"
 
   final def anyVehicleWithExpiredRegistration(id: VehicleRegistrationId =
-    VehicleRegistrationId(defaultRegistrationId)) = VehiclesWithExpiredRegistration(
+    VehicleRegistrationId(defaultRegistrationId)): VehiclesWithExpiredRegistration = VehiclesWithExpiredRegistration(
     vehicleRegistrationId = id,
     licensePlate = LicensePlate(defaultLicencePlate),
     tollBoothId = TollBoothId(defaultTollBoothId),
     entryTime = Instant.parse(defaultEntryTime)
   )
 
-  final def anyVehicleWithExpiredRegistrationRecord(createdAt: Instant, id: String = defaultRegistrationId) =
+  final def anyVehicleWithExpiredRegistrationRecord(
+      createdAt: Instant,
+      id: String = defaultRegistrationId
+  ): VehiclesWithExpiredRegistration.Record =
     VehiclesWithExpiredRegistration.Record(
       created_at = createdAt,
       vehicle_registration_id = id,
@@ -30,7 +33,10 @@ trait VehiclesWithExpiredRegistrationFixture {
       entry_time = Instant.parse(defaultEntryTime)
     )
 
-  final def anyVehicleWithExpiredRegistrationMessage(createdAt: Instant, id: String = defaultRegistrationId) =
+  final def anyVehicleWithExpiredRegistrationMessage(
+      createdAt: Instant,
+      id: String = defaultRegistrationId
+  ): Message[VehiclesWithExpiredRegistration.Payload] =
     Message(
       VehiclesWithExpiredRegistration.Payload(
         created_at = createdAt.toString,
@@ -42,13 +48,15 @@ trait VehiclesWithExpiredRegistrationFixture {
       Map(VehiclesWithExpiredRegistration.TimestampAttribute -> createdAt.toString)
     )
 
-  final val vehicleWithNotExpiredRegistrationDiagnostic = VehiclesWithExpiredRegistrationDiagnostic(
-    tollBothId = TollBoothId("1"),
-    reason = VehiclesWithExpiredRegistrationDiagnostic.NotExpired
-  )
+  final val vehicleWithNotExpiredRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
+    VehiclesWithExpiredRegistrationDiagnostic(
+      tollBothId = TollBoothId("1"),
+      reason = VehiclesWithExpiredRegistrationDiagnostic.NotExpired
+    )
 
-  final val vehicleWithMissingRegistrationDiagnostic = VehiclesWithExpiredRegistrationDiagnostic(
-    tollBothId = TollBoothId("1"),
-    reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
-  )
+  final val vehicleWithMissingRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
+    VehiclesWithExpiredRegistrationDiagnostic(
+      tollBothId = TollBoothId("1"),
+      reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
+    )
 }

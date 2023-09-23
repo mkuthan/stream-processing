@@ -15,6 +15,10 @@ case class VehiclesWithExpiredRegistrationDiagnostic(tollBothId: TollBoothId, re
 }
 
 object VehiclesWithExpiredRegistrationDiagnostic {
+
+  val NotExpired = "Vehicle registration is not expired"
+  val MissingRegistration = "Missing vehicle registration"
+
   @BigQueryType.toTable
   case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
 

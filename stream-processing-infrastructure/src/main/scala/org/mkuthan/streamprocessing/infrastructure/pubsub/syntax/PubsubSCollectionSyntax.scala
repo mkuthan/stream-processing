@@ -10,11 +10,11 @@ import com.spotify.scio.values.SCollection
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonWriteConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.shared.json.JsonSerde
 
 private[syntax] trait PubsubSCollectionSyntax {
 

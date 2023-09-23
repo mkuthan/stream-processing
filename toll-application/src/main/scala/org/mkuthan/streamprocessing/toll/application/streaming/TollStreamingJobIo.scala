@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegis
 trait TollStreamingJobIo extends DiagnosticIo with RegistrationIo with TollBoothIo with VehicleIo
 
 trait DiagnosticIo {
-  val DiagnosticTableIoId: IoIdentifier[IoDiagnostic.Raw] =
+  val DiagnosticTableIoId: IoIdentifier[IoDiagnostic.Record] =
     IoIdentifier("diagnostic-table-id")
 }
 

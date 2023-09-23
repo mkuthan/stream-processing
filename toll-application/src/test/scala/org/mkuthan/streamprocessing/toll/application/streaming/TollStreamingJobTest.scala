@@ -8,6 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
+import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
@@ -26,9 +27,6 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
     with TollJobFixtures
     with TollStreamingJobIo {
-
-  // TODO: move to the infra module, but where?
-  type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
 
   "Toll job" should "run in the streaming mode" in {
     JobTest[TollStreamingJob.type]
@@ -89,8 +87,8 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubResult[VehicleRegistration.Payload]](VehicleRegistrationSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
           .addElementsAtTime(
-            anyVehicleRegistrationPayload.registration_time,
-            Right(Message(anyVehicleRegistrationPayload))
+            anyVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
+            Right(anyVehicleRegistrationMessage)
           )
           // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
@@ -124,9 +122,9 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       // calculate vehicles with expired registrations
       .output(CustomIO[Message[VehiclesWithExpiredRegistration.Payload]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+          val createdAt = Instant.parse("2014-09-10T12:01:00Z") // entry time
           results should containInAnyOrder(Seq(
-            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationPayload.id),
+            anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationMessage.payload.id),
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
           ))
       }
@@ -137,7 +135,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           // TODO
           results should beEmpty
       }
-      .output(CustomIO[IoDiagnostic.Raw](DiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[IoDiagnostic.Record](DiagnosticTableIoId.id)) { results =>
         // toll booth entry and toll booth exit
         results should haveSize(2)
       }

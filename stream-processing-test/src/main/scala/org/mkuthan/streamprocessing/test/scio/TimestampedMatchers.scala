@@ -55,7 +55,17 @@ trait TimestampedMatchers extends InstantSyntax {
       time: String,
       value: T
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
-    containValue((value, time.toInstant))
+    containValueAtTime(time.toInstant, value)
+
+  /**
+   * Assert that the SCollection contains the provided element at given time without making assumptions about other
+   * elements in the collection.
+   */
+  def containValueAtTime[T: Coder: Eq](
+      time: Instant,
+      value: T
+  ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
+    containValue((value, time))
 
   /**
    * Assert that the SCollection contains a single provided element at given time.
@@ -80,6 +90,15 @@ trait TimestampedMatchers extends InstantSyntax {
    */
   def containInAnyOrderAtTime[T: Coder: Eq](
       time: String,
+      value: Iterable[T]
+  ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
+    containInAnyOrderAtTime(time.toInstant, value)
+
+  /**
+   * Assert that the SCollection contains the provided elements at given time.
+   */
+  def containInAnyOrderAtTime[T: Coder: Eq](
+      time: Instant,
       value: Iterable[T]
   ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] =
     containInAnyOrder(value.map(v => (v, time.toInstant)))

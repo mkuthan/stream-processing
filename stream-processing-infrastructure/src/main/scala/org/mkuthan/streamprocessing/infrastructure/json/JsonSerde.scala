@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.shared.json
+package org.mkuthan.streamprocessing.infrastructure.json
 
 import scala.util.Try
 

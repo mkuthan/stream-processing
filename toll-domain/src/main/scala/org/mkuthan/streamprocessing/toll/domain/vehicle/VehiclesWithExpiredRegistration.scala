@@ -48,29 +48,24 @@ object VehiclesWithExpiredRegistration {
       license_plate: String
   )
 
-  def calculateInFixedWindow(
+  def calculateWithTemporalJoin(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistrations: SCollection[VehicleRegistration],
-      duration: Duration
+      leftWindowDuration: Duration,
+      rightWindowDuration: Duration,
+      windowOptions: WindowOptions
   ): (SCollection[VehiclesWithExpiredRegistration], SCollection[VehiclesWithExpiredRegistrationDiagnostic]) = {
-    val windowOptions = WindowOptions(
-      trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
-      allowedLateness = Duration.ZERO,
-      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-      onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
-    )
-
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
       .withFixedWindows(
-        duration = duration,
+        duration = leftWindowDuration,
         options = windowOptions
       )
 
     val vehicleRegistrationByLicensePlate = vehicleRegistrations
       .keyBy(_.licensePlate)
       .withFixedWindows(
-        duration = Duration.standardDays(2), // historical data from today and the previous day
+        duration = rightWindowDuration,
         options = windowOptions
       )
 
@@ -81,13 +76,16 @@ object VehiclesWithExpiredRegistration {
         case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
           Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
         case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
-          val diagnosticReason = "Vehicle registration is not expired"
-          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
+          Left(VehiclesWithExpiredRegistrationDiagnostic(
+            boothEntry.id,
+            VehiclesWithExpiredRegistrationDiagnostic.NotExpired
+          ))
         case (boothEntry, None) =>
-          val diagnosticReason = "Missing vehicle registration"
-          Left(VehiclesWithExpiredRegistrationDiagnostic(boothEntry.id, diagnosticReason))
+          Left(VehiclesWithExpiredRegistrationDiagnostic(
+            boothEntry.id,
+            VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
+          ))
       }
-      .distinct // materialize window
 
     results.unzip
   }

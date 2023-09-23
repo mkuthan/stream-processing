@@ -67,7 +67,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
       // calculate vehicles with expired registrations
       .output(CustomIO[VehiclesWithExpiredRegistration.Record](VehiclesWithExpiredRegistrationDailyTableIoId.id)) {
         results =>
-          val createdAt = Instant.parse("2014-09-10T23:59:59.999Z")
+          val createdAt = Instant.parse("2014-09-10T12:01:00Z")
           results should containInAnyOrder(Seq(
             anyVehicleWithExpiredRegistrationRecord(createdAt, anyVehicleRegistrationRecord.id)
           ))

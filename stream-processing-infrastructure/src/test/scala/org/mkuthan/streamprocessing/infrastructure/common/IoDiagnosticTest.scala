@@ -30,7 +30,7 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
     with IntegrationTestScioContext
     with BigQueryContext {
 
-  val ioDiagnosticType = BigQueryType[IoDiagnostic.Raw]
+  val ioDiagnosticType = BigQueryType[IoDiagnostic.Record]
 
   val anyIoDiagnostic = IoDiagnostic(
     id = "any-id",
@@ -62,10 +62,10 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
         sc
           .testUnbounded(ioDiagnostics)
           .sumByKeyInFixedWindow(windowDuration = tenMinutes, windowOptions = windowOptions)
-          .mapWithTimestamp(IoDiagnostic.toRaw)
+          .mapWithTimestamp(IoDiagnostic.toRecord)
           .writeUnboundedToBigQuery(
-            IoIdentifier[IoDiagnostic.Raw]("any-id"),
-            BigQueryTable[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName")
+            IoIdentifier[IoDiagnostic.Record]("any-id"),
+            BigQueryTable[IoDiagnostic.Record](s"$projectId:$datasetName.$tableName")
           )
 
         val run = sc.run()
@@ -74,8 +74,8 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
           val results = readTable(datasetName, tableName).map(ioDiagnosticType.fromAvro)
 
           results should contain.only(
-            IoDiagnostic.toRaw(ioDiagnostic1.copy(count = 3L), instant),
-            IoDiagnostic.toRaw(ioDiagnostic2.copy(count = 2L), instant)
+            IoDiagnostic.toRecord(ioDiagnostic1.copy(count = 3L), instant),
+            IoDiagnostic.toRecord(ioDiagnostic2.copy(count = 2L), instant)
           )
         }
 
@@ -100,10 +100,10 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
         sc
           .testBounded(ioDiagnostics)
           .sumByKeyInFixedWindow(windowDuration = tenMinutes, windowOptions = windowOptions)
-          .mapWithTimestamp(IoDiagnostic.toRaw)
+          .mapWithTimestamp(IoDiagnostic.toRecord)
           .writeBoundedToBigQuery(
-            IoIdentifier[IoDiagnostic.Raw]("any-id"),
-            BigQueryPartition.hourly[IoDiagnostic.Raw](s"$projectId:$datasetName.$tableName", localDateTime)
+            IoIdentifier[IoDiagnostic.Record]("any-id"),
+            BigQueryPartition.hourly[IoDiagnostic.Record](s"$projectId:$datasetName.$tableName", localDateTime)
           )
 
         val run = sc.run()
@@ -112,8 +112,8 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
           val results = readTable(datasetName, tableName).map(ioDiagnosticType.fromAvro)
 
           results should contain.only(
-            IoDiagnostic.toRaw(ioDiagnostic1.copy(count = 3L), instant),
-            IoDiagnostic.toRaw(ioDiagnostic2.copy(count = 2L), instant)
+            IoDiagnostic.toRecord(ioDiagnostic1.copy(count = 3L), instant),
+            IoDiagnostic.toRecord(ioDiagnostic2.copy(count = 2L), instant)
           )
         }
 

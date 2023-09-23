@@ -51,7 +51,7 @@ object RowRestriction {
       read.withRowRestriction(sql)
   }
 
-  case class DateColumnRestriction(columnName: String, localDate: LocalDate) extends RowRestriction {
+  case class TimestampColumnRestriction(columnName: String, localDate: LocalDate) extends RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(s"TIMESTAMP_TRUNC($columnName, DAY) = '$localDate'")
   }

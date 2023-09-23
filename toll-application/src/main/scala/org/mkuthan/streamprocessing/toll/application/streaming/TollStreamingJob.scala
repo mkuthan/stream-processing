@@ -11,7 +11,6 @@ import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
 
 import org.joda.time.Duration
-import org.joda.time.LocalDate
 
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction.PartitionDateRestriction
@@ -33,7 +32,14 @@ object TollStreamingJob extends TollStreamingJobIo {
 
   private val TenMinutes = Duration.standardMinutes(10)
 
-  private val DefaultWindowOptions = WindowOptions()
+  private val TwoDays = Duration.standardDays(2)
+
+  private val DefaultWindowOptions = WindowOptions(
+    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
+    allowedLateness = Duration.ZERO,
+    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+  )
 
   private val DeadLetterWindowOptions = WindowOptions(
     trigger = Repeatedly.forever(
@@ -42,13 +48,6 @@ object TollStreamingJob extends TollStreamingJobIo {
         AfterPane.elementCountAtLeast(1_000_000)
       )
     ),
-    allowedLateness = Duration.ZERO,
-    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
-  )
-
-  private val DiagnosticWindowOptions = WindowOptions(
-    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
     allowedLateness = Duration.ZERO,
     accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
     onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
@@ -128,20 +127,26 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
 
     totalVehicleTimesDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRecord)
       .writeUnboundedToBigQuery(TotalVehicleTimeDiagnosticTableIoId, config.totalVehicleTimeDiagnosticTable)
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
-      VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, TenMinutes)
+      VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
+        boothEntries,
+        vehicleRegistrations,
+        leftWindowDuration = TenMinutes,
+        rightWindowDuration = TwoDays,
+        windowOptions = DefaultWindowOptions
+      )
 
     VehiclesWithExpiredRegistration
       .encodeMessage(vehiclesWithExpiredRegistration)
       .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     vehiclesWithExpiredRegistrationDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRecord)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
@@ -158,7 +163,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     )
 
     ioDiagnostics
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DiagnosticWindowOptions)
+      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .mapWithTimestamp(IoDiagnostic.toRecord)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 

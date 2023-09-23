@@ -48,32 +48,24 @@ object VehiclesWithExpiredRegistration {
       license_plate: String
   )
 
-  // TODO: no GBK, it's rather calculateWithTemporalJoin
-  def calculateInFixedWindow(
+  def calculateWithTemporalJoin(
       boothEntries: SCollection[TollBoothEntry],
       vehicleRegistrations: SCollection[VehicleRegistration],
-      duration: Duration
-      // TODO: right side duration
-      // TODO: window options
+      leftWindowDuration: Duration,
+      rightWindowDuration: Duration,
+      windowOptions: WindowOptions
   ): (SCollection[VehiclesWithExpiredRegistration], SCollection[VehiclesWithExpiredRegistrationDiagnostic]) = {
-    val windowOptions = WindowOptions(
-      trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
-      allowedLateness = Duration.ZERO,
-      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-      onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
-    )
-
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
       .withFixedWindows(
-        duration = duration,
+        duration = leftWindowDuration,
         options = windowOptions
       )
 
     val vehicleRegistrationByLicensePlate = vehicleRegistrations
       .keyBy(_.licensePlate)
       .withFixedWindows(
-        duration = Duration.standardDays(2), // historical data from today and the previous day
+        duration = rightWindowDuration,
         options = windowOptions
       )
 
@@ -94,8 +86,6 @@ object VehiclesWithExpiredRegistration {
             VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
           ))
       }
-      // TODO: remove
-      .distinct // materialize window
 
     results.unzip
   }

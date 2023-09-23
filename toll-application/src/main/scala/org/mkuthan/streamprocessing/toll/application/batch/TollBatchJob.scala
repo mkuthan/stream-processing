@@ -24,6 +24,8 @@ object TollBatchJob extends TollBatchJobIo {
 
   private val OneDay = Duration.standardDays(1)
 
+  private val TwoDays = Duration.standardDays(1)
+
   private val DefaultWindowOptions = WindowOptions()
 
   def main(mainArgs: Array[String]): Unit = {
@@ -36,7 +38,7 @@ object TollBatchJob extends TollBatchJobIo {
       EntryTableIoId,
       config.entryTable,
       StorageReadConfiguration().withRowRestriction(
-        RowRestriction.DateColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
+        RowRestriction.TimestampColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
       )
     )
     val boothEntries = TollBoothEntry.decodeRecord(boothEntryRecords)
@@ -45,7 +47,7 @@ object TollBatchJob extends TollBatchJobIo {
       ExitTableIoId,
       config.exitTable,
       StorageReadConfiguration().withRowRestriction(
-        RowRestriction.DateColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
+        RowRestriction.TimestampColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
       )
     )
     val boothExits = TollBoothExit.decodeRecord(boothExitRecords)
@@ -90,7 +92,13 @@ object TollBatchJob extends TollBatchJobIo {
 
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
-      VehiclesWithExpiredRegistration.calculateInFixedWindow(boothEntries, vehicleRegistrations, OneDay)
+      VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
+        boothEntries,
+        vehicleRegistrations,
+        leftWindowDuration = OneDay,
+        rightWindowDuration = TwoDays,
+        windowOptions = DefaultWindowOptions
+      )
     VehiclesWithExpiredRegistration
       .encodeRecord(vehiclesWithExpiredRegistration)
       .writeBoundedToBigQuery(

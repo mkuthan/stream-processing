@@ -122,7 +122,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       // calculate vehicles with expired registrations
       .output(CustomIO[Message[VehiclesWithExpiredRegistration.Payload]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
-          val createdAt = Instant.parse("2014-09-10T12:09:59.999Z")
+          val createdAt = Instant.parse("2014-09-10T12:01:00Z") // entry time
           results should containInAnyOrder(Seq(
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationPayload.id),
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)

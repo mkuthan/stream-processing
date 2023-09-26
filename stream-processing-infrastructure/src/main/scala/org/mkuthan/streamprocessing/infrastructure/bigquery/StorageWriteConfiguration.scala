@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.infrastructure.bigquery
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 
-case class StorageWriteConfiguration(
+final case class StorageWriteConfiguration(
     writeDisposition: WriteDisposition = WriteDisposition.Append
 ) {
   def withWriteDisposition(writeDisposition: WriteDisposition): StorageWriteConfiguration =

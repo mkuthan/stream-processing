@@ -1,6 +1,6 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-case class BigQueryTable[T](id: String) {
+final case class BigQueryTable[T](id: String) {
 
   import org.apache.beam.sdk.io.gcp.bigquery.BigQueryHelpers
 

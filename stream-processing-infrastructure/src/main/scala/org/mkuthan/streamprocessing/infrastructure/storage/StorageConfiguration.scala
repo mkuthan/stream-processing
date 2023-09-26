@@ -1,6 +1,6 @@
 package org.mkuthan.streamprocessing.infrastructure.storage
 
-case class StorageConfiguration(
+final case class StorageConfiguration(
     prefix: Prefix = Prefix.Empty,
     suffix: Suffix = Suffix.Json,
     numShards: NumShards = NumShards.RunnerSpecific

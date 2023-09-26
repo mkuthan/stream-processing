@@ -8,14 +8,14 @@ import com.spotify.scio.coders.CoderMaterializer
 
 import org.joda.time.Instant
 
-case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])
+final case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])
 
 object BoundedTestCollection extends InstantSyntax {
 
   def builder[T: Coder](): Builder[T] =
     Builder[T](Seq.empty)
 
-  case class Builder[T: Coder](content: Seq[TimestampedValue[T]]) {
+  final case class Builder[T: Coder](content: Seq[TimestampedValue[T]]) {
     def addElementsAtMinimumTime(element: T, elements: T*): Builder[T] = {
       val timestampedElements = (element +: elements)
         .foldLeft(content)((acc, e) => acc :+ TimestampedValue.atMinimumTimestamp(e))

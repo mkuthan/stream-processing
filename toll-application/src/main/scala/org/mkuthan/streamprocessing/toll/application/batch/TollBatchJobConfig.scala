@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-case class TollBatchJobConfig(
+final case class TollBatchJobConfig(
     effectiveDate: LocalDate,
     entryTable: BigQueryTable[TollBoothEntry.Record],
     exitTable: BigQueryTable[TollBoothExit.Record],

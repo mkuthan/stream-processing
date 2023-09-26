@@ -1,3 +1,3 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-case class BigQueryQuery[T](query: String)
+final case class BigQueryQuery[T](query: String)

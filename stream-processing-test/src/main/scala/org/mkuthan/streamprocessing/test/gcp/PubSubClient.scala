@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import org.mkuthan.streamprocessing.test.common.RandomString
 
-object PubSubClient extends GcpProjectId with LazyLogging {
+object PubsubClient extends GcpProjectId with LazyLogging {
 
   import GoogleClientUtils._
 

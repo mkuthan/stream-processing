@@ -143,7 +143,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     VehiclesWithExpiredRegistration
       .encodeMessage(vehiclesWithExpiredRegistration)
-      .publishJsonToPubSub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
+      .publishJsonToPubsub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     vehiclesWithExpiredRegistrationDiagnostic
       .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)

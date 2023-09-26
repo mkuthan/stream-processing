@@ -17,7 +17,7 @@ import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
 
 object JsonSerdeTest extends JodaTimeArbitrary {
 
-  case class SampleClass(
+  final case class SampleClass(
       string: String,
       optionString: Option[String],
       int: Int,
@@ -31,11 +31,11 @@ object JsonSerdeTest extends JodaTimeArbitrary {
       localTime: LocalTime
   )
 
-  case class SingleFieldClass(f1: String)
+  final case class SingleFieldClass(f1: String)
 
-  case class TwoFieldsClass(f1: String, f2: String)
+  final case class TwoFieldsClass(f1: String, f2: String)
 
-  case class ParametrizedClass[T](f: T)
+  final case class ParametrizedClass[T](f: T)
 }
 
 class JsonSerdeTest extends AnyFlatSpec

@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.infrastructure.bigquery
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.TypedRead
 
-case class StorageReadConfiguration(
+final case class StorageReadConfiguration(
     rowRestriction: RowRestriction = RowRestriction.NoRestriction,
     selectedFields: SelectedFields = SelectedFields.NoFields
 ) {

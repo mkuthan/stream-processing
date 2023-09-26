@@ -9,7 +9,7 @@ import org.mkuthan.streamprocessing.test.scio.boundedTestCollectionOf
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 object SCollectionSumByKeyOpsTest {
-  case class SampleClass(key: String, count: Int = 1)
+  final case class SampleClass(key: String, count: Int = 1)
 
   implicit val SampleClassSumByKey: SumByKey[SampleClass] = SumByKey.create(
     keyFn = _.key,

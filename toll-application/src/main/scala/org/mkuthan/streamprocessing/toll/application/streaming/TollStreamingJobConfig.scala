@@ -18,7 +18,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnost
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
-case class TollStreamingJobConfig(
+final case class TollStreamingJobConfig(
     effectiveDate: LocalDate,
     entrySubscription: PubsubSubscription[TollBoothEntry.Payload],
     entryDlq: StorageBucket[TollBoothEntry.DeadLetterPayload],

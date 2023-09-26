@@ -5,7 +5,7 @@ import org.scalatest.Suite
 trait PubsubContext {
   this: Suite =>
 
-  import PubSubClient._
+  import PubsubClient._
 
   def withTopic(fn: String => Any): Any = {
     val topicName = generateTopicName()

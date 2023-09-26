@@ -4,7 +4,7 @@ import scala.annotation.unused
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO.Write
 
-case class JsonWriteConfiguration(
+final case class JsonWriteConfiguration(
     idAttribute: IdAttribute = NoIdAttribute,
     maxBatchBytesSize: MaxBatchBytesSize = MaxBatchBytesSize.HighThroughput,
     maxBatchSize: MaxBatchSize = MaxBatchSize.HighThroughput,

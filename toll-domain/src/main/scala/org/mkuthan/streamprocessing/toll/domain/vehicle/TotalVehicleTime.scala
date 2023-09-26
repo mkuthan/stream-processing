@@ -23,7 +23,7 @@ final case class TotalVehicleTime(
 object TotalVehicleTime {
 
   @BigQueryType.toTable
-  case class Record(
+  final case class Record(
       created_at: Instant,
       license_plate: String,
       toll_booth_id: String,

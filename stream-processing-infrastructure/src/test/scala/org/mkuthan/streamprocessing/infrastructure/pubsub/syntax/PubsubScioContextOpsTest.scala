@@ -17,7 +17,7 @@ import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.Sampl
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.common.RandomString._
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
-import org.mkuthan.streamprocessing.test.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.test.gcp.PubsubClient._
 import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext

@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.infrastructure.bigquery
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write
 
-case class FileLoadsConfiguration(
+final case class FileLoadsConfiguration(
     writeDisposition: WriteDisposition = WriteDisposition.Truncate
 ) {
   def withWriteDisposition(writeDisposition: WriteDisposition): FileLoadsConfiguration =

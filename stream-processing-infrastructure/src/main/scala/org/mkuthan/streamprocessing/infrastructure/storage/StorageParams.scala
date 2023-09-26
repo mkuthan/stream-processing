@@ -13,7 +13,7 @@ object StorageWriteParam {
 sealed trait NumShards extends StorageWriteParam
 
 object NumShards {
-  case class Explicit(value: Int) extends NumShards {
+  final case class Explicit(value: Int) extends NumShards {
     require(value > 0)
 
     override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
@@ -36,7 +36,7 @@ object Prefix {
       write.withPrefix("")
   }
 
-  case class Explicit(value: String) extends Prefix {
+  final case class Explicit(value: String) extends Prefix {
     require(value.nonEmpty)
     override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
       write.withPrefix(value)
@@ -51,7 +51,7 @@ object Suffix {
       write.withSuffix("")
   }
 
-  case class Explicit(value: String) extends Suffix {
+  final case class Explicit(value: String) extends Suffix {
     require(value.nonEmpty)
     override def configure(write: StorageWriteParam.Type): StorageWriteParam.Type =
       write.withSuffix(value)

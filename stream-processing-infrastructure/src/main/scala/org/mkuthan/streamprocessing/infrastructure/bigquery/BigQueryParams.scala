@@ -46,17 +46,17 @@ object RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] = read
   }
 
-  case class SqlRestriction(sql: String) extends RowRestriction {
+  final case class SqlRestriction(sql: String) extends RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(sql)
   }
 
-  case class TimestampColumnRestriction(columnName: String, localDate: LocalDate) extends RowRestriction {
+  final case class TimestampColumnRestriction(columnName: String, localDate: LocalDate) extends RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(s"TIMESTAMP_TRUNC($columnName, DAY) = '$localDate'")
   }
 
-  case class PartitionDateRestriction(localDate: LocalDate) extends RowRestriction {
+  final case class PartitionDateRestriction(localDate: LocalDate) extends RowRestriction {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withRowRestriction(s"_PARTITIONDATE = '$localDate'")
   }
@@ -69,7 +69,7 @@ object SelectedFields {
     override def configure[T](read: TypedRead[T]): TypedRead[T] = read
   }
 
-  case class NamedFields(fields: List[String]) extends SelectedFields {
+  final case class NamedFields(fields: List[String]) extends SelectedFields {
     override def configure[T](read: TypedRead[T]): TypedRead[T] =
       read.withSelectedFields(fields.asJava)
   }

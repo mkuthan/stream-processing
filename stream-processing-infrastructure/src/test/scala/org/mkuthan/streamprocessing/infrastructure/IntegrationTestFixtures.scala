@@ -65,7 +65,7 @@ trait IntegrationTestFixtures extends JodaTimeArbitrary {
 
 object IntegrationTestFixtures {
   @BigQueryType.toTable
-  case class SampleClass(
+  final case class SampleClass(
       stringField: String,
       optionalStringField: Option[String],
       intField: Int,

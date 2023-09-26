@@ -26,7 +26,7 @@ object VehiclesWithExpiredRegistration {
 
   val TimestampAttribute = "created_at"
 
-  case class Payload(
+  final case class Payload(
       created_at: String,
       vehicle_registration_id: String,
       toll_booth_id: String,
@@ -35,7 +35,7 @@ object VehiclesWithExpiredRegistration {
   )
 
   @BigQueryType.toTable
-  case class Record(
+  final case class Record(
       created_at: Instant,
       vehicle_registration_id: String,
       toll_booth_id: String,

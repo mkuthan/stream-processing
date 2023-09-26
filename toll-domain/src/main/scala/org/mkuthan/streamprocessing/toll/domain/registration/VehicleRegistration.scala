@@ -17,7 +17,7 @@ import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-case class VehicleRegistration(
+final case class VehicleRegistration(
     id: VehicleRegistrationId,
     registrationTime: Instant,
     licensePlate: LicensePlate,
@@ -32,14 +32,14 @@ object VehicleRegistration {
 
   val DlqCounter: Counter = ScioMetrics.counter[VehicleRegistration]("dlq")
 
-  case class Payload(
+  final case class Payload(
       id: String,
       license_plate: String,
       expired: String
   )
 
   @BigQueryType.toTable
-  case class Record(
+  final case class Record(
       id: String,
       license_plate: String,
       expired: Int

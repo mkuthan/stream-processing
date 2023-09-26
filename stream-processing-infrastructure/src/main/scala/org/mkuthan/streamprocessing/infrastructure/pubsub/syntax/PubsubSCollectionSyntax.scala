@@ -24,7 +24,7 @@ private[syntax] trait PubsubSCollectionSyntax {
 
     import com.spotify.scio.values.BetterSCollection._
 
-    def publishJsonToPubSub(
+    def publishJsonToPubsub(
         id: IoIdentifier[T],
         topic: PubsubTopic[T],
         configuration: JsonWriteConfiguration = JsonWriteConfiguration()

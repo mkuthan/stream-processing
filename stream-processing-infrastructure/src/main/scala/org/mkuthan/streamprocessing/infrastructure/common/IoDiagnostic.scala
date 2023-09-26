@@ -8,7 +8,7 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
-case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
+final case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
   private lazy val keyFields = this match {
     case IoDiagnostic(id, reason, count @ _) =>
       Seq(id, reason)
@@ -17,7 +17,7 @@ case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
 
 object IoDiagnostic {
   @BigQueryType.toTable
-  case class Record(created_at: Instant, id: String, reason: String, count: Long)
+  final case class Record(created_at: Instant, id: String, reason: String, count: Long)
 
   implicit val sumByKey: SumByKey[IoDiagnostic] =
     SumByKey.create(

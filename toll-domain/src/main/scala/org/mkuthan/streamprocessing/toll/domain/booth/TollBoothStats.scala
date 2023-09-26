@@ -10,7 +10,7 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
-case class TollBoothStats(
+final case class TollBoothStats(
     id: TollBoothId,
     count: Int,
     totalToll: BigDecimal,
@@ -26,7 +26,7 @@ case class TollBoothStats(
 object TollBoothStats {
 
   @BigQueryType.toTable
-  case class Record(
+  final case class Record(
       created_at: Instant,
       id: String,
       count: Int,

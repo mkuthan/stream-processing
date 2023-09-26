@@ -4,7 +4,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 
-case class BigQueryPartition[T](id: String) {
+final case class BigQueryPartition[T](id: String) {
 
   import org.apache.beam.sdk.io.gcp.bigquery.BigQueryHelpers
 

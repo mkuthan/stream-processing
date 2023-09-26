@@ -30,14 +30,14 @@ object TollBoothExit {
 
   val DlqCounter: Counter = ScioMetrics.counter[TollBoothExit]("dlq")
 
-  case class Payload(
+  final case class Payload(
       id: String,
       exit_time: String,
       license_plate: String
   )
 
   @BigQueryType.toTable
-  case class Record(
+  final case class Record(
       id: String,
       exit_time: Instant,
       license_plate: String

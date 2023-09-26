@@ -13,7 +13,7 @@ import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
-import org.mkuthan.streamprocessing.test.gcp.PubSubClient._
+import org.mkuthan.streamprocessing.test.gcp.PubsubClient._
 import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio._
 
@@ -36,7 +36,7 @@ class PubsubSCollectionOpsTest extends AnyFlatSpec with Matchers
             Message(SampleObject1, SampleMap1),
             Message(SampleObject2, SampleMap2)
           ))
-          .publishJsonToPubSub(IoIdentifier[SampleClass]("any-id"), PubsubTopic[SampleClass](topic))
+          .publishJsonToPubsub(IoIdentifier[SampleClass]("any-id"), PubsubTopic[SampleClass](topic))
 
         sc.run().waitUntilDone()
 

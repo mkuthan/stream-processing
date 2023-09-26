@@ -19,7 +19,7 @@ case object NoIdAttribute extends IdAttribute {
   override def configure[T](write: Write[T]): Write[T] = write
 }
 
-case class NamedIdAttribute(name: String) extends IdAttribute {
+final case class NamedIdAttribute(name: String) extends IdAttribute {
   require(name.nonEmpty)
 
   override def configure[T](read: Read[T]): Read[T] =
@@ -41,7 +41,7 @@ case object NoTimestampAttribute extends TimestampAttribute {
   override def configure[T](write: Write[T]): Write[T] = write
 }
 
-case class NamedTimestampAttribute(name: String) extends TimestampAttribute {
+final case class NamedTimestampAttribute(name: String) extends TimestampAttribute {
   require(name.nonEmpty)
 
   override def configure[T](read: Read[T]): Read[T] =
@@ -55,7 +55,7 @@ object NamedTimestampAttribute {
   val Default: NamedTimestampAttribute = NamedTimestampAttribute("ts")
 }
 
-case class MaxBatchBytesSize(value: Int) extends PubsubWriteParam {
+final case class MaxBatchBytesSize(value: Int) extends PubsubWriteParam {
   require(value > 0)
 
   override def configure[T](write: Write[T]): Write[T] =
@@ -66,7 +66,7 @@ object MaxBatchBytesSize {
   val HighThroughput: MaxBatchBytesSize = MaxBatchBytesSize(8 * 1024 * 1024)
 }
 
-case class MaxBatchSize(value: Int) extends PubsubWriteParam {
+final case class MaxBatchSize(value: Int) extends PubsubWriteParam {
   require(value > 0)
 
   override def configure[T](write: Write[T]): Write[T] =

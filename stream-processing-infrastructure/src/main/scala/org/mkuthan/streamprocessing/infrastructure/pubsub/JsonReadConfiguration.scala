@@ -2,7 +2,7 @@ package org.mkuthan.streamprocessing.infrastructure.pubsub
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO.Read
 
-case class JsonReadConfiguration(
+final case class JsonReadConfiguration(
     idAttribute: IdAttribute = NoIdAttribute,
     tsAttribute: TimestampAttribute = NoTimestampAttribute
 ) {

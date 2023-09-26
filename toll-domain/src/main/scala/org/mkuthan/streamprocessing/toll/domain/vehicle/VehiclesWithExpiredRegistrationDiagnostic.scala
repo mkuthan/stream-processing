@@ -7,7 +7,7 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-case class VehiclesWithExpiredRegistrationDiagnostic(tollBothId: TollBoothId, reason: String, count: Long = 1L) {
+final case class VehiclesWithExpiredRegistrationDiagnostic(tollBothId: TollBoothId, reason: String, count: Long = 1L) {
   private lazy val keyFields = this match {
     case VehiclesWithExpiredRegistrationDiagnostic(tollBoothId, reason, count @ _) =>
       Seq(tollBoothId, reason)
@@ -20,7 +20,7 @@ object VehiclesWithExpiredRegistrationDiagnostic {
   val MissingRegistration = "Missing vehicle registration"
 
   @BigQueryType.toTable
-  case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
+  final case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
 
   implicit val sumByKey: SumByKey[VehiclesWithExpiredRegistrationDiagnostic] =
     SumByKey.create(

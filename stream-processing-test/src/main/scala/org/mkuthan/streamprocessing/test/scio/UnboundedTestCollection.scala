@@ -9,7 +9,7 @@ import com.spotify.scio.coders.CoderMaterializer
 import org.joda.time.Duration
 import org.joda.time.Instant
 
-case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
+final case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
 
 object UnboundedTestCollection {
 
@@ -18,7 +18,7 @@ object UnboundedTestCollection {
     Builder(testStream)
   }
 
-  case class Builder[T: Coder](builder: TestStream.Builder[T]) extends InstantSyntax {
+  final case class Builder[T: Coder](builder: TestStream.Builder[T]) extends InstantSyntax {
     def addElementsAtWatermarkTime(element: T, elements: T*): Builder[T] =
       Builder(builder.addElements(element, elements: _*))
 

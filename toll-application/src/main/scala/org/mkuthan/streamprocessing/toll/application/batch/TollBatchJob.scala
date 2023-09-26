@@ -8,7 +8,6 @@ import org.joda.time.Duration
 import org.mkuthan.streamprocessing.infrastructure._
 import org.mkuthan.streamprocessing.infrastructure.bigquery.RowRestriction
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageReadConfiguration
-import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -82,9 +81,8 @@ object TollBatchJob extends TollBatchJobIo {
       .encodeRecord(totalVehicleTimes)
       .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
 
-    totalVehicleTimesDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = OneDay)
-      .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRecord)
+    TotalVehicleTimeDiagnostic
+      .aggregateAndEncode(totalVehicleTimesDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
         TotalVehicleTimeDiagnosticOneHourGapTableIoId,
         config.totalVehicleTimeDiagnosticOneHourGapTable
@@ -106,9 +104,8 @@ object TollBatchJob extends TollBatchJobIo {
         config.vehiclesWithExpiredRegistrationDailyPartition
       )
 
-    vehiclesWithExpiredRegistrationDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = OneDay)
-      .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRecord)
+    VehiclesWithExpiredRegistrationDiagnostic
+      .aggregateAndEncode(vehiclesWithExpiredRegistrationDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticDailyPartition

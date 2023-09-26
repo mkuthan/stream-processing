@@ -1,9 +1,13 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
+import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
 
+import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
@@ -27,11 +31,19 @@ object TotalVehicleTimeDiagnostic {
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
-  def toRecord(diagnostic: TotalVehicleTimeDiagnostic, createdAt: Instant): Record =
-    Record(
-      created_at = createdAt,
-      toll_both_id = diagnostic.tollBothId.id,
-      reason = diagnostic.reason,
-      count = diagnostic.count
-    )
+  def aggregateAndEncode(
+      input: SCollection[TotalVehicleTimeDiagnostic],
+      windowDuration: Duration,
+      windowOptions: WindowOptions
+  ): SCollection[Record] =
+    input
+      .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
+      .mapWithTimestamp { case (r, t) =>
+        Record(
+          created_at = t,
+          toll_both_id = r.tollBothId.id,
+          reason = r.reason,
+          count = r.count
+        )
+      }
 }

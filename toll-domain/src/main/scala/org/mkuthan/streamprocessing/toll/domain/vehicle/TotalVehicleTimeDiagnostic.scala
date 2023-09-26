@@ -11,7 +11,11 @@ import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-final case class TotalVehicleTimeDiagnostic(tollBothId: TollBoothId, reason: String, count: Long = 1L) {
+final case class TotalVehicleTimeDiagnostic(
+    tollBothId: TollBoothId,
+    reason: String,
+    count: Long = 1L
+) {
   private lazy val keyFields = this match {
     case TotalVehicleTimeDiagnostic(tollBoothId, reason, count @ _) =>
       Seq(tollBoothId, reason)
@@ -23,7 +27,12 @@ object TotalVehicleTimeDiagnostic {
   val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTime"
 
   @BigQueryType.toTable
-  final case class Record(created_at: Instant, toll_both_id: String, reason: String, count: Long = 1L)
+  final case class Record(
+      created_at: Instant,
+      toll_both_id: String,
+      reason: String,
+      count: Long
+  )
 
   implicit val sumByKey: SumByKey[TotalVehicleTimeDiagnostic] =
     SumByKey.create(

@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.infrastructure.common
+package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.values.WindowOptions
 
@@ -9,22 +9,22 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio._
 
-class IoDiagnosticTest extends AnyFlatSpec with Matchers
+class TotalVehicleTimeDiagnosticTest extends AnyFlatSpec with Matchers
     with TestScioContext
-    with IoDiagnosticFixture {
+    with TotalVehicleTimeDiagnosticFixture {
 
-  import IoDiagnostic._
+  import TotalVehicleTimeDiagnostic._
 
-  val FiveMinutes: Duration = Duration.standardMinutes(5)
-  val DefaultWindowOptions: WindowOptions = WindowOptions()
+  private val FiveMinutes = Duration.standardMinutes(5)
+  private val DefaultWindowOptions = WindowOptions()
 
-  behavior of "IoDiagnostic"
+  behavior of "TotalVehicleTimeDiagnostic"
 
   it should "aggregate and encode into record" in runWithScioContext { sc =>
-    val diagnostic1 = anyDiagnostic.copy(id = "1", count = 1)
-    val diagnostic2 = anyDiagnostic.copy(id = "2", count = 2)
+    val diagnostic1 = anyDiagnostic.copy(reason = "1", count = 1)
+    val diagnostic2 = anyDiagnostic.copy(reason = "2", count = 2)
 
-    val input = boundedTestCollectionOf[IoDiagnostic]
+    val input = boundedTestCollectionOf[TotalVehicleTimeDiagnostic]
       .addElementsAtTime("2014-09-10T12:00:00Z", diagnostic1)
       .addElementsAtTime("2014-09-10T12:01:00Z", diagnostic2)
       .addElementsAtTime("2014-09-10T12:02:00Z", diagnostic1)
@@ -40,12 +40,12 @@ class IoDiagnosticTest extends AnyFlatSpec with Matchers
         Seq(
           anyDiagnosticRecord.copy(
             created_at = Instant.parse("2014-09-10T12:04:59.999Z"),
-            id = "1",
+            reason = "1",
             count = 2
           ),
           anyDiagnosticRecord.copy(
             created_at = Instant.parse("2014-09-10T12:04:59.999Z"),
-            id = "2",
+            reason = "2",
             count = 4
           )
         )

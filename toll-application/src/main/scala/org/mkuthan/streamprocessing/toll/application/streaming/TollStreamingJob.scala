@@ -126,9 +126,8 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeRecord(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
 
-    totalVehicleTimesDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .mapWithTimestamp(TotalVehicleTimeDiagnostic.toRecord)
+    TotalVehicleTimeDiagnostic
+      .aggregateAndEncode(totalVehicleTimesDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(TotalVehicleTimeDiagnosticTableIoId, config.totalVehicleTimeDiagnosticTable)
 
     // calculate vehicles with expired registrations
@@ -145,9 +144,8 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeMessage(vehiclesWithExpiredRegistration)
       .publishJsonToPubsub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    vehiclesWithExpiredRegistrationDiagnostic
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .mapWithTimestamp(VehiclesWithExpiredRegistrationDiagnostic.toRecord)
+    VehiclesWithExpiredRegistrationDiagnostic
+      .aggregateAndEncode(vehiclesWithExpiredRegistrationDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticTable
@@ -162,9 +160,8 @@ object TollStreamingJob extends TollStreamingJobIo {
       totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId)
     )
 
-    ioDiagnostics
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .mapWithTimestamp(IoDiagnostic.toRecord)
+    IoDiagnostic
+      .aggregateAndEncode(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()

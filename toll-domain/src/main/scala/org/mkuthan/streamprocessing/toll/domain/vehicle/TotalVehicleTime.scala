@@ -58,7 +58,7 @@ object TotalVehicleTime {
   }
 
   def encodeRecord(input: SCollection[TotalVehicleTime]): SCollection[Record] =
-    input.withTimestamp.map { case (r, t) =>
+    input.mapWithTimestamp { case (r, t) =>
       Record(
         created_at = t,
         license_plate = r.licensePlate.number,

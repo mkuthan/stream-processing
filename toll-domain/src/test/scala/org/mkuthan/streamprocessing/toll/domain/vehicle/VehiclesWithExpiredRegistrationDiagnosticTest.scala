@@ -20,7 +20,7 @@ class VehiclesWithExpiredRegistrationDiagnosticTest extends AnyFlatSpec with Mat
 
   behavior of "VehiclesWithExpiredRegistrationDiagnostic"
 
-  it should "aggregate and encode VehiclesWithExpiredRegistrationDiagnostic into record" in runWithScioContext { sc =>
+  it should "aggregate and encode into record" in runWithScioContext { sc =>
     val diagnostic1 = anyDiagnostic.copy(reason = "1", count = 1)
     val diagnostic2 = anyDiagnostic.copy(reason = "2", count = 2)
 

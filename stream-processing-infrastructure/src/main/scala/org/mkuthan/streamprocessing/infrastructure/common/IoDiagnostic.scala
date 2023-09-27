@@ -2,13 +2,19 @@ package org.mkuthan.streamprocessing.infrastructure.common
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
 
+import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
-final case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
+final case class IoDiagnostic(
+    id: String,
+    reason: String,
+    count: Long = 1
+) {
   private lazy val keyFields = this match {
     case IoDiagnostic(id, reason, count @ _) =>
       Seq(id, reason)
@@ -17,7 +23,12 @@ final case class IoDiagnostic(id: String, reason: String, count: Long = 1) {
 
 object IoDiagnostic {
   @BigQueryType.toTable
-  final case class Record(created_at: Instant, id: String, reason: String, count: Long)
+  final case class Record(
+      created_at: Instant,
+      id: String,
+      reason: String,
+      count: Long
+  )
 
   implicit val sumByKey: SumByKey[IoDiagnostic] =
     SumByKey.create(
@@ -28,11 +39,19 @@ object IoDiagnostic {
   def union(first: SCollection[IoDiagnostic], others: SCollection[IoDiagnostic]*): SCollection[IoDiagnostic] =
     first.unionInGlobalWindow(others: _*)
 
-  def toRecord[T](diagnostic: IoDiagnostic, createdAt: Instant): Record =
-    Record(
-      created_at = createdAt,
-      id = diagnostic.id,
-      reason = diagnostic.reason,
-      count = diagnostic.count
-    )
+  def aggregateAndEncode(
+      input: SCollection[IoDiagnostic],
+      windowDuration: Duration,
+      windowOptions: WindowOptions
+  ): SCollection[Record] =
+    input
+      .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
+      .mapWithTimestamp { case (r, t) =>
+        Record(
+          created_at = t,
+          id = r.id,
+          reason = r.reason,
+          count = r.count
+        )
+      }
 }

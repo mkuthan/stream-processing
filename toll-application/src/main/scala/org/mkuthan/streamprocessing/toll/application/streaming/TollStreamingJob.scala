@@ -160,9 +160,8 @@ object TollStreamingJob extends TollStreamingJobIo {
       totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId)
     )
 
-    ioDiagnostics
-      .sumByKeyInFixedWindow(windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .mapWithTimestamp(IoDiagnostic.toRecord)
+    IoDiagnostic
+      .aggregateAndEncode(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()

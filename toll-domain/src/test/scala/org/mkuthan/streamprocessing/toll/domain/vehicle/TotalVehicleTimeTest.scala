@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.toll.domain.vehicle
 
+import com.spotify.scio.values.WindowOptions
+
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
@@ -17,11 +19,13 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with TollBoothEntryFixture
     with TollBoothExitFixture
-    with TotalVehicleTimeFixture {
+    with TotalVehicleTimeFixture
+    with TotalVehicleTimeDiagnosticFixture {
 
   import TotalVehicleTime._
 
   private val FiveMinutes = Duration.standardMinutes(5)
+  private val DefaultWindowOptions = WindowOptions()
 
   behavior of "TotalVehicleTime"
 
@@ -43,7 +47,12 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
+      calculateInSessionWindow(
+        sc.testBounded(boothEntries),
+        sc.testBounded(boothExits),
+        FiveMinutes,
+        DefaultWindowOptions
+      )
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
@@ -79,14 +88,19 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val (results, diagnostic) =
-      calculateInSessionWindow(sc.testBounded(boothEntries), sc.testBounded(boothExits), FiveMinutes)
+      calculateInSessionWindow(
+        sc.testBounded(boothEntries),
+        sc.testBounded(boothExits),
+        FiveMinutes,
+        DefaultWindowOptions
+      )
 
     results should beEmpty
 
     diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
       containSingleValueAtTime(
         "2014-09-10T12:08:00.999Z",
-        TotalVehicleTimeDiagnostic(tollBoothId, TotalVehicleTimeDiagnostic.MissingTollBoothExit, 1)
+        totalVehicleTimeWithMissingTollBoothExitDiagnostic
       )
     }
   }

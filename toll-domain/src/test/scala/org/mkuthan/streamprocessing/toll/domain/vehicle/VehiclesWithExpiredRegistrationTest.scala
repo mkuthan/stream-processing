@@ -18,7 +18,8 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with VehiclesWithExpiredRegistrationFixture
     with TollBoothEntryFixture
-    with VehicleRegistrationFixture {
+    with VehicleRegistrationFixture
+    with VehiclesWithExpiredRegistrationDiagnosticFixture {
 
   import VehiclesWithExpiredRegistration._
 

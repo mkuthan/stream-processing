@@ -2,6 +2,7 @@ package org.mkuthan.streamprocessing.toll.domain.vehicle
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
 
 import org.joda.time.Duration
 import org.joda.time.Instant
@@ -35,14 +36,15 @@ object TotalVehicleTime {
   def calculateInSessionWindow(
       boothEntries: SCollection[TollBoothEntry],
       boothExits: SCollection[TollBoothExit],
-      gapDuration: Duration
+      gapDuration: Duration,
+      windowOptions: WindowOptions
   ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
-      .withSessionWindows(gapDuration)
+      .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
     val boothExistsById = boothExits
       .keyBy(exit => (exit.id, exit.licensePlate))
-      .withSessionWindows(gapDuration)
+      .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
 
     val results = boothEntriesById
       .leftOuterJoin(boothExistsById)

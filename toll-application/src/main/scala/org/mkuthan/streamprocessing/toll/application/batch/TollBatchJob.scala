@@ -1,5 +1,10 @@
 package org.mkuthan.streamprocessing.toll.application.batch
 
+import org.apache.beam.sdk.transforms.windowing.AfterWatermark
+import org.apache.beam.sdk.transforms.windowing.Repeatedly
+import org.apache.beam.sdk.transforms.windowing.Window
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
 import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
 
@@ -25,7 +30,12 @@ object TollBatchJob extends TollBatchJobIo {
 
   private val TwoDays = Duration.standardDays(1)
 
-  private val DefaultWindowOptions = WindowOptions()
+  private val DefaultWindowOptions = WindowOptions(
+    trigger = Repeatedly.forever(AfterWatermark.pastEndOfWindow()),
+    allowedLateness = Duration.ZERO,
+    accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+    onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
+  )
 
   def main(mainArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(mainArgs)
@@ -33,23 +43,23 @@ object TollBatchJob extends TollBatchJobIo {
     val config = TollBatchJobConfig.parse(args)
 
     // read toll booth entries and toll booth exists
-    val boothEntryRecords = sc.readFromBigQuery(
+    val entryRecords = sc.readFromBigQuery(
       EntryTableIoId,
       config.entryTable,
       StorageReadConfiguration().withRowRestriction(
         RowRestriction.TimestampColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
       )
     )
-    val boothEntries = TollBoothEntry.decodeRecord(boothEntryRecords)
+    val entries = TollBoothEntry.decodeRecord(entryRecords)
 
-    val boothExitRecords = sc.readFromBigQuery(
+    val exitRecords = sc.readFromBigQuery(
       ExitTableIoId,
       config.exitTable,
       StorageReadConfiguration().withRowRestriction(
         RowRestriction.TimestampColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
       )
     )
-    val boothExits = TollBoothExit.decodeRecord(boothExitRecords)
+    val exits = TollBoothExit.decodeRecord(exitRecords)
 
     // read vehicle registrations
     val vehicleRegistrationRecords =
@@ -64,19 +74,19 @@ object TollBatchJob extends TollBatchJobIo {
     val vehicleRegistrations = VehicleRegistration.decodeRecord(vehicleRegistrationRecords, config.effectiveDate)
 
     // calculate tool booth stats
-    val boothStatsHourly = TollBoothStats.calculateInFixedWindow(boothEntries, OneHour, DefaultWindowOptions)
+    val tollBoothStatsHourly = TollBoothStats.calculateInFixedWindow(entries, OneHour, DefaultWindowOptions)
     TollBoothStats
-      .encode(boothStatsHourly)
+      .encode(tollBoothStatsHourly)
       .writeBoundedToBigQuery(EntryStatsHourlyTableIoId, config.entryStatsHourlyPartition)
 
-    val boothStatsDaily = TollBoothStats.calculateInFixedWindow(boothEntries, OneDay, DefaultWindowOptions)
+    val tollBoothStatsDaily = TollBoothStats.calculateInFixedWindow(entries, OneDay, DefaultWindowOptions)
     TollBoothStats
-      .encode(boothStatsDaily)
+      .encode(tollBoothStatsDaily)
       .writeBoundedToBigQuery(EntryStatsDailyTableIoId, config.entryStatsDailyPartition)
 
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
-      TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, OneHour)
+      TotalVehicleTime.calculateInSessionWindow(entries, exits, OneHour, DefaultWindowOptions)
     TotalVehicleTime
       .encodeRecord(totalVehicleTimes)
       .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
@@ -91,7 +101,7 @@ object TollBatchJob extends TollBatchJobIo {
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
-        boothEntries,
+        entries,
         vehicleRegistrations,
         leftWindowDuration = OneDay,
         rightWindowDuration = TwoDays,

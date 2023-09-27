@@ -30,7 +30,7 @@ object VehiclesWithExpiredRegistrationDiagnostic {
   @BigQueryType.toTable
   final case class Record(
       created_at: Instant,
-      toll_both_id: String,
+      toll_booth_id: String,
       reason: String,
       count: Long
   )
@@ -51,7 +51,7 @@ object VehiclesWithExpiredRegistrationDiagnostic {
       .mapWithTimestamp { case (r, t) =>
         Record(
           created_at = t,
-          toll_both_id = r.tollBoothId.id,
+          toll_booth_id = r.tollBoothId.id,
           reason = r.reason,
           count = r.count
         )

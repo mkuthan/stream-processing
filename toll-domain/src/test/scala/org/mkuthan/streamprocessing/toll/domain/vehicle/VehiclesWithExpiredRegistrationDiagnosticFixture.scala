@@ -6,18 +6,29 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 trait VehiclesWithExpiredRegistrationDiagnosticFixture {
 
-  final val anyDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
+  final val anyVehiclesWithExpiredRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
     VehiclesWithExpiredRegistrationDiagnostic(
       tollBoothId = TollBoothId("1"),
       reason = "any reason",
       count = 1
     )
 
-  final val anyDiagnosticRecord: VehiclesWithExpiredRegistrationDiagnostic.Record =
+  final val anyVehiclesWithExpiredRegistrationDiagnosticRecord: VehiclesWithExpiredRegistrationDiagnostic.Record =
     VehiclesWithExpiredRegistrationDiagnostic.Record(
       created_at = Instant.EPOCH,
-      toll_both_id = anyDiagnostic.tollBoothId.id,
-      reason = anyDiagnostic.reason,
-      count = anyDiagnostic.count
+      toll_booth_id = anyVehiclesWithExpiredRegistrationDiagnostic.tollBoothId.id,
+      reason = anyVehiclesWithExpiredRegistrationDiagnostic.reason,
+      count = anyVehiclesWithExpiredRegistrationDiagnostic.count
     )
+
+  final val vehicleWithNotExpiredRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
+    anyVehiclesWithExpiredRegistrationDiagnostic.copy(
+      reason = VehiclesWithExpiredRegistrationDiagnostic.NotExpired
+    )
+
+  final val vehicleWithMissingRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
+    anyVehiclesWithExpiredRegistrationDiagnostic.copy(
+      reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
+    )
+
 }

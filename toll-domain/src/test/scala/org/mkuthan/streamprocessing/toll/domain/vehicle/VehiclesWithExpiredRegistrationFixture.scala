@@ -47,16 +47,4 @@ trait VehiclesWithExpiredRegistrationFixture {
       ),
       Map(VehiclesWithExpiredRegistration.TimestampAttribute -> createdAt.toString)
     )
-
-  final val vehicleWithNotExpiredRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
-    VehiclesWithExpiredRegistrationDiagnostic(
-      tollBoothId = TollBoothId("1"),
-      reason = VehiclesWithExpiredRegistrationDiagnostic.NotExpired
-    )
-
-  final val vehicleWithMissingRegistrationDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
-    VehiclesWithExpiredRegistrationDiagnostic(
-      tollBoothId = TollBoothId("1"),
-      reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
-    )
 }

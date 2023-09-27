@@ -6,16 +6,19 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 trait TotalVehicleTimeDiagnosticFixture {
 
-  final val anyDiagnostic: TotalVehicleTimeDiagnostic = TotalVehicleTimeDiagnostic(
+  final val anyTotalVehicleTimeDiagnostic: TotalVehicleTimeDiagnostic = TotalVehicleTimeDiagnostic(
     tollBoothId = TollBoothId("1"),
     reason = "any reason",
     count = 1
   )
 
-  final val anyDiagnosticRecord: TotalVehicleTimeDiagnostic.Record = TotalVehicleTimeDiagnostic.Record(
+  final val anyTotalVehicleTimeDiagnosticRecord: TotalVehicleTimeDiagnostic.Record = TotalVehicleTimeDiagnostic.Record(
     created_at = Instant.EPOCH,
-    toll_booth_id = anyDiagnostic.tollBoothId.id,
-    reason = anyDiagnostic.reason,
-    count = anyDiagnostic.count
+    toll_booth_id = anyTotalVehicleTimeDiagnostic.tollBoothId.id,
+    reason = anyTotalVehicleTimeDiagnostic.reason,
+    count = anyTotalVehicleTimeDiagnostic.count
   )
+
+  final val totalVehicleTimeWithMissingTollBoothExitDiagnostic: TotalVehicleTimeDiagnostic =
+    anyTotalVehicleTimeDiagnostic.copy(reason = TotalVehicleTimeDiagnostic.MissingTollBoothExit)
 }

@@ -59,27 +59,27 @@ object TollStreamingJob extends TollStreamingJobIo {
     val config = TollStreamingJobConfig.parse(args)
 
     // receive toll booth entries and toll booth exists
-    val (boothEntryMessages, boothEntryMessagesDlq) =
+    val (entryMessages, entryMessagesDlq) =
       sc.subscribeJsonFromPubsub(
         EntrySubscriptionIoId,
         config.entrySubscription,
         JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute(TollBoothEntry.TimestampAttribute))
       ).unzip
 
-    val (boothEntries, boothEntriesDlq) = TollBoothEntry.decodeMessage(boothEntryMessages)
-    boothEntriesDlq
+    val (entries, entriesDlq) = TollBoothEntry.decodeMessage(entryMessages)
+    entriesDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
-    val (boothExitMessages, boothExitMessagesDlq) =
+    val (exitMessages, exitMessagesDlq) =
       sc.subscribeJsonFromPubsub(
         ExitSubscriptionIoId,
         config.exitSubscription,
         JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute(TollBoothExit.TimestampAttribute))
       ).unzip
 
-    val (boothExits, boothExistsDlq) = TollBoothExit.decodeMessage(boothExitMessages)
-    boothExistsDlq
+    val (exits, existsDlq) = TollBoothExit.decodeMessage(exitMessages)
+    existsDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
@@ -114,14 +114,14 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
-    val boothStats = TollBoothStats.calculateInFixedWindow(boothEntries, TenMinutes, DefaultWindowOptions)
+    val tollBoothStats = TollBoothStats.calculateInFixedWindow(entries, TenMinutes, DefaultWindowOptions)
     val tollBoothStatsDlq = TollBoothStats
-      .encode(boothStats)
+      .encode(tollBoothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
     // calculate total vehicle times
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
-      TotalVehicleTime.calculateInSessionWindow(boothEntries, boothExits, TenMinutes)
+      TotalVehicleTime.calculateInSessionWindow(entries, exits, TenMinutes, DefaultWindowOptions)
     val totalVehicleTimesDlq = TotalVehicleTime
       .encodeRecord(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimeTableIoId, config.totalVehicleTimeTable)
@@ -133,7 +133,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     // calculate vehicles with expired registrations
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
-        boothEntries,
+        entries,
         vehicleRegistrations,
         leftWindowDuration = TenMinutes,
         rightWindowDuration = TwoDays,
@@ -153,8 +153,8 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     // dead letters diagnostic
     val ioDiagnostics = IoDiagnostic.union(
-      boothEntryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
-      boothExitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
+      entryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
+      exitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
       vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId),
       tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId),
       totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId)

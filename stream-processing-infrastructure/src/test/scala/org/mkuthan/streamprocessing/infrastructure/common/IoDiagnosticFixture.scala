@@ -4,16 +4,16 @@ import org.joda.time.Instant
 
 trait IoDiagnosticFixture {
 
-  final val anyDiagnostic: IoDiagnostic = IoDiagnostic(
+  final val anyIoDiagnostic: IoDiagnostic = IoDiagnostic(
     id = "1",
     reason = "any reason",
     count = 1
   )
 
-  final val anyDiagnosticRecord: IoDiagnostic.Record = IoDiagnostic.Record(
+  final val anyIoDiagnosticRecord: IoDiagnostic.Record = IoDiagnostic.Record(
     created_at = Instant.EPOCH,
-    id = anyDiagnostic.id,
-    reason = anyDiagnostic.reason,
-    count = anyDiagnostic.count
+    id = anyIoDiagnostic.id,
+    reason = anyIoDiagnostic.reason,
+    count = anyIoDiagnostic.count
   )
 }

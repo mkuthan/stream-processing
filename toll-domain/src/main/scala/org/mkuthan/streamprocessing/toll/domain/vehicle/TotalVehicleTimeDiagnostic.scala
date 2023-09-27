@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 final case class TotalVehicleTimeDiagnostic(
-    tollBothId: TollBoothId,
+    tollBoothId: TollBoothId,
     reason: String,
     count: Long = 1L
 ) {
@@ -29,7 +29,7 @@ object TotalVehicleTimeDiagnostic {
   @BigQueryType.toTable
   final case class Record(
       created_at: Instant,
-      toll_both_id: String,
+      toll_booth_id: String,
       reason: String,
       count: Long
   )
@@ -50,7 +50,7 @@ object TotalVehicleTimeDiagnostic {
       .mapWithTimestamp { case (r, t) =>
         Record(
           created_at = t,
-          toll_both_id = r.tollBothId.id,
+          toll_booth_id = r.tollBoothId.id,
           reason = r.reason,
           count = r.count
         )

@@ -8,7 +8,7 @@ trait VehiclesWithExpiredRegistrationDiagnosticFixture {
 
   final val anyDiagnostic: VehiclesWithExpiredRegistrationDiagnostic =
     VehiclesWithExpiredRegistrationDiagnostic(
-      tollBothId = TollBoothId("1"),
+      tollBoothId = TollBoothId("1"),
       reason = "any reason",
       count = 1
     )
@@ -16,7 +16,7 @@ trait VehiclesWithExpiredRegistrationDiagnosticFixture {
   final val anyDiagnosticRecord: VehiclesWithExpiredRegistrationDiagnostic.Record =
     VehiclesWithExpiredRegistrationDiagnostic.Record(
       created_at = Instant.EPOCH,
-      toll_both_id = anyDiagnostic.tollBothId.id,
+      toll_both_id = anyDiagnostic.tollBoothId.id,
       reason = anyDiagnostic.reason,
       count = anyDiagnostic.count
     )

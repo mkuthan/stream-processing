@@ -12,7 +12,7 @@ import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
 final case class VehiclesWithExpiredRegistrationDiagnostic(
-    tollBothId: TollBoothId,
+    tollBoothId: TollBoothId,
     reason: String,
     count: Long = 1L
 ) {
@@ -51,7 +51,7 @@ object VehiclesWithExpiredRegistrationDiagnostic {
       .mapWithTimestamp { case (r, t) =>
         Record(
           created_at = t,
-          toll_both_id = r.tollBothId.id,
+          toll_both_id = r.tollBoothId.id,
           reason = r.reason,
           count = r.count
         )

@@ -7,14 +7,14 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 trait TotalVehicleTimeDiagnosticFixture {
 
   final val anyDiagnostic: TotalVehicleTimeDiagnostic = TotalVehicleTimeDiagnostic(
-    tollBothId = TollBoothId("1"),
+    tollBoothId = TollBoothId("1"),
     reason = "any reason",
     count = 1
   )
 
   final val anyDiagnosticRecord: TotalVehicleTimeDiagnostic.Record = TotalVehicleTimeDiagnostic.Record(
     created_at = Instant.EPOCH,
-    toll_both_id = anyDiagnostic.tollBothId.id,
+    toll_booth_id = anyDiagnostic.tollBoothId.id,
     reason = anyDiagnostic.reason,
     count = anyDiagnostic.count
   )

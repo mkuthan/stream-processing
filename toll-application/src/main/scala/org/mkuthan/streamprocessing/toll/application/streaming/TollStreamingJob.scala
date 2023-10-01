@@ -41,6 +41,10 @@ object TollStreamingJob extends TollStreamingJobIo {
     onTimeBehavior = Window.OnTimeBehavior.FIRE_IF_NON_EMPTY
   )
 
+  private val TollBoothStatsWindowOptions = DefaultWindowOptions.copy(
+    allowedLateness = Duration.standardMinutes(2)
+  )
+
   private val DeadLetterWindowOptions = WindowOptions(
     trigger = Repeatedly.forever(
       AfterFirst.of(
@@ -114,7 +118,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     // calculate tool booth stats
-    val tollBoothStats = TollBoothStats.calculateInFixedWindow(entries, TenMinutes, DefaultWindowOptions)
+    val tollBoothStats = TollBoothStats.calculateInFixedWindow(entries, TenMinutes, TollBoothStatsWindowOptions)
     val tollBoothStatsDlq = TollBoothStats
       .encode(tollBoothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)

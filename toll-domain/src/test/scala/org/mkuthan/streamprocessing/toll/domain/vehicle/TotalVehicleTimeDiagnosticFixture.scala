@@ -21,4 +21,7 @@ trait TotalVehicleTimeDiagnosticFixture {
 
   final val totalVehicleTimeWithMissingTollBoothExitDiagnostic: TotalVehicleTimeDiagnostic =
     anyTotalVehicleTimeDiagnostic.copy(reason = TotalVehicleTimeDiagnostic.MissingTollBoothExit)
+
+  final val totalVehicleTimeWithMissingTollBoothExitDiagnosticRecord: TotalVehicleTimeDiagnostic.Record =
+    anyTotalVehicleTimeDiagnosticRecord.copy(reason = TotalVehicleTimeDiagnostic.MissingTollBoothExit)
 }

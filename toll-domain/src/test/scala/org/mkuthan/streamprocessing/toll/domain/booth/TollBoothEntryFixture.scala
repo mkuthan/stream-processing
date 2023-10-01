@@ -27,9 +27,6 @@ trait TollBoothEntryFixture {
     error = "requirement failed: Toll booth id is empty"
   )
 
-  final val tollBoothEntryPayloadWithoutExit: TollBoothEntry.Payload =
-    anyTollBoothEntryPayload.copy(license_plate = "other license plate")
-
   final val anyTollBoothEntryRecord: TollBoothEntry.Record = TollBoothEntry.Record(
     id = anyTollBoothEntryPayload.id,
     entry_time = Instant.parse(anyTollBoothEntryPayload.entry_time),

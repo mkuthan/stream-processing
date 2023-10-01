@@ -29,7 +29,7 @@ trait VehicleRegistrationFixture {
   final val vehicleRegistrationDecodingError: DeadLetter[VehicleRegistration.Payload] =
     DeadLetter[VehicleRegistration.Payload](
       data = vehicleRegistrationMessageInvalid.payload,
-      error = "requirement failed: Licence plate number is empty"
+      error = "requirement failed: License plate number is empty"
     )
 
   final val anyVehicleRegistrationRecord: VehicleRegistration.Record = VehicleRegistration.Record(

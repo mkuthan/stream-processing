@@ -30,9 +30,4 @@ trait VehiclesWithExpiredRegistrationDiagnosticFixture {
     anyVehiclesWithExpiredRegistrationDiagnostic.copy(
       reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
     )
-
-  final val vehicleWithMissingRegistrationDiagnosticRecord: VehiclesWithExpiredRegistrationDiagnostic.Record =
-    anyVehiclesWithExpiredRegistrationDiagnosticRecord.copy(
-      reason = VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
-    )
 }

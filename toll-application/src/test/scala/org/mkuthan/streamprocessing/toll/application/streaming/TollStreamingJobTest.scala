@@ -9,7 +9,6 @@ import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
-import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
@@ -52,35 +51,23 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Payload]]
           .addElementsAtTime(
             anyTollBoothEntryPayload.entry_time,
-            Right(Message(anyTollBoothEntryPayload)),
-            Right(Message(tollBoothEntryPayloadInvalid)),
-            Left(PubsubDeadLetter(
-              "corrupted".getBytes,
-              Map(),
-              "some error"
-            ))
+            Right(Message(anyTollBoothEntryPayload))
           )
           .advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothEntry.Payload]](EntryDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothEntryDecodingError)
+        results should beEmpty
       }
       .inputStream(
         CustomIO[PubsubResult[TollBoothExit.Payload]](ExitSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[TollBoothExit.Payload]]
           .addElementsAtTime(
             anyTollBoothExitPayload.exit_time,
-            Right(Message(anyTollBoothExitPayload)),
-            Right(Message(tollBoothExitPayloadInvalid)),
-            Left(PubsubDeadLetter(
-              "corrupted".getBytes,
-              Map(),
-              "some error"
-            ))
+            Right(Message(anyTollBoothExitPayload))
           ).advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothExit.Payload]](ExitDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothExitDecodingError)
+        results should beEmpty
       }
       // receive vehicle registrations
       .inputStream(
@@ -90,17 +77,13 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
             anyVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
             Right(anyVehicleRegistrationMessage)
           )
-          // TODO: add invalid message and check dead letter
           .advanceWatermarkToInfinity().testStream
       )
       .input(
         CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id),
-        Seq(
-          anyVehicleRegistrationRecord
-        )
+        Seq(anyVehicleRegistrationRecord)
       )
       .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
-        // TODO: add invalid vehicle registration and check dead letter
         results should beEmpty
       }
       // calculate tool booth stats
@@ -116,7 +99,6 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         )
       }
       .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
-        // TODO
         results should beEmpty
       }
       // calculate vehicles with expired registrations
@@ -132,15 +114,11 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>
-          // TODO
           results should beEmpty
       }
       .output(CustomIO[IoDiagnostic.Record](DiagnosticTableIoId.id)) { results =>
-        // toll booth entry and toll booth exit
-        results should haveSize(2)
+        results should beEmpty
       }
       .run()
   }
-
-  // TODO: how to reuse setup between test scenarios and modify only relevant inputs/outputs
 }

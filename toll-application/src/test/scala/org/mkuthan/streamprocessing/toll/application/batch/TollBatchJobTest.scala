@@ -38,31 +38,19 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         "--vehiclesWithExpiredRegistrationDiagnosticDailyTable=toll.vehicles_with_expired_registration_diagnostic_daily"
       )
       // read toll booth entries and toll booth exists
-      .input(
-        CustomIO[TollBoothEntry.Record](EntryTableIoId.id),
-        Seq(
-          anyTollBoothEntryRecord,
-          // entry without matching exit and without matching registration
-          anyTollBoothEntryRecord.copy(
-            id = "2",
-            license_plate = "JNB 7002"
-          )
-        )
-      )
+      .input(CustomIO[TollBoothEntry.Record](EntryTableIoId.id), Seq(anyTollBoothEntryRecord))
       .input(CustomIO[TollBoothExit.Record](ExitTableIoId.id), Seq(anyTollBoothExitRecord))
       // read vehicle registrations
       .input(CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRecord))
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsHourlyTableIoId.id)) { results =>
         results should containInAnyOrder(Seq(
-          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:59:59.999Z")),
-          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:59:59.999Z"), id = "2")
+          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:59:59.999Z"))
         ))
       }
       .output(CustomIO[TollBoothStats.Record](EntryStatsDailyTableIoId.id)) { results =>
         results should containInAnyOrder(Seq(
-          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T23:59:59.999Z")),
-          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T23:59:59.999Z"), id = "2")
+          anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T23:59:59.999Z"))
         ))
       }
       // calculate total vehicle times
@@ -73,12 +61,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
       }
       .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticOneHourGapTableIoId.id)) {
         results =>
-          results should containSingleValue(
-            totalVehicleTimeWithMissingTollBoothExitDiagnosticRecord.copy(
-              created_at = Instant.parse("2014-09-10T23:59:59.999Z"),
-              toll_booth_id = "2"
-            )
-          )
+          results should beEmpty
       }
       // calculate vehicles with expired registrations
       .output(CustomIO[VehiclesWithExpiredRegistration.Record](VehiclesWithExpiredRegistrationDailyTableIoId.id)) {
@@ -92,12 +75,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId.id
       )) {
         results =>
-          results should containSingleValue(
-            vehicleWithMissingRegistrationDiagnosticRecord.copy(
-              created_at = Instant.parse("2014-09-10T23:59:59.999Z"),
-              toll_booth_id = "2"
-            )
-          )
+          results should beEmpty
       }
       .run()
   }

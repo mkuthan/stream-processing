@@ -5,8 +5,10 @@ import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.transforms.windowing.Window
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
 
+import com.spotify.scio.values.SCollection
 import com.spotify.scio.values.WindowOptions
 import com.spotify.scio.ContextAndArgs
+import com.spotify.scio.ScioContext
 
 import org.joda.time.Duration
 
@@ -42,7 +44,18 @@ object TollBatchJob extends TollBatchJobIo {
 
     val config = TollBatchJobConfig.parse(args)
 
-    // read toll booth entries and toll booth exists
+    val entries = readEntries(sc, config)
+    val exits = readExits(sc, config)
+    val vehicleRegistrations = readVehicleRegistrations(sc, config)
+
+    calculateTollBoothStats(config, entries)
+    calculateTotalVehicleTimes(config, entries, exits)
+    calculateVehiclesWithExpiredRegistrations(config, entries, vehicleRegistrations)
+
+    val _ = sc.run()
+  }
+
+  private def readEntries(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothEntry] = {
     val entryRecords = sc.readFromBigQuery(
       EntryTableIoId,
       config.entryTable,
@@ -50,8 +63,10 @@ object TollBatchJob extends TollBatchJobIo {
         RowRestriction.TimestampColumnRestriction(TollBoothEntry.PartitioningColumnName, config.effectiveDate)
       )
     )
-    val entries = TollBoothEntry.decodeRecord(entryRecords)
+    TollBoothEntry.decodeRecord(entryRecords)
+  }
 
+  private def readExits(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothExit] = {
     val exitRecords = sc.readFromBigQuery(
       ExitTableIoId,
       config.exitTable,
@@ -59,9 +74,13 @@ object TollBatchJob extends TollBatchJobIo {
         RowRestriction.TimestampColumnRestriction(TollBoothExit.PartitioningColumnName, config.effectiveDate)
       )
     )
-    val exits = TollBoothExit.decodeRecord(exitRecords)
+    TollBoothExit.decodeRecord(exitRecords)
+  }
 
-    // read vehicle registrations
+  private def readVehicleRegistrations(
+      sc: ScioContext,
+      config: TollBatchJobConfig
+  ): SCollection[VehicleRegistration] = {
     val vehicleRegistrationRecords =
       sc.readFromBigQuery(
         VehicleRegistrationTableIoId,
@@ -71,9 +90,13 @@ object TollBatchJob extends TollBatchJobIo {
         )
       )
 
-    val vehicleRegistrations = VehicleRegistration.decodeRecord(vehicleRegistrationRecords, config.effectiveDate)
+    VehicleRegistration.decodeRecord(vehicleRegistrationRecords, config.effectiveDate)
+  }
 
-    // calculate tool booth stats
+  private def calculateTollBoothStats(
+      config: TollBatchJobConfig,
+      entries: SCollection[TollBoothEntry]
+  ): Unit = {
     val tollBoothStatsHourly = TollBoothStats.calculateInFixedWindow(entries, OneHour, DefaultWindowOptions)
     TollBoothStats
       .encode(tollBoothStatsHourly)
@@ -84,9 +107,16 @@ object TollBatchJob extends TollBatchJobIo {
       .encode(tollBoothStatsDaily)
       .writeBoundedToBigQuery(EntryStatsDailyTableIoId, config.entryStatsDailyPartition)
 
-    // calculate total vehicle times
+  }
+
+  private def calculateTotalVehicleTimes(
+      config: TollBatchJobConfig,
+      entries: SCollection[TollBoothEntry],
+      exits: SCollection[TollBoothExit]
+  ): Unit = {
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
       TotalVehicleTime.calculateInSessionWindow(entries, exits, OneHour, DefaultWindowOptions)
+
     TotalVehicleTime
       .encodeRecord(totalVehicleTimes)
       .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
@@ -97,8 +127,13 @@ object TollBatchJob extends TollBatchJobIo {
         TotalVehicleTimeDiagnosticOneHourGapTableIoId,
         config.totalVehicleTimeDiagnosticOneHourGapTable
       )
+  }
 
-    // calculate vehicles with expired registrations
+  private def calculateVehiclesWithExpiredRegistrations(
+      config: TollBatchJobConfig,
+      entries: SCollection[TollBoothEntry],
+      vehicleRegistrations: SCollection[VehicleRegistration]
+  ): Unit = {
     val (vehiclesWithExpiredRegistration, vehiclesWithExpiredRegistrationDiagnostic) =
       VehiclesWithExpiredRegistration.calculateWithTemporalJoin(
         entries,
@@ -120,7 +155,6 @@ object TollBatchJob extends TollBatchJobIo {
         VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticDailyPartition
       )
-
-    val _ = sc.run()
   }
+
 }

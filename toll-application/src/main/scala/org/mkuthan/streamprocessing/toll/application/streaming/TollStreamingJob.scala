@@ -84,16 +84,20 @@ object TollStreamingJob extends TollStreamingJobIo {
     val vehiclesWithExpiredRegistrationDiagnosticDlq =
       calculateVehiclesWithExpiredRegistrations(config, entries, vehicleRegistrations)
 
-    ioDiagnostic(
-      config,
-      entryMessagesDlq,
-      exitMessagesDlq,
-      vehicleRegistrationMessagesDlq,
-      tollBoothStatsDlq,
-      totalVehicleTimesDlq,
-      totalVehicleTimesDiagnosticDlq,
-      vehiclesWithExpiredRegistrationDiagnosticDlq
+    // io diagnostic
+    val ioDiagnostics = IoDiagnostic.union(
+      entryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
+      exitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
+      vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId),
+      tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId),
+      totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId),
+      totalVehicleTimesDiagnosticDlq.toDiagnostic(TotalVehicleTimeDiagnosticTableIoId),
+      vehiclesWithExpiredRegistrationDiagnosticDlq.toDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
     )
+
+    val _ = IoDiagnostic
+      .aggregateAndEncode(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
+      .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
   }
@@ -234,32 +238,5 @@ object TollStreamingJob extends TollStreamingJobIo {
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticTable
       )
-  }
-
-  private def ioDiagnostic(
-      config: TollStreamingJobConfig,
-      entryMessagesDlq: SCollection[PubsubDeadLetter[TollBoothEntry.Payload]],
-      exitMessagesDlq: SCollection[PubsubDeadLetter[TollBoothExit.Payload]],
-      vehicleRegistrationMessagesDlq: SCollection[PubsubDeadLetter[VehicleRegistration.Payload]],
-      tollBoothStatsDlq: SCollection[BigQueryDeadLetter[TollBoothStats.Record]],
-      totalVehicleTimesDlq: SCollection[BigQueryDeadLetter[TotalVehicleTime.Record]],
-      totalVehicleTimesDiagnosticDlq: SCollection[BigQueryDeadLetter[TotalVehicleTimeDiagnostic.Record]],
-      vehiclesWithExpiredRegistrationDiagnosticDlq: SCollection[
-        BigQueryDeadLetter[VehiclesWithExpiredRegistrationDiagnostic.Record]
-      ]
-  ): Unit = {
-    val ioDiagnostics = IoDiagnostic.union(
-      entryMessagesDlq.toDiagnostic(EntrySubscriptionIoId),
-      exitMessagesDlq.toDiagnostic(ExitSubscriptionIoId),
-      vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId),
-      tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId),
-      totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimeTableIoId),
-      totalVehicleTimesDiagnosticDlq.toDiagnostic(TotalVehicleTimeDiagnosticTableIoId),
-      vehiclesWithExpiredRegistrationDiagnosticDlq.toDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
-    )
-
-    val _ = IoDiagnostic
-      .aggregateAndEncode(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
   }
 }

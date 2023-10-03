@@ -11,20 +11,20 @@ import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-final case class TotalVehicleTimeDiagnostic(
+final case class TotalVehicleTimesDiagnostic(
     tollBoothId: TollBoothId,
     reason: String,
     count: Long = 1L
 ) {
   private lazy val keyFields = this match {
-    case TotalVehicleTimeDiagnostic(tollBoothId, reason, count @ _) =>
+    case TotalVehicleTimesDiagnostic(tollBoothId, reason, count @ _) =>
       Seq(tollBoothId, reason)
   }
 }
 
-object TotalVehicleTimeDiagnostic {
+object TotalVehicleTimesDiagnostic {
 
-  val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTime"
+  val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTimes"
 
   @BigQueryType.toTable
   final case class Record(
@@ -34,14 +34,14 @@ object TotalVehicleTimeDiagnostic {
       count: Long
   )
 
-  implicit val sumByKey: SumByKey[TotalVehicleTimeDiagnostic] =
+  implicit val sumByKey: SumByKey[TotalVehicleTimesDiagnostic] =
     SumByKey.create(
       keyFn = _.keyFields.mkString("|@|"),
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
   def aggregateAndEncode(
-      input: SCollection[TotalVehicleTimeDiagnostic],
+      input: SCollection[TotalVehicleTimesDiagnostic],
       windowDuration: Duration,
       windowOptions: WindowOptions
   ): SCollection[Record] =

@@ -13,8 +13,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -32,8 +32,8 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--entryStatsHourlyTable=toll.entry_stats_hourly",
         "--entryStatsDailyTable=toll.entry_stats_daily",
-        "--totalVehicleTimeOneHourGapTable=toll.total_vehicle_time_one_hour_gap",
-        "--totalVehicleTimeDiagnosticOneHourGapTable=toll.total_vehicle_time_diagnostic_one_hour_gap",
+        "--totalVehicleTimesOneHourGapTable=toll.total_vehicle_time_one_hour_gap",
+        "--totalVehicleTimesDiagnosticOneHourGapTable=toll.total_vehicle_time_diagnostic_one_hour_gap",
         "--vehiclesWithExpiredRegistrationDailyTable=toll.vehicles_with_expired_registration_daily",
         "--vehiclesWithExpiredRegistrationDiagnosticDailyTable=toll.vehicles_with_expired_registration_diagnostic_daily"
       )
@@ -54,12 +54,12 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         ))
       }
       // calculate total vehicle times
-      .output(CustomIO[TotalVehicleTime.Record](TotalVehicleTimeOneHourGapTableIoId.id)) { results =>
+      .output(CustomIO[TotalVehicleTimes.Record](TotalVehicleTimesOneHourGapTableIoId.id)) { results =>
         results should containSingleValue(
-          anyTotalVehicleTimeRecord.copy(created_at = Instant.parse("2014-09-10T13:02:59.999Z"))
+          anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T13:02:59.999Z"))
         )
       }
-      .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticOneHourGapTableIoId.id)) {
+      .output(CustomIO[TotalVehicleTimesDiagnostic.Record](TotalVehicleTimesDiagnosticOneHourGapTableIoId.id)) {
         results =>
           results should beEmpty
       }

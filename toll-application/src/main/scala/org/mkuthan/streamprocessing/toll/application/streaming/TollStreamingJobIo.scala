@@ -6,8 +6,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -51,9 +51,9 @@ trait VehicleIo {
       : IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record] =
     IoIdentifier("vehicles-with-expired-registration-diagnostic-table-id")
 
-  val TotalVehicleTimeTableIoId: IoIdentifier[TotalVehicleTime.Record] =
-    IoIdentifier("total-vehicle-time-table-id")
+  val TotalVehicleTimesTableIoId: IoIdentifier[TotalVehicleTimes.Record] =
+    IoIdentifier("total-vehicle-times-table-id")
 
-  val TotalVehicleTimeDiagnosticTableIoId: IoIdentifier[TotalVehicleTimeDiagnostic.Record] =
-    IoIdentifier("total-vehicle-time-diagnostic-table-id")
+  val TotalVehicleTimesDiagnosticTableIoId: IoIdentifier[TotalVehicleTimesDiagnostic.Record] =
+    IoIdentifier("total-vehicle-times-diagnostic-table-id")
 }

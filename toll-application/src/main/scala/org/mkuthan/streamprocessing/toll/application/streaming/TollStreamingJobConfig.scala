@@ -13,8 +13,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -28,8 +28,8 @@ final case class TollStreamingJobConfig(
     vehicleRegistrationTable: BigQueryTable[VehicleRegistration.Record],
     vehicleRegistrationDlq: StorageBucket[VehicleRegistration.DeadLetterPayload],
     entryStatsTable: BigQueryTable[TollBoothStats.Record],
-    totalVehicleTimeTable: BigQueryTable[TotalVehicleTime.Record],
-    totalVehicleTimeDiagnosticTable: BigQueryTable[TotalVehicleTimeDiagnostic.Record],
+    totalVehicleTimesTable: BigQueryTable[TotalVehicleTimes.Record],
+    totalVehicleTimesDiagnosticTable: BigQueryTable[TotalVehicleTimesDiagnostic.Record],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Payload],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic.Record],
     diagnosticTable: BigQueryTable[IoDiagnostic.Record]
@@ -49,8 +49,8 @@ object TollStreamingJobConfig {
       vehicleRegistrationTable = BigQueryTable(args.required("vehicleRegistrationTable")),
       vehicleRegistrationDlq = StorageBucket(args.required("vehicleRegistrationDlq")),
       entryStatsTable = BigQueryTable(args.required("entryStatsTable")),
-      totalVehicleTimeTable = BigQueryTable(args.required("totalVehicleTimeTable")),
-      totalVehicleTimeDiagnosticTable = BigQueryTable(args.required("totalVehicleTimeDiagnosticTable")),
+      totalVehicleTimesTable = BigQueryTable(args.required("totalVehicleTimesTable")),
+      totalVehicleTimesDiagnosticTable = BigQueryTable(args.required("totalVehicleTimesDiagnosticTable")),
       vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
       vehiclesWithExpiredRegistrationDiagnosticTable =
         BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),

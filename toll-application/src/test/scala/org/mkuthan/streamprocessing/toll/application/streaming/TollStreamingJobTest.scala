@@ -17,8 +17,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -39,8 +39,8 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=vehicle_registration_dlq",
         "--entryStatsTable=toll.entry_stats",
-        "--totalVehicleTimeTable=toll.total_vehicle_time",
-        "--totalVehicleTimeDiagnosticTable=toll.total_vehicle_time_diagnostic",
+        "--totalVehicleTimesTable=toll.total_vehicle_time",
+        "--totalVehicleTimesDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
         "--diagnosticTable=toll.io_diagnostic"
@@ -93,12 +93,12 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         )
       }
       // calculate total vehicle times
-      .output(CustomIO[TotalVehicleTime.Record](TotalVehicleTimeTableIoId.id)) { results =>
+      .output(CustomIO[TotalVehicleTimes.Record](TotalVehicleTimesTableIoId.id)) { results =>
         results should containSingleValue(
-          anyTotalVehicleTimeRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
+          anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
         )
       }
-      .output(CustomIO[TotalVehicleTimeDiagnostic.Record](TotalVehicleTimeDiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[TotalVehicleTimesDiagnostic.Record](TotalVehicleTimesDiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       // calculate vehicles with expired registrations

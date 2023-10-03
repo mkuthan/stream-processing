@@ -55,7 +55,7 @@ object TollBoothStats {
       .map(fromBoothEntry)
       .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
 
-  def encode(input: SCollection[TollBoothStats]): SCollection[Record] =
+  def encodeRecord(input: SCollection[TollBoothStats]): SCollection[Record] =
     input.mapWithTimestamp { case (r, t) =>
       Record(
         created_at = t,

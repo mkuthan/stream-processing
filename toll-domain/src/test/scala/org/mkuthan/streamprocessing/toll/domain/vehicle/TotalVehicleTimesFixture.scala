@@ -6,9 +6,9 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-trait TotalVehicleTimeFixture {
+trait TotalVehicleTimesFixture {
 
-  final val anyTotalVehicleTime: TotalVehicleTime = TotalVehicleTime(
+  final val anyTotalVehicleTimes: TotalVehicleTimes = TotalVehicleTimes(
     tollBoothId = TollBoothId("1"),
     licensePlate = LicensePlate("JNB 7001"),
     entryTime = Instant.parse("2014-09-10T12:01:00.000Z"),
@@ -16,12 +16,12 @@ trait TotalVehicleTimeFixture {
     duration = Duration.standardSeconds(120)
   )
 
-  final val anyTotalVehicleTimeRecord: TotalVehicleTime.Record = TotalVehicleTime.Record(
+  final val anyTotalVehicleTimesRecord: TotalVehicleTimes.Record = TotalVehicleTimes.Record(
     created_at = Instant.EPOCH,
-    toll_booth_id = anyTotalVehicleTime.tollBoothId.id,
-    license_plate = anyTotalVehicleTime.licensePlate.number,
-    entry_time = anyTotalVehicleTime.entryTime,
-    exit_time = anyTotalVehicleTime.exitTime,
-    duration_seconds = anyTotalVehicleTime.duration.getStandardSeconds
+    toll_booth_id = anyTotalVehicleTimes.tollBoothId.id,
+    license_plate = anyTotalVehicleTimes.licensePlate.number,
+    entry_time = anyTotalVehicleTimes.entryTime,
+    exit_time = anyTotalVehicleTimes.exitTime,
+    duration_seconds = anyTotalVehicleTimes.duration.getStandardSeconds
   )
 }

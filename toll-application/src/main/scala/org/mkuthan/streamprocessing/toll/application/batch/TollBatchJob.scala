@@ -19,8 +19,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -44,9 +44,9 @@ object TollBatchJob extends TollBatchJobIo {
 
     val config = TollBatchJobConfig.parse(args)
 
-    val entries = readEntries(sc, config)
-    val exits = readExits(sc, config)
-    val vehicleRegistrations = readVehicleRegistrations(sc, config)
+    val entries = getEntries(sc, config)
+    val exits = getExits(sc, config)
+    val vehicleRegistrations = getVehicleRegistrations(sc, config)
 
     calculateTollBoothStats(config, entries)
     calculateTotalVehicleTimes(config, entries, exits)
@@ -55,7 +55,7 @@ object TollBatchJob extends TollBatchJobIo {
     val _ = sc.run()
   }
 
-  private def readEntries(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothEntry] = {
+  private def getEntries(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothEntry] = {
     val entryRecords = sc.readFromBigQuery(
       EntryTableIoId,
       config.entryTable,
@@ -66,7 +66,7 @@ object TollBatchJob extends TollBatchJobIo {
     TollBoothEntry.decodeRecord(entryRecords)
   }
 
-  private def readExits(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothExit] = {
+  private def getExits(sc: ScioContext, config: TollBatchJobConfig): SCollection[TollBoothExit] = {
     val exitRecords = sc.readFromBigQuery(
       ExitTableIoId,
       config.exitTable,
@@ -77,7 +77,7 @@ object TollBatchJob extends TollBatchJobIo {
     TollBoothExit.decodeRecord(exitRecords)
   }
 
-  private def readVehicleRegistrations(
+  private def getVehicleRegistrations(
       sc: ScioContext,
       config: TollBatchJobConfig
   ): SCollection[VehicleRegistration] = {
@@ -99,12 +99,12 @@ object TollBatchJob extends TollBatchJobIo {
   ): Unit = {
     val tollBoothStatsHourly = TollBoothStats.calculateInFixedWindow(entries, OneHour, DefaultWindowOptions)
     TollBoothStats
-      .encode(tollBoothStatsHourly)
+      .encodeRecord(tollBoothStatsHourly)
       .writeBoundedToBigQuery(EntryStatsHourlyTableIoId, config.entryStatsHourlyPartition)
 
     val tollBoothStatsDaily = TollBoothStats.calculateInFixedWindow(entries, OneDay, DefaultWindowOptions)
     TollBoothStats
-      .encode(tollBoothStatsDaily)
+      .encodeRecord(tollBoothStatsDaily)
       .writeBoundedToBigQuery(EntryStatsDailyTableIoId, config.entryStatsDailyPartition)
 
   }
@@ -115,17 +115,17 @@ object TollBatchJob extends TollBatchJobIo {
       exits: SCollection[TollBoothExit]
   ): Unit = {
     val (totalVehicleTimes, totalVehicleTimesDiagnostic) =
-      TotalVehicleTime.calculateInSessionWindow(entries, exits, OneHour, DefaultWindowOptions)
+      TotalVehicleTimes.calculateInSessionWindow(entries, exits, OneHour, DefaultWindowOptions)
 
-    TotalVehicleTime
+    TotalVehicleTimes
       .encodeRecord(totalVehicleTimes)
-      .writeBoundedToBigQuery(TotalVehicleTimeOneHourGapTableIoId, config.totalVehicleTimeOneHourGapPartition)
+      .writeBoundedToBigQuery(TotalVehicleTimesOneHourGapTableIoId, config.totalVehicleTimesOneHourGapPartition)
 
-    TotalVehicleTimeDiagnostic
+    TotalVehicleTimesDiagnostic
       .aggregateAndEncode(totalVehicleTimesDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
-        TotalVehicleTimeDiagnosticOneHourGapTableIoId,
-        config.totalVehicleTimeDiagnosticOneHourGapTable
+        TotalVehicleTimesDiagnosticOneHourGapTableIoId,
+        config.totalVehicleTimesDiagnosticOneHourGapTable
       )
   }
 

@@ -10,8 +10,8 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTime
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimeDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
@@ -26,8 +26,8 @@ final case class TollBatchJobConfig(
     vehiclesWithExpiredRegistrationDiagnosticDailyPartition: BigQueryPartition[
       VehiclesWithExpiredRegistrationDiagnostic.Record
     ],
-    totalVehicleTimeOneHourGapPartition: BigQueryPartition[TotalVehicleTime.Record],
-    totalVehicleTimeDiagnosticOneHourGapTable: BigQueryPartition[TotalVehicleTimeDiagnostic.Record]
+    totalVehicleTimesOneHourGapPartition: BigQueryPartition[TotalVehicleTimes.Record],
+    totalVehicleTimesDiagnosticOneHourGapTable: BigQueryPartition[TotalVehicleTimesDiagnostic.Record]
 )
 
 object TollBatchJobConfig {
@@ -44,10 +44,10 @@ object TollBatchJobConfig {
         BigQueryPartition.daily(args.required("vehiclesWithExpiredRegistrationDailyTable"), effectiveDate),
       vehiclesWithExpiredRegistrationDiagnosticDailyPartition =
         BigQueryPartition.daily(args.required("vehiclesWithExpiredRegistrationDiagnosticDailyTable"), effectiveDate),
-      totalVehicleTimeOneHourGapPartition =
-        BigQueryPartition.daily(args.required("totalVehicleTimeOneHourGapTable"), effectiveDate),
-      totalVehicleTimeDiagnosticOneHourGapTable =
-        BigQueryPartition.daily(args.required("totalVehicleTimeDiagnosticOneHourGapTable"), effectiveDate)
+      totalVehicleTimesOneHourGapPartition =
+        BigQueryPartition.daily(args.required("totalVehicleTimesOneHourGapTable"), effectiveDate),
+      totalVehicleTimesDiagnosticOneHourGapTable =
+        BigQueryPartition.daily(args.required("totalVehicleTimesDiagnosticOneHourGapTable"), effectiveDate)
     )
   }
 }

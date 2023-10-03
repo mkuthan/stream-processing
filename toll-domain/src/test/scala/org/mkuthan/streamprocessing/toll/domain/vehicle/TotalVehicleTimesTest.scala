@@ -15,21 +15,21 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
+class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
     with TestScioContext
     with TollBoothEntryFixture
     with TollBoothExitFixture
-    with TotalVehicleTimeFixture
-    with TotalVehicleTimeDiagnosticFixture {
+    with TotalVehicleTimesFixture
+    with TotalVehicleTimesDiagnosticFixture {
 
-  import TotalVehicleTime._
+  import TotalVehicleTimes._
 
   private val FiveMinutes = Duration.standardMinutes(5)
   private val DefaultWindowOptions = WindowOptions()
 
-  behavior of "TotalVehicleTime"
+  behavior of "TotalVehicleTimes"
 
-  it should "calculate TotalVehicleTime using session window" in runWithScioContext { sc =>
+  it should "calculate TotalVehicleTimes using session window" in runWithScioContext { sc =>
     val tollBoothId = TollBoothId("1")
     val licensePlate = LicensePlate("AB 123")
     val entryTime = Instant.parse("2014-09-10T12:03:01Z")
@@ -57,7 +57,7 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
       containSingleValueAtTime(
         "2014-09-10T12:09:02.999Z",
-        anyTotalVehicleTime.copy(
+        anyTotalVehicleTimes.copy(
           tollBoothId = tollBoothId,
           licensePlate = licensePlate,
           entryTime = entryTime,
@@ -100,18 +100,18 @@ class TotalVehicleTimeTest extends AnyFlatSpec with Matchers
     diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
       containSingleValueAtTime(
         "2014-09-10T12:08:00.999Z",
-        totalVehicleTimeWithMissingTollBoothExitDiagnostic
+        totalVehicleTimesWithMissingTollBoothExitDiagnostic
       )
     }
   }
 
   it should "encode into record" in runWithScioContext { sc =>
     val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
-    val inputs = boundedTestCollectionOf[TotalVehicleTime]
-      .addElementsAtTime(recordTimestamp, anyTotalVehicleTime)
+    val inputs = boundedTestCollectionOf[TotalVehicleTimes]
+      .addElementsAtTime(recordTimestamp, anyTotalVehicleTimes)
       .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
-    results should containSingleValue(anyTotalVehicleTimeRecord.copy(created_at = recordTimestamp))
+    results should containSingleValue(anyTotalVehicleTimesRecord.copy(created_at = recordTimestamp))
   }
 }

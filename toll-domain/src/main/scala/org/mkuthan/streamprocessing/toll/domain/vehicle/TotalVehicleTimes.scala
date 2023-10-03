@@ -13,7 +13,7 @@ import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
-final case class TotalVehicleTime(
+final case class TotalVehicleTimes(
     licensePlate: LicensePlate,
     tollBoothId: TollBoothId,
     entryTime: Instant,
@@ -21,7 +21,7 @@ final case class TotalVehicleTime(
     duration: Duration
 )
 
-object TotalVehicleTime {
+object TotalVehicleTimes {
 
   @BigQueryType.toTable
   final case class Record(
@@ -38,7 +38,7 @@ object TotalVehicleTime {
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration,
       windowOptions: WindowOptions
-  ): (SCollection[TotalVehicleTime], SCollection[TotalVehicleTimeDiagnostic]) = {
+  ): (SCollection[TotalVehicleTimes], SCollection[TotalVehicleTimesDiagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
@@ -51,15 +51,15 @@ object TotalVehicleTime {
       .values
       .map {
         case (boothEntry, Some(boothExit)) =>
-          Right(toTotalVehicleTime(boothEntry, boothExit))
+          Right(toTotalVehicleTimes(boothEntry, boothExit))
         case (boothEntry, None) =>
-          Left(TotalVehicleTimeDiagnostic(boothEntry.id, TotalVehicleTimeDiagnostic.MissingTollBoothExit))
+          Left(TotalVehicleTimesDiagnostic(boothEntry.id, TotalVehicleTimesDiagnostic.MissingTollBoothExit))
       }
 
     results.unzip
   }
 
-  def encodeRecord(input: SCollection[TotalVehicleTime]): SCollection[Record] =
+  def encodeRecord(input: SCollection[TotalVehicleTimes]): SCollection[Record] =
     input.mapWithTimestamp { case (r, t) =>
       Record(
         created_at = t,
@@ -71,9 +71,9 @@ object TotalVehicleTime {
       )
     }
 
-  private def toTotalVehicleTime(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTime = {
+  private def toTotalVehicleTimes(boothEntry: TollBoothEntry, boothExit: TollBoothExit): TotalVehicleTimes = {
     val diff = boothExit.exitTime.getMillis - boothEntry.entryTime.getMillis
-    TotalVehicleTime(
+    TotalVehicleTimes(
       licensePlate = boothEntry.licensePlate,
       tollBoothId = boothEntry.id,
       entryTime = boothEntry.entryTime,

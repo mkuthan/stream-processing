@@ -10,16 +10,16 @@ import org.scalatest.matchers.should.Matchers
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-class TotalVehicleTimeDiagnosticTest extends AnyFlatSpec with Matchers
+class TotalVehicleTimesDiagnosticTest extends AnyFlatSpec with Matchers
     with TestScioContext
-    with TotalVehicleTimeDiagnosticFixture {
+    with TotalVehicleTimesDiagnosticFixture {
 
-  import TotalVehicleTimeDiagnostic._
+  import TotalVehicleTimesDiagnostic._
 
   private val FiveMinutes = Duration.standardMinutes(5)
   private val DefaultWindowOptions = WindowOptions()
 
-  behavior of "TotalVehicleTimeDiagnostic"
+  behavior of "TotalVehicleTimesDiagnostic"
 
   it should "aggregate and encode into record" in runWithScioContext { sc =>
     val tollBooth1 = TollBoothId("1")
@@ -27,12 +27,12 @@ class TotalVehicleTimeDiagnosticTest extends AnyFlatSpec with Matchers
     val reason1 = "reason 1"
     val reason2 = "reason 2"
 
-    val diagnostic1 = anyTotalVehicleTimeDiagnostic
+    val diagnostic1 = anyTotalVehicleTimesDiagnostic
       .copy(tollBoothId = tollBooth1, reason = reason1, count = 1)
-    val diagnostic2 = anyTotalVehicleTimeDiagnostic
+    val diagnostic2 = anyTotalVehicleTimesDiagnostic
       .copy(tollBoothId = tollBooth2, reason = reason2, count = 2)
 
-    val input = boundedTestCollectionOf[TotalVehicleTimeDiagnostic]
+    val input = boundedTestCollectionOf[TotalVehicleTimesDiagnostic]
       .addElementsAtTime("2014-09-10T12:00:00Z", diagnostic1, diagnostic2)
       .addElementsAtTime("2014-09-10T12:01:00Z", diagnostic1, diagnostic2)
       .advanceWatermarkToInfinity()
@@ -41,7 +41,7 @@ class TotalVehicleTimeDiagnosticTest extends AnyFlatSpec with Matchers
       aggregateAndEncode(sc.testBounded(input), FiveMinutes, DefaultWindowOptions)
 
     val endOfWindow = "2014-09-10T12:04:59.999Z"
-    val diagnosticRecord = anyTotalVehicleTimeDiagnosticRecord
+    val diagnosticRecord = anyTotalVehicleTimesDiagnosticRecord
       .copy(created_at = Instant.parse(endOfWindow))
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {

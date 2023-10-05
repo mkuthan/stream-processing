@@ -40,7 +40,7 @@ object TotalVehicleTimesDiagnostic {
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
-  def aggregateAndEncode(
+  def aggregateAndEncodeRecord(
       input: SCollection[TotalVehicleTimesDiagnostic],
       windowDuration: Duration,
       windowOptions: WindowOptions

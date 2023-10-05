@@ -192,7 +192,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToBigQuery(TotalVehicleTimesTableIoId, config.totalVehicleTimesTable)
 
     val totalVehicleTimesDiagnosticDlq = TotalVehicleTimesDiagnostic
-      .aggregateAndEncode(totalVehicleTimesDiagnostic, TenMinutes, DefaultWindowOptions)
+      .aggregateAndEncodeRecord(totalVehicleTimesDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(TotalVehicleTimesDiagnosticTableIoId, config.totalVehicleTimesDiagnosticTable)
 
     IoDiagnostic.union(
@@ -220,7 +220,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .publishJsonToPubsub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
     val vehiclesWithExpiredRegistrationsDiagnosticDlq = VehiclesWithExpiredRegistrationDiagnostic
-      .aggregateAndEncode(vehiclesWithExpiredRegistrationDiagnostic, TenMinutes, DefaultWindowOptions)
+      .aggregateAndEncodeRecord(vehiclesWithExpiredRegistrationDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticTable

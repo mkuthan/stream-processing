@@ -17,19 +17,18 @@ import org.mkuthan.streamprocessing.shared.scio.SumByKey
 private[syntax] trait SCollectionSyntax {
 
   implicit class SCollectionOps[T: Coder](private val self: SCollection[T]) {
-    def unionInGlobalWindow(others: SCollection[T]*): SCollection[T] = {
-      val commonWindowOptions = WindowOptions(
-        trigger = Repeatedly.forever(AfterPane.elementCountAtLeast(1)),
-        accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
-      )
+    private val GlobalWindowOptions = WindowOptions(
+      trigger = Repeatedly.forever(AfterPane.elementCountAtLeast(1)),
+      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES
+    )
 
+    def unionInGlobalWindow(others: SCollection[T]*): SCollection[T] =
       self.transform { in =>
-        val inputWithGlobalWindow = in.withGlobalWindow(commonWindowOptions)
-        val othersWithGlobalWindow = others.map(_.withGlobalWindow(commonWindowOptions))
+        val inputWithGlobalWindow = in.withGlobalWindow(GlobalWindowOptions)
+        val othersWithGlobalWindow = others.map(_.withGlobalWindow(GlobalWindowOptions))
 
         SCollection.unionAll(inputWithGlobalWindow +: othersWithGlobalWindow)
       }
-    }
 
     def mapWithTimestamp[U: Coder](mapFn: (T, Instant) => U): SCollection[U] =
       self.transform { in =>

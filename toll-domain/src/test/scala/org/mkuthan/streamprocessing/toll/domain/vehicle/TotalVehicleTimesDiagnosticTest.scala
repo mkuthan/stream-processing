@@ -38,7 +38,7 @@ class TotalVehicleTimesDiagnosticTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results =
-      aggregateAndEncode(sc.testBounded(input), FiveMinutes, DefaultWindowOptions)
+      aggregateAndEncodeRecord(sc.testBounded(input), FiveMinutes, DefaultWindowOptions)
 
     val endOfWindow = "2014-09-10T12:04:59.999Z"
     val diagnosticRecord = anyTotalVehicleTimesDiagnosticRecord

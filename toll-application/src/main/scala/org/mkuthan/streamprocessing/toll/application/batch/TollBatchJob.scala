@@ -122,7 +122,7 @@ object TollBatchJob extends TollBatchJobIo {
       .writeBoundedToBigQuery(TotalVehicleTimesOneHourGapTableIoId, config.totalVehicleTimesOneHourGapPartition)
 
     TotalVehicleTimesDiagnostic
-      .aggregateAndEncode(totalVehicleTimesDiagnostic, OneDay, DefaultWindowOptions)
+      .aggregateAndEncodeRecord(totalVehicleTimesDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
         TotalVehicleTimesDiagnosticOneHourGapTableIoId,
         config.totalVehicleTimesDiagnosticOneHourGapTable
@@ -150,7 +150,7 @@ object TollBatchJob extends TollBatchJobIo {
       )
 
     VehiclesWithExpiredRegistrationDiagnostic
-      .aggregateAndEncode(vehiclesWithExpiredRegistrationDiagnostic, OneDay, DefaultWindowOptions)
+      .aggregateAndEncodeRecord(vehiclesWithExpiredRegistrationDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId,
         config.vehiclesWithExpiredRegistrationDiagnosticDailyPartition

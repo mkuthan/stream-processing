@@ -80,7 +80,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
   implicit class BigQuerySCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[BigQueryDeadLetter[T]]
   ) {
-    def toDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
+    def toIoDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
       self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
   }
 

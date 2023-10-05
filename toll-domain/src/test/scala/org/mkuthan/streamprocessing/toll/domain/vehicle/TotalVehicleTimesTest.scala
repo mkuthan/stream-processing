@@ -106,12 +106,12 @@ class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
   }
 
   it should "encode into record" in runWithScioContext { sc =>
-    val recordTimestamp = Instant.parse("2014-09-10T12:08:00.999Z")
+    val createdAt = Instant.parse("2014-09-10T12:08:00.999Z")
     val inputs = boundedTestCollectionOf[TotalVehicleTimes]
-      .addElementsAtTime(recordTimestamp, anyTotalVehicleTimes)
+      .addElementsAtTime(createdAt, anyTotalVehicleTimes)
       .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
-    results should containSingleValue(anyTotalVehicleTimesRecord.copy(created_at = recordTimestamp))
+    results should containSingleValue(anyTotalVehicleTimesRecord.copy(created_at = createdAt))
   }
 }

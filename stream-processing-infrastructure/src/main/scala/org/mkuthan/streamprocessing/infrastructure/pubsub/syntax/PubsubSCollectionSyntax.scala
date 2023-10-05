@@ -50,7 +50,7 @@ private[syntax] trait PubsubSCollectionSyntax {
   implicit class SCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[PubsubDeadLetter[T]]
   ) {
-    def toDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
+    def toIoDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
       self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
   }
 }

@@ -39,7 +39,7 @@ object IoDiagnostic {
   def union(first: SCollection[IoDiagnostic], others: SCollection[IoDiagnostic]*): SCollection[IoDiagnostic] =
     first.unionInGlobalWindow(others: _*)
 
-  def aggregateAndEncode(
+  def aggregateAndEncodeRecord(
       input: SCollection[IoDiagnostic],
       windowDuration: Duration,
       windowOptions: WindowOptions

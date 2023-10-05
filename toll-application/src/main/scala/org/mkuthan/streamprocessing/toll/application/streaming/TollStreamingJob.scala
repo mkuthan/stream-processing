@@ -80,7 +80,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     )
 
     val _ = IoDiagnostic
-      .aggregateAndEncode(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
+      .aggregateAndEncodeRecord(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
       .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
 
     val _ = sc.run()
@@ -102,7 +102,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
-    val ioDiagnostic = entryMessagesDlq.toDiagnostic(EntrySubscriptionIoId)
+    val ioDiagnostic = entryMessagesDlq.toIoDiagnostic(EntrySubscriptionIoId)
 
     (entries, ioDiagnostic)
   }
@@ -123,7 +123,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
       .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
-    val ioDiagnostic = exitMessagesDlq.toDiagnostic(ExitSubscriptionIoId)
+    val ioDiagnostic = exitMessagesDlq.toIoDiagnostic(ExitSubscriptionIoId)
 
     (exits, ioDiagnostic)
   }
@@ -162,7 +162,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     val vehicleRegistrations = VehicleRegistration
       .unionHistoryWithUpdates(vehicleRegistrationsHistory, vehicleRegistrationUpdates)
 
-    val ioDiagnostic = vehicleRegistrationMessagesDlq.toDiagnostic(VehicleRegistrationSubscriptionIoId)
+    val ioDiagnostic = vehicleRegistrationMessagesDlq.toIoDiagnostic(VehicleRegistrationSubscriptionIoId)
 
     (vehicleRegistrations, ioDiagnostic)
   }
@@ -176,7 +176,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeRecord(tollBoothStats)
       .writeUnboundedToBigQuery(EntryStatsTableIoId, config.entryStatsTable)
 
-    tollBoothStatsDlq.toDiagnostic(EntryStatsTableIoId)
+    tollBoothStatsDlq.toIoDiagnostic(EntryStatsTableIoId)
   }
 
   private def calculateTotalVehicleTimes(
@@ -196,8 +196,8 @@ object TollStreamingJob extends TollStreamingJobIo {
       .writeUnboundedToBigQuery(TotalVehicleTimesDiagnosticTableIoId, config.totalVehicleTimesDiagnosticTable)
 
     IoDiagnostic.union(
-      totalVehicleTimesDlq.toDiagnostic(TotalVehicleTimesTableIoId),
-      totalVehicleTimesDiagnosticDlq.toDiagnostic(TotalVehicleTimesDiagnosticTableIoId)
+      totalVehicleTimesDlq.toIoDiagnostic(TotalVehicleTimesTableIoId),
+      totalVehicleTimesDiagnosticDlq.toIoDiagnostic(TotalVehicleTimesDiagnosticTableIoId)
     )
   }
 
@@ -226,6 +226,6 @@ object TollStreamingJob extends TollStreamingJobIo {
         config.vehiclesWithExpiredRegistrationDiagnosticTable
       )
 
-    vehiclesWithExpiredRegistrationsDiagnosticDlq.toDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
+    vehiclesWithExpiredRegistrationsDiagnosticDlq.toIoDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
   }
 }

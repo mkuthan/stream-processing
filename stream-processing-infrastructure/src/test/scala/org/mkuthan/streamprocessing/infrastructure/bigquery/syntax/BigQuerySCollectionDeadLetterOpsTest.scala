@@ -15,7 +15,7 @@ class BigQuerySCollectionDeadLetterOpsTest extends AnyFlatSpec
     with TestScioContext
     with IntegrationTestFixtures {
 
-  "BigQuery SCollection DeadLetter syntax" should "map unbounded dead letter into diagnostic" in runWithScioContext {
+  "BigQuery SCollection DeadLetter syntax" should "map unbounded dead letter into IO diagnostic" in runWithScioContext {
     sc =>
       val id = IoIdentifier[SampleClass]("any id")
 
@@ -26,7 +26,7 @@ class BigQuerySCollectionDeadLetterOpsTest extends AnyFlatSpec
         .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
         .advanceWatermarkToInfinity()
 
-      val results = sc.testUnbounded(deadLetters).toDiagnostic(id)
+      val results = sc.testUnbounded(deadLetters).toIoDiagnostic(id)
 
       results should containInAnyOrder(Seq(
         IoDiagnostic(id.id, "error 1"),

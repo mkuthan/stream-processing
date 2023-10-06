@@ -1,7 +1,7 @@
 package org.mkuthan.streamprocessing.toll.application.streaming
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -14,7 +14,7 @@ import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegis
 trait TollStreamingJobIo extends DiagnosticIo with RegistrationIo with TollBoothIo with VehicleIo
 
 trait DiagnosticIo {
-  val DiagnosticTableIoId: IoIdentifier[IoDiagnostic.Record] =
+  val DiagnosticTableIoId: IoIdentifier[Diagnostic.Record] =
     IoIdentifier("diagnostic-table-id")
 }
 

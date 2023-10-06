@@ -7,9 +7,9 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
@@ -116,7 +116,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         results =>
           results should beEmpty
       }
-      .output(CustomIO[IoDiagnostic.Record](DiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[Diagnostic.Record](DiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       .run()

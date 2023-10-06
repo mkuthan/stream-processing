@@ -5,10 +5,10 @@ import com.spotify.scio.Args
 import org.joda.time.LocalDate
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
 import org.mkuthan.streamprocessing.infrastructure.storage.StorageBucket
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
@@ -32,7 +32,7 @@ final case class TollStreamingJobConfig(
     totalVehicleTimesDiagnosticTable: BigQueryTable[TotalVehicleTimesDiagnostic.Record],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Payload],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[VehiclesWithExpiredRegistrationDiagnostic.Record],
-    diagnosticTable: BigQueryTable[IoDiagnostic.Record]
+    diagnosticTable: BigQueryTable[Diagnostic.Record]
 )
 
 object TollStreamingJobConfig {

@@ -11,6 +11,7 @@ import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
+// TODO: unify VehiclesWithExpiredRegistrationDiagnostic and TotalVehicleTimesDiagnostic
 final case class VehiclesWithExpiredRegistrationDiagnostic(
     tollBoothId: TollBoothId,
     reason: String,

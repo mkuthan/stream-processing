@@ -8,12 +8,12 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO
 import com.spotify.scio.coders.Coder
 import com.spotify.scio.values.SCollection
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonWriteConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubTopic
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 
 private[syntax] trait PubsubSCollectionSyntax {
@@ -50,7 +50,7 @@ private[syntax] trait PubsubSCollectionSyntax {
   implicit class SCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[PubsubDeadLetter[T]]
   ) {
-    def toIoDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
-      self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
+    def toDiagnostic(id: IoIdentifier[T]): SCollection[Diagnostic] =
+      self.map(deadLetter => Diagnostic(id.id, deadLetter.error))
   }
 }

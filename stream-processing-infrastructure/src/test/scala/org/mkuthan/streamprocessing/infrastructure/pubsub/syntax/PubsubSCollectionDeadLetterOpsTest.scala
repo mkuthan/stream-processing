@@ -3,11 +3,11 @@ package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.test.scio._
 
 class PubsubSCollectionDeadLetterOpsTest extends AnyFlatSpec
@@ -15,7 +15,7 @@ class PubsubSCollectionDeadLetterOpsTest extends AnyFlatSpec
     with TestScioContext
     with IntegrationTestFixtures {
 
-  "Pubsub SCollection DeadLetter syntax" should "map unbounded dead letter into IO diagnostic" in runWithScioContext {
+  "Pubsub SCollection DeadLetter syntax" should "map unbounded dead letter into diagnostic" in runWithScioContext {
     sc =>
       val id = IoIdentifier[SampleClass]("any id")
 
@@ -26,11 +26,11 @@ class PubsubSCollectionDeadLetterOpsTest extends AnyFlatSpec
         .addElementsAtWatermarkTime(deadLetter1, deadLetter2)
         .advanceWatermarkToInfinity()
 
-      val results = sc.testUnbounded(deadLetters).toIoDiagnostic(id)
+      val results = sc.testUnbounded(deadLetters).toDiagnostic(id)
 
       results should containInAnyOrder(Seq(
-        IoDiagnostic(id.id, "error 1"),
-        IoDiagnostic(id.id, "error 2")
+        Diagnostic(id.id, "error 1"),
+        Diagnostic(id.id, "error 2")
       ))
   }
 }

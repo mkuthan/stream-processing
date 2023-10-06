@@ -1,14 +1,13 @@
 package org.mkuthan.streamprocessing.toll.application.batch
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 trait TollBatchJobIo extends TollBoothIo with RegistrationIo with VehicleIo
 
@@ -35,13 +34,12 @@ trait VehicleIo {
   val VehiclesWithExpiredRegistrationDailyTableIoId: IoIdentifier[VehiclesWithExpiredRegistration.Record] =
     IoIdentifier("vehicles-with-expired-registration-daily-table-id")
 
-  val VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId
-      : IoIdentifier[VehiclesWithExpiredRegistrationDiagnostic.Record] =
+  val VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId: IoIdentifier[TollBoothDiagnostic.Record] =
     IoIdentifier("vehicles-with-expired-registration-diagnostic-daily-table-id")
 
   val TotalVehicleTimesOneHourGapTableIoId: IoIdentifier[TotalVehicleTimes.Record] =
     IoIdentifier("total-vehicle-times-one-hour-gap-table-id")
 
-  val TotalVehicleTimesDiagnosticOneHourGapTableIoId: IoIdentifier[TotalVehicleTimesDiagnostic.Record] =
+  val TotalVehicleTimesDiagnosticOneHourGapTableIoId: IoIdentifier[TollBoothDiagnostic.Record] =
     IoIdentifier("total-vehicle-times-diagnostic-one-hour-gap-table-id")
 }

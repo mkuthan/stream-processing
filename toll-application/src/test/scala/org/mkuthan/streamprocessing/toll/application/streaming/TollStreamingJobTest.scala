@@ -13,14 +13,13 @@ import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
@@ -98,7 +97,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
         )
       }
-      .output(CustomIO[TotalVehicleTimesDiagnostic.Record](TotalVehicleTimesDiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[TollBoothDiagnostic.Record](TotalVehicleTimesDiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       // calculate vehicles with expired registrations
@@ -110,7 +109,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
           ))
       }
-      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Record](
+      .output(CustomIO[TollBoothDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>

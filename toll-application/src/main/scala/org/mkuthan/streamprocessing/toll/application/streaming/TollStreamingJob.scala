@@ -21,14 +21,13 @@ import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonReadConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.NamedTimestampAttribute
 import org.mkuthan.streamprocessing.shared._
 import org.mkuthan.streamprocessing.shared.common.Diagnostic
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 object TollStreamingJob extends TollStreamingJobIo {
 
@@ -191,7 +190,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeRecord(totalVehicleTimes)
       .writeUnboundedToBigQuery(TotalVehicleTimesTableIoId, config.totalVehicleTimesTable)
 
-    val totalVehicleTimesDiagnosticDlq = TotalVehicleTimesDiagnostic
+    val totalVehicleTimesDiagnosticDlq = TollBoothDiagnostic
       .aggregateAndEncodeRecord(totalVehicleTimesDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(TotalVehicleTimesDiagnosticTableIoId, config.totalVehicleTimesDiagnosticTable)
 
@@ -220,7 +219,7 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeMessage(vehiclesWithExpiredRegistration)
       .publishJsonToPubsub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
-    val vehiclesWithExpiredRegistrationsDiagnosticDlq = VehiclesWithExpiredRegistrationDiagnostic
+    val vehiclesWithExpiredRegistrationsDiagnosticDlq = TollBoothDiagnostic
       .aggregateAndEncodeRecord(vehiclesWithExpiredRegistrationDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(
         VehiclesWithExpiredRegistrationDiagnosticTableIoId,

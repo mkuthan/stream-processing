@@ -100,7 +100,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     val (entries, entriesDlq) = TollBoothEntry.decodeMessage(entryMessages)
     entriesDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
-      .writeUnboundedToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
+      .writeToStorageAsJson(EntryDlqBucketIoId, config.entryDlq)
 
     val ioDiagnostic = entryMessagesDlq.toIoDiagnostic(EntrySubscriptionIoId)
 
@@ -121,7 +121,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     val (exits, existsDlq) = TollBoothExit.decodeMessage(exitMessages)
     existsDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
-      .writeUnboundedToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
+      .writeToStorageAsJson(ExitDlqBucketIoId, config.exitDlq)
 
     val ioDiagnostic = exitMessagesDlq.toIoDiagnostic(ExitSubscriptionIoId)
 
@@ -144,7 +144,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     vehicleRegistrationUpdatesDlq
       .withFixedWindows(duration = TenMinutes, options = DeadLetterWindowOptions)
-      .writeUnboundedToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
+      .writeToStorageAsJson(VehicleRegistrationDlqBucketIoId, config.vehicleRegistrationDlq)
 
     val partitionDate = config.effectiveDate.minusDays(1)
     val vehicleRegistrationRecords =

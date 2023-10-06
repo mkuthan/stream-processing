@@ -18,7 +18,7 @@ private[syntax] trait StorageSCollectionSyntax {
 
     import com.spotify.scio.values.BetterSCollection._
 
-    def writeUnboundedToStorageAsJson(
+    def writeToStorageAsJson(
         id: IoIdentifier[T],
         bucket: StorageBucket[T],
         storageConfiguration: StorageConfiguration = StorageConfiguration()

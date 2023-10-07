@@ -35,14 +35,14 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
         "--exitDlq=exit_dlq",
         "--vehicleRegistrationSubscription=projects/any-id/subscriptions/vehicle-registration-subscription",
-        "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=vehicle_registration_dlq",
+        "--vehicleRegistrationTable=toll.vehicle_registration",
         "--entryStatsTable=toll.entry_stats",
         "--totalVehicleTimesTable=toll.total_vehicle_time",
         "--totalVehicleTimesDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
-        "--diagnosticTable=toll.io_diagnostic"
+        "--ioDiagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubResult[TollBoothEntry.Payload]](
@@ -115,7 +115,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         results =>
           results should beEmpty
       }
-      .output(CustomIO[Diagnostic.Record](DiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[Diagnostic.Record](IoDiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       .run()

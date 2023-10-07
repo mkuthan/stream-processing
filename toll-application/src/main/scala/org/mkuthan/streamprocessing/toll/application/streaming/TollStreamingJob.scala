@@ -80,7 +80,7 @@ object TollStreamingJob extends TollStreamingJobIo {
 
     val _ = Diagnostic
       .aggregateAndEncodeRecord(ioDiagnostics, windowDuration = TenMinutes, windowOptions = DefaultWindowOptions)
-      .writeUnboundedToBigQuery(DiagnosticTableIoId, config.diagnosticTable)
+      .writeUnboundedToBigQuery(IoDiagnosticTableIoId, config.ioDiagnosticTable)
 
     val _ = sc.run()
   }

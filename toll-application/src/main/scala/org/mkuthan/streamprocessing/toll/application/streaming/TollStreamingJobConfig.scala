@@ -31,7 +31,7 @@ final case class TollStreamingJobConfig(
     totalVehicleTimesDiagnosticTable: BigQueryTable[TollBoothDiagnostic.Record],
     vehiclesWithExpiredRegistrationTopic: PubsubTopic[VehiclesWithExpiredRegistration.Payload],
     vehiclesWithExpiredRegistrationDiagnosticTable: BigQueryTable[TollBoothDiagnostic.Record],
-    diagnosticTable: BigQueryTable[Diagnostic.Record]
+    ioDiagnosticTable: BigQueryTable[Diagnostic.Record]
 )
 
 object TollStreamingJobConfig {
@@ -53,7 +53,7 @@ object TollStreamingJobConfig {
       vehiclesWithExpiredRegistrationTopic = PubsubTopic(args.required("vehiclesWithExpiredRegistrationTopic")),
       vehiclesWithExpiredRegistrationDiagnosticTable =
         BigQueryTable(args.required("vehiclesWithExpiredRegistrationDiagnosticTable")),
-      diagnosticTable = BigQueryTable(args.required("diagnosticTable"))
+      ioDiagnosticTable = BigQueryTable(args.required("ioDiagnosticTable"))
     )
   }
 }

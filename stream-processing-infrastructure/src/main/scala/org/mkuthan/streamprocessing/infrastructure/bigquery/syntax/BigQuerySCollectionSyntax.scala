@@ -18,8 +18,8 @@ import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
 import org.mkuthan.streamprocessing.infrastructure.bigquery.FileLoadsConfiguration
 import org.mkuthan.streamprocessing.infrastructure.bigquery.StorageWriteConfiguration
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 
 private[syntax] trait BigQuerySCollectionSyntax {
 
@@ -80,8 +80,8 @@ private[syntax] trait BigQuerySCollectionSyntax {
   implicit class BigQuerySCollectionDeadLetterOps[T <: AnyRef: Coder](
       private val self: SCollection[BigQueryDeadLetter[T]]
   ) {
-    def toIoDiagnostic(id: IoIdentifier[T]): SCollection[IoDiagnostic] =
-      self.map(deadLetter => IoDiagnostic(id.id, deadLetter.error))
+    def toDiagnostic(id: IoIdentifier[T]): SCollection[Diagnostic] =
+      self.map(deadLetter => Diagnostic(id.id, deadLetter.error))
   }
 
 }

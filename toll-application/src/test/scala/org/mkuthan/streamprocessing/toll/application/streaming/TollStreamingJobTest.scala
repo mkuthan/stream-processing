@@ -7,20 +7,19 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.infrastructure.common.IoDiagnostic
 import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
+import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.scio._
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
-import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
-import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationDiagnostic
 
 class TollStreamingJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
@@ -36,14 +35,14 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         "--exitSubscription=projects/any-id/subscriptions/exit-subscription",
         "--exitDlq=exit_dlq",
         "--vehicleRegistrationSubscription=projects/any-id/subscriptions/vehicle-registration-subscription",
-        "--vehicleRegistrationTable=toll.vehicle_registration",
         "--vehicleRegistrationDlq=vehicle_registration_dlq",
+        "--vehicleRegistrationTable=toll.vehicle_registration",
         "--entryStatsTable=toll.entry_stats",
         "--totalVehicleTimesTable=toll.total_vehicle_time",
         "--totalVehicleTimesDiagnosticTable=toll.total_vehicle_time_diagnostic",
         "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
-        "--diagnosticTable=toll.io_diagnostic"
+        "--ioDiagnosticTable=toll.io_diagnostic"
       )
       // receive toll booth entries and toll booth exists
       .inputStream[PubsubResult[TollBoothEntry.Payload]](
@@ -98,7 +97,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
         )
       }
-      .output(CustomIO[TotalVehicleTimesDiagnostic.Record](TotalVehicleTimesDiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[TollBoothDiagnostic.Record](TotalVehicleTimesDiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       // calculate vehicles with expired registrations
@@ -110,13 +109,13 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
           ))
       }
-      .output(CustomIO[VehiclesWithExpiredRegistrationDiagnostic.Record](
+      .output(CustomIO[TollBoothDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>
           results should beEmpty
       }
-      .output(CustomIO[IoDiagnostic.Record](DiagnosticTableIoId.id)) { results =>
+      .output(CustomIO[Diagnostic.Record](IoDiagnosticTableIoId.id)) { results =>
         results should beEmpty
       }
       .run()

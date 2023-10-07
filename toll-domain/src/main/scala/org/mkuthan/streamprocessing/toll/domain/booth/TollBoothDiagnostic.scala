@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.domain.vehicle
+package org.mkuthan.streamprocessing.toll.domain.booth
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
@@ -11,21 +11,22 @@ import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-final case class VehiclesWithExpiredRegistrationDiagnostic(
+final case class TollBoothDiagnostic(
     tollBoothId: TollBoothId,
     reason: String,
     count: Long = 1L
 ) {
   private lazy val keyFields = this match {
-    case VehiclesWithExpiredRegistrationDiagnostic(tollBoothId, reason, count @ _) =>
+    case TollBoothDiagnostic(tollBoothId, reason, count @ _) =>
       Seq(tollBoothId, reason)
   }
 }
 
-object VehiclesWithExpiredRegistrationDiagnostic {
+object TollBoothDiagnostic {
 
-  val NotExpired = "Vehicle registration is not expired"
-  val MissingRegistration = "Missing vehicle registration"
+  val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTimes"
+  val VehicleRegistrationNotExpired = "Vehicle registration is not expired"
+  val MissingVehicleRegistration = "Missing vehicle registration"
 
   @BigQueryType.toTable
   final case class Record(
@@ -35,25 +36,25 @@ object VehiclesWithExpiredRegistrationDiagnostic {
       count: Long
   )
 
-  implicit val sumByKey: SumByKey[VehiclesWithExpiredRegistrationDiagnostic] =
+  implicit val sumByKey: SumByKey[TollBoothDiagnostic] =
     SumByKey.create(
       keyFn = _.keyFields.mkString("|@|"),
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
   def aggregateAndEncodeRecord(
-      input: SCollection[VehiclesWithExpiredRegistrationDiagnostic],
+      input: SCollection[TollBoothDiagnostic],
       windowDuration: Duration,
       windowOptions: WindowOptions
   ): SCollection[Record] =
     input
       .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
-      .mapWithTimestamp { case (r, t) =>
+      .mapWithTimestamp { case (diagnostic, timestamp) =>
         Record(
-          created_at = t,
-          toll_booth_id = r.tollBoothId.id,
-          reason = r.reason,
-          count = r.count
+          created_at = timestamp,
+          toll_booth_id = diagnostic.tollBoothId.id,
+          reason = diagnostic.reason,
+          count = diagnostic.count
         )
       }
 }

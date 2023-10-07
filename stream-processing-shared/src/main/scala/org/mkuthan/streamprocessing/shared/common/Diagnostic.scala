@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.toll.domain.vehicle
+package org.mkuthan.streamprocessing.shared.common
 
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.values.SCollection
@@ -9,39 +9,36 @@ import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
-import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 
-final case class TotalVehicleTimesDiagnostic(
-    tollBoothId: TollBoothId,
+// TODO: move to shared/diagnostic
+final case class Diagnostic(
+    id: String,
     reason: String,
-    count: Long = 1L
+    count: Long = 1
 ) {
   private lazy val keyFields = this match {
-    case TotalVehicleTimesDiagnostic(tollBoothId, reason, count @ _) =>
-      Seq(tollBoothId, reason)
+    case Diagnostic(id, reason, count @ _) =>
+      Seq(id, reason)
   }
 }
 
-object TotalVehicleTimesDiagnostic {
-
-  val MissingTollBoothExit = "Missing TollBoothExit to calculate TotalVehicleTimes"
-
+object Diagnostic {
   @BigQueryType.toTable
   final case class Record(
       created_at: Instant,
-      toll_booth_id: String,
+      id: String,
       reason: String,
       count: Long
   )
 
-  implicit val sumByKey: SumByKey[TotalVehicleTimesDiagnostic] =
+  implicit val sumByKey: SumByKey[Diagnostic] =
     SumByKey.create(
       keyFn = _.keyFields.mkString("|@|"),
       plusFn = (x, y) => x.copy(count = x.count + y.count)
     )
 
   def aggregateAndEncodeRecord(
-      input: SCollection[TotalVehicleTimesDiagnostic],
+      input: SCollection[Diagnostic],
       windowDuration: Duration,
       windowOptions: WindowOptions
   ): SCollection[Record] =
@@ -50,7 +47,7 @@ object TotalVehicleTimesDiagnostic {
       .mapWithTimestamp { case (r, t) =>
         Record(
           created_at = t,
-          toll_booth_id = r.tollBoothId.id,
+          id = r.id,
           reason = r.reason,
           count = r.count
         )

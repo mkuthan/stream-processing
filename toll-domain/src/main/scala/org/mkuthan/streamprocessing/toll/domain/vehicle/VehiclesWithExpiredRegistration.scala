@@ -9,6 +9,7 @@ import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.shared.scio.syntax._
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -49,7 +50,7 @@ object VehiclesWithExpiredRegistration {
       leftWindowDuration: Duration,
       rightWindowDuration: Duration,
       windowOptions: WindowOptions
-  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[VehiclesWithExpiredRegistrationDiagnostic]) = {
+  ): (SCollection[VehiclesWithExpiredRegistration], SCollection[TollBoothDiagnostic]) = {
     val boothEntriesByLicensePlate = boothEntries
       .keyBy(_.licensePlate)
       .withFixedWindows(
@@ -71,14 +72,14 @@ object VehiclesWithExpiredRegistration {
         case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
           Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
         case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
-          Left(VehiclesWithExpiredRegistrationDiagnostic(
+          Left(TollBoothDiagnostic(
             boothEntry.id,
-            VehiclesWithExpiredRegistrationDiagnostic.NotExpired
+            TollBoothDiagnostic.VehicleRegistrationNotExpired
           ))
         case (boothEntry, None) =>
-          Left(VehiclesWithExpiredRegistrationDiagnostic(
+          Left(TollBoothDiagnostic(
             boothEntry.id,
-            VehiclesWithExpiredRegistrationDiagnostic.MissingRegistration
+            TollBoothDiagnostic.MissingVehicleRegistration
           ))
       }
 

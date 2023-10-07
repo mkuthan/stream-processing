@@ -8,6 +8,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnosticFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
@@ -17,10 +19,10 @@ import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
     with TestScioContext
+    with TollBoothDiagnosticFixture
     with TollBoothEntryFixture
     with TollBoothExitFixture
-    with TotalVehicleTimesFixture
-    with TotalVehicleTimesDiagnosticFixture {
+    with TotalVehicleTimesFixture {
 
   import TotalVehicleTimes._
 
@@ -100,7 +102,7 @@ class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
     diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
       containSingleValueAtTime(
         "2014-09-10T12:08:00.999Z",
-        totalVehicleTimesWithMissingTollBoothExitDiagnostic
+        anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.MissingTollBoothExit)
       )
     }
   }

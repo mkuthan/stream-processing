@@ -8,6 +8,7 @@ import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.scio.syntax._
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothId
@@ -38,7 +39,7 @@ object TotalVehicleTimes {
       boothExits: SCollection[TollBoothExit],
       gapDuration: Duration,
       windowOptions: WindowOptions
-  ): (SCollection[TotalVehicleTimes], SCollection[TotalVehicleTimesDiagnostic]) = {
+  ): (SCollection[TotalVehicleTimes], SCollection[TollBoothDiagnostic]) = {
     val boothEntriesById = boothEntries
       .keyBy(entry => (entry.id, entry.licensePlate))
       .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
@@ -53,7 +54,7 @@ object TotalVehicleTimes {
         case (boothEntry, Some(boothExit)) =>
           Right(toTotalVehicleTimes(boothEntry, boothExit))
         case (boothEntry, None) =>
-          Left(TotalVehicleTimesDiagnostic(boothEntry.id, TotalVehicleTimesDiagnostic.MissingTollBoothExit))
+          Left(TollBoothDiagnostic(boothEntry.id, TollBoothDiagnostic.MissingTollBoothExit))
       }
 
     results.unzip

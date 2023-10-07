@@ -8,6 +8,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnosticFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
@@ -16,10 +18,10 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 
 class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     with TestScioContext
-    with VehiclesWithExpiredRegistrationFixture
     with TollBoothEntryFixture
+    with TollBoothDiagnosticFixture
     with VehicleRegistrationFixture
-    with VehiclesWithExpiredRegistrationDiagnosticFixture {
+    with VehiclesWithExpiredRegistrationFixture {
 
   import VehiclesWithExpiredRegistration._
 
@@ -103,7 +105,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
         anyTollBoothEntry.entryTime,
-        vehicleWithNotExpiredRegistrationDiagnostic
+        anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.VehicleRegistrationNotExpired)
       )
     }
   }
@@ -140,7 +142,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
       containSingleValueAtTime(
         anyTollBoothEntry.entryTime,
-        vehicleWithMissingRegistrationDiagnostic
+        anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.MissingVehicleRegistration)
       )
     }
   }

@@ -10,7 +10,7 @@ import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
 
-trait TollStreamingJobIo extends  TollBoothIo with RegistrationIo  with VehicleIo with DiagnosticIo
+trait TollStreamingJobIo extends TollBoothIo with RegistrationIo with VehicleIo with DiagnosticIo
 
 trait TollBoothIo {
   val EntrySubscriptionIoId: IoIdentifier[TollBoothEntry.Payload] =
@@ -21,7 +21,7 @@ trait TollBoothIo {
 
   val ExitSubscriptionIoId: IoIdentifier[TollBoothExit.Payload] =
     IoIdentifier("exit-subscription-id")
-    
+
   val ExitDlqBucketIoId: IoIdentifier[TollBoothExit.DeadLetterPayload] =
     IoIdentifier("exit-dlq-bucket-id")
 
@@ -39,7 +39,6 @@ trait RegistrationIo {
   val VehicleRegistrationTableIoId: IoIdentifier[VehicleRegistration.Record] =
     IoIdentifier("toll.vehicle_registration")
 }
-
 
 trait VehicleIo {
   val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Payload] =

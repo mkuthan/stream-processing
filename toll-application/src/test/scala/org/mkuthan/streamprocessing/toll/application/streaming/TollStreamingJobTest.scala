@@ -11,7 +11,8 @@ import org.mkuthan.streamprocessing.infrastructure.pubsub.syntax._
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
 import org.mkuthan.streamprocessing.shared.common.Diagnostic
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.JobTestScioContext
 import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry

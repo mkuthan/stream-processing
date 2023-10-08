@@ -15,7 +15,7 @@ import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.gcp.PubsubClient._
 import org.mkuthan.streamprocessing.test.gcp.PubsubContext
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
 class PubsubSCollectionOpsTest extends AnyFlatSpec with Matchers

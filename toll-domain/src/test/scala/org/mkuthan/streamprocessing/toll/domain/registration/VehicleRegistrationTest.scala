@@ -5,7 +5,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.common.Message
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     with TestScioContext

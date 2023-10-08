@@ -18,7 +18,9 @@ import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.Sampl
 import org.mkuthan.streamprocessing.test.gcp.BigQueryClient._
 import org.mkuthan.streamprocessing.test.gcp.BigQueryContext
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.InMemorySink
+import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow
 class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers

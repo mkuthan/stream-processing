@@ -9,6 +9,8 @@ import com.spotify.scio.coders.CoderMaterializer
 import org.joda.time.Duration
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.test.common.InstantSyntax
+
 final case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
 
 object UnboundedTestCollection {

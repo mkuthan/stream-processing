@@ -12,6 +12,9 @@ import cats.kernel.Eq
 import org.joda.time.Instant
 import org.scalatest.matchers.Matcher
 
+import org.mkuthan.streamprocessing.test.common.InstantSyntax
+
+// TODO: replace by ScioMatchers and don't use SCollectionMatchers at all
 trait TimestampedMatchers extends InstantSyntax {
   this: SCollectionMatchers =>
 

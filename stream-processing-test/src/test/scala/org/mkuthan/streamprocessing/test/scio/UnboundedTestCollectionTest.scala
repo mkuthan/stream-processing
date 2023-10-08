@@ -4,6 +4,8 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.test.scio.syntax._
+
 class UnboundedTestCollectionTest extends AnyFlatSpec with Matchers with TestScioContext {
   "Builder" should "build UnboundedTestCollection" in runWithScioContext { sc =>
     val anyTime = "2000-01-01T00:00:00.000Z"

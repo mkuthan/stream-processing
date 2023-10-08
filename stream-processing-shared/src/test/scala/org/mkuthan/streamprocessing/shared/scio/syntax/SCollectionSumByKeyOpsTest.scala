@@ -5,7 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
-import org.mkuthan.streamprocessing.test.scio.boundedTestCollectionOf
+import org.mkuthan.streamprocessing.test.scio.syntax._
 import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 object SCollectionSumByKeyOpsTest {

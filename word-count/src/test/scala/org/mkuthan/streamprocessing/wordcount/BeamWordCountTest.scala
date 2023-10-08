@@ -7,7 +7,8 @@ import org.joda.time.Duration
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioContext {
 

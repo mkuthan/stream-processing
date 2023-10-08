@@ -18,7 +18,7 @@ import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.Sampl
 import org.mkuthan.streamprocessing.test.gcp.GcpTestPatience
 import org.mkuthan.streamprocessing.test.gcp.StorageClient._
 import org.mkuthan.streamprocessing.test.gcp.StorageContext
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
 @Slow

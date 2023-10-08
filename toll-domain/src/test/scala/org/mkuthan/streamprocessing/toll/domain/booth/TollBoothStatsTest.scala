@@ -9,7 +9,8 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 class TollBoothStatsTest extends AnyFlatSpec with Matchers
     with TestScioContext

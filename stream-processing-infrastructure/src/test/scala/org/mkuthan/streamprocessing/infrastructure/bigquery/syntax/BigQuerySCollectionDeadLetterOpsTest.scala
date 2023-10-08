@@ -8,7 +8,8 @@ import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
 import org.mkuthan.streamprocessing.shared.common.Diagnostic
-import org.mkuthan.streamprocessing.test.scio._
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 class BigQuerySCollectionDeadLetterOpsTest extends AnyFlatSpec
     with Matchers

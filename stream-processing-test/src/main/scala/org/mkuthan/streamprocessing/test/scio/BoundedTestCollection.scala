@@ -8,6 +8,8 @@ import com.spotify.scio.coders.CoderMaterializer
 
 import org.joda.time.Instant
 
+import org.mkuthan.streamprocessing.test.common.InstantSyntax
+
 final case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])
 
 object BoundedTestCollection extends InstantSyntax {

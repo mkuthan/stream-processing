@@ -6,6 +6,8 @@ import org.joda.time.Instant
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import org.mkuthan.streamprocessing.test.scio.syntax._
+
 class BoundedTestCollectionTest extends AnyFlatSpec with Matchers with TestScioContext {
   "Builder" should "build BoundedTestCollection" in runWithScioContext { sc =>
     val minTime = BoundedWindow.TIMESTAMP_MIN_VALUE.toString

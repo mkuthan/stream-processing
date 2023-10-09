@@ -10,17 +10,17 @@ import org.mkuthan.streamprocessing.test.scio.syntax._
 
 class BoundedTestCollectionTest extends AnyFlatSpec with Matchers with TestScioContext {
   "Builder" should "build BoundedTestCollection" in runWithScioContext { sc =>
-    val minTime = BoundedWindow.TIMESTAMP_MIN_VALUE.toString
-    val anyTime = "2000-01-01T00:00:00.000Z"
+    val minTime = BoundedWindow.TIMESTAMP_MIN_VALUE
+    val anyTime = Instant.parse("2000-01-01T00:00:00.000Z")
 
-    val boundedTestCollection = BoundedTestCollection.builder[String]()
+    val input = BoundedTestCollection.builder[String]()
       .addElementsAtMinimumTime("first", "second", "third")
       .addElementsAtTime(anyTime, "fourth", "fifth", "sixth")
-      .addElementsAtTime(Instant.parse(anyTime), "seventh")
+      .addElementsAtTime(anyTime.toString, "seventh")
       .advanceWatermarkToInfinity()
 
-    val results = sc.testBounded(boundedTestCollection)
-    results.withTimestamp should containInAnyOrderAtTime[String](Seq(
+    val results = sc.testBounded(input).withTimestamp
+    results should containElementsAtTime(
       (minTime, "first"),
       (minTime, "second"),
       (minTime, "third"),
@@ -28,7 +28,7 @@ class BoundedTestCollectionTest extends AnyFlatSpec with Matchers with TestScioC
       (anyTime, "fifth"),
       (anyTime, "sixth"),
       (anyTime, "seventh")
-    ))
+    )
   }
 
 }

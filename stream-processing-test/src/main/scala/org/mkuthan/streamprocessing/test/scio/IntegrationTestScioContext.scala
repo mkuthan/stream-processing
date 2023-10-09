@@ -13,7 +13,7 @@ import org.mkuthan.streamprocessing.test.gcp.GcpProjectId
 import org.mkuthan.streamprocessing.test.gcp.StorageClient
 
 trait IntegrationTestScioContext extends BeforeAndAfterAll
-    with SCollectionMatchers with TimestampedMatchers
+    with SCollectionMatchers with ScioMatchers
     with GcpProjectId {
   this: Suite =>
 

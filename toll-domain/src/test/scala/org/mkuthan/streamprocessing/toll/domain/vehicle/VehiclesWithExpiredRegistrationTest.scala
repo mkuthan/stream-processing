@@ -59,12 +59,10 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       )
 
     results.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containInAnyOrderAtTime(
+      containElementsAtTime(
         anyTollBoothEntry.entryTime,
-        Seq(
-          anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id),
-          anyVehicleWithExpiredRegistration(anyVehicleRegistrationUpdate.id)
-        )
+        anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id),
+        anyVehicleWithExpiredRegistration(anyVehicleRegistrationUpdate.id)
       )
     }
 
@@ -97,14 +95,14 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       )
 
     results.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         anyTollBoothEntry.entryTime,
         anyVehicleWithExpiredRegistration(anyVehicleRegistrationHistory.id)
       )
     }
 
     diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         anyTollBoothEntry.entryTime,
         anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.VehicleRegistrationNotExpired)
       )
@@ -141,7 +139,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
     results should beEmpty
 
     diagnostics.withTimestamp should inOnlyPane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         anyTollBoothEntry.entryTime,
         anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.MissingVehicleRegistration)
       )

@@ -24,7 +24,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
-    results.withTimestamp should containSingleValueAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
+    results.withTimestamp should containElementsAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
     dlq should beEmpty
   }
 
@@ -39,7 +39,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
       val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
-      dlq.withTimestamp should containSingleValueAtTime(
+      dlq.withTimestamp should containElementsAtTime(
         invalidTollBoothExitMessage.attributes(TollBoothExit.TimestampAttribute),
         tollBoothExitDecodingError
       )
@@ -56,7 +56,7 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
     val results = decodeRecord(sc.testBounded(inputs))
 
-    results.withTimestamp should containSingleValueAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
+    results.withTimestamp should containElementsAtTime(anyTollBoothExit.exitTime, anyTollBoothExit)
   }
 
 }

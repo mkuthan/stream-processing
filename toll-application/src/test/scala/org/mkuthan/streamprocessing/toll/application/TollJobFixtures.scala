@@ -29,7 +29,7 @@ trait TollJobFixtures
     PubsubDeadLetter("any exit payload".getBytes, Map(), "any exit error")
 
   final val vehicleRegistrationPubsubDeadLetter: PubsubDeadLetter[VehicleRegistration.Payload] =
-    PubsubDeadLetter("any vehicle registration".getBytes, Map(), "any vehicle registration")
+    PubsubDeadLetter("any vehicle registration".getBytes, Map(), "any vehicle registration error")
 
   final val anyIoDiagnosticRecord: Diagnostic.Record = Diagnostic.Record(
     created_at = Instant.EPOCH,

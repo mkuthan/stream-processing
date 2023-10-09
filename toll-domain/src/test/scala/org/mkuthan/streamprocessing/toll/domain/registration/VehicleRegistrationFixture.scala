@@ -24,7 +24,7 @@ trait VehicleRegistrationFixture {
   )
 
   final val invalidVehicleRegistrationMessage: Message[VehicleRegistration.Payload] = Message(
-    anyVehicleRegistrationMessage.payload.copy(license_plate = ""),
+    anyVehicleRegistrationPayload.copy(license_plate = ""),
     anyVehicleRegistrationMessage.attributes
   )
 

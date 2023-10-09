@@ -36,8 +36,8 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
     val run = runWithScioContext { sc =>
       val input = unboundedTestCollectionOf[Message[VehicleRegistration.Payload]]
         .addElementsAtTime(
-          vehicleRegistrationMessageInvalid.attributes(VehicleRegistration.TimestampAttribute),
-          vehicleRegistrationMessageInvalid
+          invalidVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
+          invalidVehicleRegistrationMessage
         )
         .advanceWatermarkToInfinity()
 

@@ -17,8 +17,10 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
 
   it should "decode valid message into TollBoothExit" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Payload]]
-      .addElementsAtTime(anyTollBoothExitPayload.exit_time, Message(anyTollBoothExitPayload))
-      .advanceWatermarkToInfinity()
+      .addElementsAtTime(
+        anyTollBoothExitMessage.attributes(TollBoothExit.TimestampAttribute),
+        anyTollBoothExitMessage
+      ).advanceWatermarkToInfinity()
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
@@ -29,14 +31,16 @@ class TollBoothExitTest extends AnyFlatSpec with Matchers
   it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothExit.Payload]]
-        .addElementsAtTime(tollBoothExitPayloadInvalid.exit_time, Message(tollBoothExitPayloadInvalid))
-        .advanceWatermarkToInfinity()
+        .addElementsAtTime(
+          invalidTollBoothExitMessage.attributes(TollBoothExit.TimestampAttribute),
+          invalidTollBoothExitMessage
+        ).advanceWatermarkToInfinity()
 
       val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
       dlq.withTimestamp should containSingleValueAtTime(
-        tollBoothExitPayloadInvalid.exit_time,
+        invalidTollBoothExitMessage.attributes(TollBoothExit.TimestampAttribute),
         tollBoothExitDecodingError
       )
     }

@@ -3,11 +3,12 @@ package org.mkuthan.streamprocessing.toll.domain.booth
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.shared.common.DeadLetter
+import org.mkuthan.streamprocessing.shared.common.Message
 import org.mkuthan.streamprocessing.toll.domain.common.LicensePlate
 
 trait TollBoothEntryFixture {
 
-  final val anyTollBoothEntryPayload: TollBoothEntry.Payload = TollBoothEntry.Payload(
+  private final val anyTollBoothEntryPayload: TollBoothEntry.Payload = TollBoothEntry.Payload(
     id = "1",
     entry_time = "2014-09-10T12:01:00Z",
     license_plate = "JNB 7001",
@@ -20,10 +21,17 @@ trait TollBoothEntryFixture {
     tag = "String"
   )
 
-  final val tollBoothEntryPayloadInvalid: TollBoothEntry.Payload = anyTollBoothEntryPayload.copy(id = "")
+  final val anyTollBoothEntryMessage: Message[TollBoothEntry.Payload] = Message(
+    anyTollBoothEntryPayload,
+    Map(TollBoothEntry.TimestampAttribute -> anyTollBoothEntryPayload.entry_time)
+  )
+
+  final val invalidTollBoothEntryMessage: Message[TollBoothEntry.Payload] = anyTollBoothEntryMessage.copy(
+    payload = anyTollBoothEntryPayload.copy(id = "")
+  )
 
   final val tollBoothEntryDecodingError: DeadLetter[TollBoothEntry.Payload] = DeadLetter[TollBoothEntry.Payload](
-    data = tollBoothEntryPayloadInvalid,
+    data = invalidTollBoothEntryMessage.payload,
     error = "requirement failed: Toll booth id is empty"
   )
 

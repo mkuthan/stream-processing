@@ -17,7 +17,10 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
   it should "decode valid message into TollBoothEntry" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-      .addElementsAtTime(anyTollBoothEntryPayload.entry_time, Message(anyTollBoothEntryPayload))
+      .addElementsAtTime(
+        anyTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
+        anyTollBoothEntryMessage
+      )
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
@@ -29,14 +32,17 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
   it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-        .addElementsAtTime(tollBoothEntryPayloadInvalid.entry_time, Message(tollBoothEntryPayloadInvalid))
+        .addElementsAtTime(
+          invalidTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
+          invalidTollBoothEntryMessage
+        )
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
       dlq.withTimestamp should containSingleValueAtTime(
-        tollBoothEntryPayloadInvalid.entry_time,
+        invalidTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
         tollBoothEntryDecodingError
       )
     }

@@ -12,23 +12,25 @@ trait VehicleRegistrationFixture {
   private final val defaultLicensePlate = "JNB 7001"
   private final val defaultExpired = "1"
 
+  private final val anyVehicleRegistrationPayload = VehicleRegistration.Payload(
+    id = "1",
+    license_plate = defaultLicensePlate,
+    expired = defaultExpired
+  )
+
   final val anyVehicleRegistrationMessage: Message[VehicleRegistration.Payload] = Message(
-    VehicleRegistration.Payload(
-      id = "1",
-      license_plate = defaultLicensePlate,
-      expired = defaultExpired
-    ),
+    anyVehicleRegistrationPayload,
     Map(VehicleRegistration.TimestampAttribute -> messageTimestamp)
   )
 
-  final val vehicleRegistrationMessageInvalid: Message[VehicleRegistration.Payload] = Message(
+  final val invalidVehicleRegistrationMessage: Message[VehicleRegistration.Payload] = Message(
     anyVehicleRegistrationMessage.payload.copy(license_plate = ""),
     anyVehicleRegistrationMessage.attributes
   )
 
   final val vehicleRegistrationDecodingError: DeadLetter[VehicleRegistration.Payload] =
     DeadLetter[VehicleRegistration.Payload](
-      data = vehicleRegistrationMessageInvalid.payload,
+      data = invalidVehicleRegistrationMessage.payload,
       error = "requirement failed: License plate number is empty"
     )
 

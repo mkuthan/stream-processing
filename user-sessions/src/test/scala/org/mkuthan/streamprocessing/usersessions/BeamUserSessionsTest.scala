@@ -35,7 +35,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
-      containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
+      containElementsAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
     }
   }
 
@@ -48,7 +48,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
-      containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
+      containElementsAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
     }
   }
 
@@ -63,11 +63,11 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:00") {
-      containSingleValueAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
+      containElementsAtTime("00:10:59.999", ("joe", Iterable("open app", "close app")))
     }
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
-      containSingleValueAtTime("00:11:29.999", ("ben", Iterable("open app", "close app")))
+      containElementsAtTime("00:11:29.999", ("ben", Iterable("open app", "close app")))
     }
   }
 
@@ -83,7 +83,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         "00:23:09.999",
         ("joe", Iterable("open app", "show product", "add to cart", "checkout", "close app"))
       )
@@ -102,14 +102,14 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:13:00") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         "00:12:59.999",
         ("joe", Iterable("open app", "show product", "add to cart"))
       )
     }
 
     results.withTimestamp should inOnTimePane("00:13:00", "00:23:10") {
-      containSingleValueAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
+      containElementsAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
     }
   }
 
@@ -126,7 +126,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     val results = activitiesInSessionWindow(sc.testUnbounded(activities), TenMinutesGap)
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
-      containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
+      containElementsAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
     }
 
     results.withTimestamp should inWindow("00:00:00", "00:13:00") {
@@ -134,7 +134,7 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     }
 
     results.withTimestamp should inOnTimePane("00:09:30", "00:23:10") {
-      containSingleValueAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
+      containElementsAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
     }
   }
 
@@ -155,15 +155,15 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
     )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
-      containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
+      containElementsAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:13:00") {
-      containSingleValueAtTime("00:12:59.999", ("joe", Iterable("add to cart")))
+      containElementsAtTime("00:12:59.999", ("joe", Iterable("add to cart")))
     }
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
-      containSingleValueAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
+      containElementsAtTime("00:23:09.999", ("joe", Iterable("checkout", "close app")))
     }
   }
 
@@ -186,15 +186,15 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       )
 
       results.withTimestamp should inOnTimePane("00:00:00", "00:11:30") {
-        containSingleValueAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
+        containElementsAtTime("00:11:29.999", ("joe", Iterable("open app", "show product")))
       }
 
       results.withTimestamp should inLatePane("00:00:00", "00:13:00") {
-        containSingleValueAtTime("00:12:59.999", ("joe", Iterable("open app", "show product", "add to cart")))
+        containElementsAtTime("00:12:59.999", ("joe", Iterable("open app", "show product", "add to cart")))
       }
 
       results.withTimestamp should inOnTimePane("00:00:00", "00:23:10") {
-        containSingleValueAtTime(
+        containElementsAtTime(
           "00:23:09.999",
           ("joe", Iterable("open app", "show product", "add to cart", "checkout", "close app"))
         )
@@ -233,22 +233,22 @@ final class BeamUserSessionsTest extends AnyFlatSpec with Matchers with TestScio
       )
 
       results.withTimestamp should inEarlyPane("00:00:00", "00:11:00") {
-        containSingleValueAtTime("00:10:59.999", ("joe", Iterable("0", "1")))
+        containElementsAtTime("00:10:59.999", ("joe", Iterable("0", "1")))
       }
       results.withTimestamp should inEarlyPane("00:00:00", "00:13:00") {
-        containSingleValueAtTime("00:12:59.999", ("joe", Iterable("0", "1", "2", "3")))
+        containElementsAtTime("00:12:59.999", ("joe", Iterable("0", "1", "2", "3")))
       }
       results.withTimestamp should inEarlyPane("00:00:00", "00:15:00") {
-        containSingleValueAtTime("00:14:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5")))
+        containElementsAtTime("00:14:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5")))
       }
       results.withTimestamp should inOnTimePane("00:00:00", "00:15:00") {
-        containSingleValueAtTime("00:14:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5")))
+        containElementsAtTime("00:14:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5")))
       }
       results.withTimestamp should inLatePane("00:00:00", "00:16:00") {
-        containSingleValueAtTime("00:15:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5", "6")))
+        containElementsAtTime("00:15:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5", "6")))
       }
       results.withTimestamp should inLatePane("00:00:00", "00:17:00") {
-        containSingleValueAtTime("00:16:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5", "6", "7")))
+        containElementsAtTime("00:16:59.999", ("joe", Iterable("0", "1", "2", "3", "4", "5", "6", "7")))
       }
   }
 }

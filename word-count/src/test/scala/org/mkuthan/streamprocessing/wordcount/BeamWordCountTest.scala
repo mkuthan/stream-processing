@@ -32,11 +32,12 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
 
     val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
-    results.withTimestamp should containInAnyOrderAtTime(Seq(
-      ("00:00:59.999", ("foo", 1L)),
-      ("00:00:59.999", ("bar", 1L)),
-      ("00:00:59.999", ("baz", 2L))
-    ))
+    results.withTimestamp should containElementsAtTime(
+      "00:00:59.999",
+      ("foo", 1L),
+      ("bar", 1L),
+      ("baz", 2L)
+    )
   }
 
   "Words" should "be aggregated into single fixed window with latest timestamp" in runWithScioContext { sc =>
@@ -51,11 +52,11 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
       timestampCombiner = TimestampCombiner.LATEST
     )
 
-    results.withTimestamp should containInAnyOrderAtTime(Seq(
+    results.withTimestamp should containElementsAtTime(
       ("00:00:00", ("foo", 1L)),
       ("00:00:00", ("bar", 1L)),
       ("00:00:30", ("baz", 2L))
-    ))
+    )
   }
 
   "Words" should "be aggregated into consecutive fixed windows" in runWithScioContext { sc =>
@@ -68,13 +69,13 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
 
     val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
-    results.withTimestamp should containInAnyOrderAtTime(Seq(
+    results.withTimestamp should containElementsAtTime(
       ("00:00:59.999", ("foo", 1L)),
       ("00:00:59.999", ("bar", 1L)),
       ("00:00:59.999", ("baz", 2L)),
       ("00:01:59.999", ("foo", 2L)),
       ("00:01:59.999", ("bar", 2L))
-    ))
+    )
   }
 
   "Words" should "be aggregated into non-consecutive fixed windows" in runWithScioContext { sc =>
@@ -87,13 +88,13 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
 
     val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
-    results.withTimestamp should containInAnyOrderAtTime(Seq(
+    results.withTimestamp should containElementsAtTime(
       ("00:00:59.999", ("foo", 1L)),
       ("00:00:59.999", ("bar", 1L)),
       ("00:00:59.999", ("baz", 2L)),
       ("00:02:59.999", ("foo", 2L)),
       ("00:02:59.999", ("bar", 2L))
-    ))
+    )
 
     results.withTimestamp should inWindow("00:01:00", "00:02:00") {
       beEmpty
@@ -110,11 +111,12 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
 
     val results = wordCountInFixedWindow(sc.testUnbounded(words), OneMinute)
 
-    results.withTimestamp should containInAnyOrderAtTime(Seq(
-      ("00:00:59.999", ("foo", 1L)),
-      ("00:00:59.999", ("bar", 1L)),
-      ("00:00:59.999", ("baz", 2L))
-    ))
+    results.withTimestamp should containElementsAtTime(
+      "00:00:59.999",
+      ("foo", 1L),
+      ("bar", 1L),
+      ("baz", 2L)
+    )
   }
 
   "Late words within allowed lateness" should "be aggregated in late pane" in runWithScioContext { sc =>
@@ -132,15 +134,16 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
     )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
-      containInAnyOrderAtTime(Seq(
-        ("00:00:59.999", ("foo", 1L)),
-        ("00:00:59.999", ("bar", 1L)),
-        ("00:00:59.999", ("baz", 2L))
-      ))
+      containElementsAtTime(
+        "00:00:59.999",
+        ("foo", 1L),
+        ("bar", 1L),
+        ("baz", 2L)
+      )
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         "00:00:59.999",
         ("foo", 2L)
       )
@@ -163,18 +166,11 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
     )
 
     results.withTimestamp should inOnTimePane("00:00:00", "00:01:00") {
-      containInAnyOrderAtTime(Seq(
-        ("00:00:59.999", ("foo", 1L)),
-        ("00:00:59.999", ("bar", 1L)),
-        ("00:00:59.999", ("baz", 2L))
-      ))
+      containElementsAtTime("00:00:59.999", ("foo", 1L), ("bar", 1L), ("baz", 2L))
     }
 
     results.withTimestamp should inLatePane("00:00:00", "00:01:00") {
-      containSingleValueAtTime(
-        "00:00:59.999",
-        ("foo", 3L)
-      )
+      containElementsAtTime("00:00:59.999", ("foo", 3L))
     }
   }
 }

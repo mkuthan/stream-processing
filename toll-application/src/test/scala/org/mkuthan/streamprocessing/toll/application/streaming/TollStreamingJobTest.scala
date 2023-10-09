@@ -50,24 +50,28 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         CustomIO[PubsubResult[TollBoothEntry.Payload]](EntrySubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[TollBoothEntry.Payload]]
           .addElementsAtTime(
-            anyTollBoothEntryPayload.entry_time,
-            Right(Message(anyTollBoothEntryPayload))
+            anyTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
+            Right(anyTollBoothEntryMessage),
+            Right(invalidTollBoothEntryMessage),
+            Left(tollBoothEntryPubsubDeadLetter)
           )
           .advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothEntry.Payload]](EntryDlqBucketIoId.id)) { results =>
-        results should beEmpty
+        results should containSingleValue(tollBoothEntryDecodingError)
       }
       .inputStream(
         CustomIO[PubsubResult[TollBoothExit.Payload]](ExitSubscriptionIoId.id),
         unboundedTestCollectionOf[PubsubResult[TollBoothExit.Payload]]
           .addElementsAtTime(
-            anyTollBoothExitPayload.exit_time,
-            Right(Message(anyTollBoothExitPayload))
+            anyTollBoothExitMessage.attributes(TollBoothExit.TimestampAttribute),
+            Right(anyTollBoothExitMessage),
+            Right(invalidTollBoothExitMessage),
+            Left(tollBoothExitPubsubDeadLetter)
           ).advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothExit.Payload]](ExitDlqBucketIoId.id)) { results =>
-        results should beEmpty
+        results should containSingleValue(tollBoothExitDecodingError)
       }
       // receive vehicle registrations
       .inputStream(
@@ -75,7 +79,9 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         unboundedTestCollectionOf[PubsubResult[VehicleRegistration.Payload]]
           .addElementsAtTime(
             anyVehicleRegistrationMessage.attributes(VehicleRegistration.TimestampAttribute),
-            Right(anyVehicleRegistrationMessage)
+            Right(anyVehicleRegistrationMessage),
+            Right(invalidVehicleRegistrationMessage),
+            Left(vehicleRegistrationPubsubDeadLetter)
           )
           .advanceWatermarkToInfinity().testStream
       )
@@ -83,8 +89,8 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id),
         Seq(anyVehicleRegistrationRecord)
       )
-      .output(CustomIO[String](VehicleRegistrationDlqBucketIoId.id)) { results =>
-        results should beEmpty
+      .output(CustomIO[DeadLetter[VehicleRegistration.Payload]](VehicleRegistrationDlqBucketIoId.id)) { results =>
+        results should containSingleValue(vehicleRegistrationDecodingError)
       }
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsTableIoId.id)) { results =>
@@ -117,7 +123,23 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           results should beEmpty
       }
       .output(CustomIO[Diagnostic.Record](IoDiagnosticTableIoId.id)) { results =>
-        results should beEmpty
+        results should containInAnyOrder(Seq(
+          anyIoDiagnosticRecord.copy(
+            created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
+            id = EntrySubscriptionIoId.id,
+            reason = tollBoothEntryPubsubDeadLetter.error
+          ),
+          anyIoDiagnosticRecord.copy(
+            created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
+            id = ExitSubscriptionIoId.id,
+            reason = tollBoothExitPubsubDeadLetter.error
+          ),
+          anyIoDiagnosticRecord.copy(
+            created_at = Instant.parse("2014-09-10T11:59:59.999Z"),
+            id = VehicleRegistrationSubscriptionIoId.id,
+            reason = vehicleRegistrationPubsubDeadLetter.error
+          )
+        ))
       }
       .run()
   }

@@ -56,23 +56,21 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     val results = calculateInFixedWindow(sc.testBounded(inputs), FiveMinutes, DefaultWindowOptions)
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containInAnyOrderAtTime(
+      containElementsAtTime(
         "2014-09-10T12:04:59.999Z",
-        Seq(
-          anyTollBoothStats.copy(
-            id = tollBoothId1,
-            count = 2,
-            totalToll = BigDecimal(2 + 1),
-            firstEntryTime = entry1.entryTime,
-            lastEntryTime = entry2.entryTime
-          ),
-          anyTollBoothStats.copy(
-            id = tollBoothId2,
-            count = 1,
-            totalToll = BigDecimal(4),
-            firstEntryTime = entry3.entryTime,
-            lastEntryTime = entry3.entryTime
-          )
+        anyTollBoothStats.copy(
+          id = tollBoothId1,
+          count = 2,
+          totalToll = BigDecimal(2 + 1),
+          firstEntryTime = entry1.entryTime,
+          lastEntryTime = entry2.entryTime
+        ),
+        anyTollBoothStats.copy(
+          id = tollBoothId2,
+          count = 1,
+          totalToll = BigDecimal(4),
+          firstEntryTime = entry3.entryTime,
+          lastEntryTime = entry3.entryTime
         )
       )
     }
@@ -113,7 +111,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     val recordTimestamp = Instant.parse("2014-09-10T12:04:59.999Z")
 
     results.withTimestamp should inOnTimePane(windowStart, windowEnd) {
-      containSingleValueAtTime(
+      containElementsAtTime(
         recordTimestamp,
         anyTollBoothStats.copy(
           count = 2,
@@ -125,7 +123,7 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
     }
 
     results.withTimestamp should inLatePane(windowStart, windowEnd) {
-      containSingleValueAtTime(
+      containElementsAtTime(
         recordTimestamp,
         anyTollBoothStats.copy(
           count = 1,

@@ -46,12 +46,10 @@ class TollBoothDiagnosticTest extends AnyFlatSpec with Matchers
       .copy(created_at = Instant.parse(endOfWindow))
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:00:00Z", "2014-09-10T12:05:00Z") {
-      containInAnyOrderAtTime(
+      containElementsAtTime(
         endOfWindow,
-        Seq(
-          diagnosticRecord.copy(toll_booth_id = tollBooth1.id, reason = reason1, count = 1 + 1),
-          diagnosticRecord.copy(toll_booth_id = tollBooth2.id, reason = reason2, count = 2 + 2)
-        )
+        diagnosticRecord.copy(toll_booth_id = tollBooth1.id, reason = reason1, count = 1 + 1),
+        diagnosticRecord.copy(toll_booth_id = tollBooth2.id, reason = reason2, count = 2 + 2)
       )
     }
   }

@@ -58,7 +58,7 @@ class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
       )
 
     results.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:09:03Z") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         "2014-09-10T12:09:02.999Z",
         anyTotalVehicleTimes.copy(
           tollBoothId = tollBoothId,
@@ -101,7 +101,7 @@ class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
     results should beEmpty
 
     diagnostic.withTimestamp should inOnTimePane("2014-09-10T12:03:01Z", "2014-09-10T12:08:01Z") {
-      containSingleValueAtTime(
+      containElementsAtTime(
         "2014-09-10T12:08:00.999Z",
         anyTollBoothDiagnostic.copy(reason = TollBoothDiagnostic.MissingTollBoothExit)
       )

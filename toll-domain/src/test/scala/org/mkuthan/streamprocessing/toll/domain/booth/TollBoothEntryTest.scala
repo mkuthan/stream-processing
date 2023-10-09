@@ -17,26 +17,32 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
   it should "decode valid message into TollBoothEntry" in runWithScioContext { sc =>
     val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-      .addElementsAtTime(anyTollBoothEntryPayload.entry_time, Message(anyTollBoothEntryPayload))
+      .addElementsAtTime(
+        anyTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
+        anyTollBoothEntryMessage
+      )
       .advanceWatermarkToInfinity()
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
-    results.withTimestamp should containSingleValueAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
+    results.withTimestamp should containElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
     dlq should beEmpty
   }
 
   it should "put invalid message into DLQ" in {
     val run = runWithScioContext { sc =>
       val inputs = unboundedTestCollectionOf[Message[TollBoothEntry.Payload]]
-        .addElementsAtTime(tollBoothEntryPayloadInvalid.entry_time, Message(tollBoothEntryPayloadInvalid))
+        .addElementsAtTime(
+          invalidTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
+          invalidTollBoothEntryMessage
+        )
         .advanceWatermarkToInfinity()
 
       val (results, dlq) = decodeMessage(sc.testUnbounded(inputs))
 
       results should beEmpty
-      dlq.withTimestamp should containSingleValueAtTime(
-        tollBoothEntryPayloadInvalid.entry_time,
+      dlq.withTimestamp should containElementsAtTime(
+        invalidTollBoothEntryMessage.attributes(TollBoothEntry.TimestampAttribute),
         tollBoothEntryDecodingError
       )
     }
@@ -52,7 +58,7 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
 
     val results = decodeRecord(sc.testBounded(inputs))
 
-    results.withTimestamp should containSingleValueAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
+    results.withTimestamp should containElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
   }
 
 }

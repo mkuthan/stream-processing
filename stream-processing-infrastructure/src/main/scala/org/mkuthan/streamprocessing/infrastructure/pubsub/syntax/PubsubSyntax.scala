@@ -1,3 +1,3 @@
 package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
-trait PubsubSyntax extends PubsubScioContextSyntax with PubsubSCollectionSyntax with PubsubCoders
+trait PubsubSyntax extends PubsubScioContextSyntax with PubsubSCollectionSyntax with PubsubCoders with PubsubTypes

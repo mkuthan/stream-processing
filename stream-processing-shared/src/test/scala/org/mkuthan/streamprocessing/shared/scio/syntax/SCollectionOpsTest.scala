@@ -30,7 +30,7 @@ class SCollectionOpsTest extends AnyFlatSpec
         sc.testBounded(collection3).windowByMonths(1)
       )
 
-    results should containInAnyOrder(Seq("one", "two", "three"))
+    results should containElements("one", "two", "three")
   }
 
   it should "map with timestamp" in runWithScioContext { sc =>
@@ -43,6 +43,6 @@ class SCollectionOpsTest extends AnyFlatSpec
     val results = sc.testBounded(collection)
       .mapWithTimestamp { case (e, i) => e + i.toString }
 
-    results should containSingleValue(s"$element$instant")
+    results should containElements(s"$element$instant")
   }
 }

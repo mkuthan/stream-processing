@@ -24,10 +24,9 @@ private[syntax] trait SCollectionSyntax {
 
     def unionInGlobalWindow(others: SCollection[T]*): SCollection[T] =
       self.transform { in =>
-        val inputWithGlobalWindow = in.withGlobalWindow(GlobalWindowOptions)
-        val othersWithGlobalWindow = others.map(_.withGlobalWindow(GlobalWindowOptions))
+        val collectionsWithGlobalWindow = (in +: others).map(_.withGlobalWindow(GlobalWindowOptions))
 
-        SCollection.unionAll(inputWithGlobalWindow +: othersWithGlobalWindow)
+        SCollection.unionAll(collectionsWithGlobalWindow)
       }
 
     def mapWithTimestamp[U: Coder](mapFn: (T, Instant) => U): SCollection[U] =

@@ -41,7 +41,9 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(table.id)
 
-      var deadLetters = self.context.empty[BigQueryDeadLetter[T]]()
+      var deadLetters = self.context
+        .withName(s"$id/Empty Dead Letters")
+        .empty[BigQueryDeadLetter[T]]()
 
       val _ = self.betterSaveAsCustomOutput(id.id) { in =>
         val writeResult = in
@@ -50,7 +52,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
           .internal.apply("Write", io)
 
         val errors = in.context.wrap(writeResult.getFailedStorageApiInserts)
-        deadLetters = errors.applyTransform("Errors", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
+        deadLetters = errors.applyTransform("Dead Letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
 
         writeResult
       }

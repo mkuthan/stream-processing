@@ -82,4 +82,18 @@ class ScioMatchersTest extends AnyFlatSpec with Matchers with TestScioContext {
       (time2Instant, "fifth")
     )
   }
+
+  it should "match empty collection" in runWithScioContext { sc =>
+    val input = sc.empty[String]()
+    input should beEmpty
+  }
+
+  it should "match collection size" in runWithScioContext { sc =>
+    val input = boundedTestCollectionOf[String]
+      .addElementsAtMinimumTime("first")
+      .advanceWatermarkToInfinity()
+
+    val results = sc.testBounded(input)
+    results should haveSize(1)
+  }
 }

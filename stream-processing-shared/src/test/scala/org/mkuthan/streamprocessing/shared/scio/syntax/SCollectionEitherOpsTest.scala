@@ -22,7 +22,7 @@ class SCollectionEitherOpsTest extends AnyFlatSpec
       .testBounded(collection)
       .unzip
 
-    right should containInAnyOrder(Seq("r1", "r2", "r3"))
-    left should containInAnyOrder(Seq("l1", "l2"))
+    right should containElements("r1", "r2", "r3")
+    left should containElements("l1", "l2")
   }
 }

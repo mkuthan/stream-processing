@@ -154,7 +154,7 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results = encodeMessage(sc.testUnbounded(inputs))
-    results should containSingleValue(anyVehicleWithExpiredRegistrationMessage(createdAt))
+    results should containElements(anyVehicleWithExpiredRegistrationMessage(createdAt))
   }
 
   it should "encode into record" in runWithScioContext { sc =>
@@ -165,6 +165,6 @@ class VehiclesWithExpiredRegistrationTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
-    results should containSingleValue(anyVehicleWithExpiredRegistrationRecord(createdAt))
+    results should containElements(anyVehicleWithExpiredRegistrationRecord(createdAt))
   }
 }

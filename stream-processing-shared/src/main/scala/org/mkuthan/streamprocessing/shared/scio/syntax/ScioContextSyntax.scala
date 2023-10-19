@@ -7,10 +7,12 @@ import com.spotify.scio.ScioContext
 private[syntax] trait ScioContextSyntax {
 
   implicit class ScioContextOps(private val self: ScioContext) extends SCollectionSyntax {
-    def unionInGlobalWindow[T: Coder](
+    def unionInGlobalWindow[T: Coder](name: String)(
         first: SCollection[T],
         others: SCollection[T]*
     ): SCollection[T] =
-      first.unionInGlobalWindow(others: _*)
+      first
+        .withName(name)
+        .unionInGlobalWindow(others: _*)
   }
 }

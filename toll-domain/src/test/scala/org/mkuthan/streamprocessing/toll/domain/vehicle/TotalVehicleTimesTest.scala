@@ -115,6 +115,6 @@ class TotalVehicleTimesTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
-    results should containSingleValue(anyTotalVehicleTimesRecord.copy(created_at = createdAt))
+    results should containElements(anyTotalVehicleTimesRecord.copy(created_at = createdAt))
   }
 }

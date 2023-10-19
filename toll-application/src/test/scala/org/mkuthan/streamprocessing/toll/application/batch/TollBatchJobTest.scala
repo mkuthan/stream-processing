@@ -43,18 +43,18 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
       .input(CustomIO[VehicleRegistration.Record](VehicleRegistrationTableIoId.id), Seq(anyVehicleRegistrationRecord))
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsHourlyTableIoId.id)) { results =>
-        results should containInAnyOrder(Seq(
+        results should containElements(
           anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:59:59.999Z"))
-        ))
+        )
       }
       .output(CustomIO[TollBoothStats.Record](EntryStatsDailyTableIoId.id)) { results =>
-        results should containInAnyOrder(Seq(
+        results should containElements(
           anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T23:59:59.999Z"))
-        ))
+        )
       }
       // calculate total vehicle times
       .output(CustomIO[TotalVehicleTimes.Record](TotalVehicleTimesOneHourGapTableIoId.id)) { results =>
-        results should containSingleValue(
+        results should containElements(
           anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T13:02:59.999Z"))
         )
       }
@@ -66,9 +66,9 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
       .output(CustomIO[VehiclesWithExpiredRegistration.Record](VehiclesWithExpiredRegistrationDailyTableIoId.id)) {
         results =>
           val createdAt = Instant.parse("2014-09-10T12:01:00Z")
-          results should containInAnyOrder(Seq(
+          results should containElements(
             anyVehicleWithExpiredRegistrationRecord(createdAt, anyVehicleRegistrationRecord.id)
-          ))
+          )
       }
       .output(CustomIO[TollBoothDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticDailyTableIoId.id

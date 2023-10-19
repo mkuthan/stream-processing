@@ -29,10 +29,10 @@ class BigQuerySCollectionDeadLetterOpsTest extends AnyFlatSpec
 
       val results = sc.testUnbounded(deadLetters).toDiagnostic(id)
 
-      results should containInAnyOrder(Seq(
+      results should containElements(
         Diagnostic(id.id, "error 1"),
         Diagnostic(id.id, "error 2")
-      ))
+      )
   }
 
 }

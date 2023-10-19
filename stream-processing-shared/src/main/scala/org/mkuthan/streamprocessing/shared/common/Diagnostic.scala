@@ -10,7 +10,6 @@ import org.joda.time.Instant
 import org.mkuthan.streamprocessing.shared.scio.syntax._
 import org.mkuthan.streamprocessing.shared.scio.SumByKey
 
-// TODO: move to shared/diagnostic
 final case class Diagnostic(
     id: String,
     reason: String,

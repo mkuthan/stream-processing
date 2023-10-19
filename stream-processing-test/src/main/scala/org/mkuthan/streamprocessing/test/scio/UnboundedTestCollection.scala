@@ -10,6 +10,7 @@ import org.joda.time.Duration
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.test.common.InstantSyntax
+import org.mkuthan.streamprocessing.test.common.RandomString
 
 final case class UnboundedTestCollection[T: Coder](name: String, testStream: TestStream[T])
 
@@ -46,8 +47,7 @@ object UnboundedTestCollection {
     def advanceWatermarkToInfinity(): UnboundedTestCollection[T] = {
       val testStream = builder.advanceWatermarkToInfinity()
 
-      // TODO: make transform name unique and avoid warnings from direct runner
-      UnboundedTestCollection("foo", testStream)
+      UnboundedTestCollection(RandomString.randomString(), testStream)
     }
   }
 }

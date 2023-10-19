@@ -69,7 +69,7 @@ object TollStreamingJob extends TollStreamingJobIo {
     val vehiclesWithExpiredRegistrationsIoDiagnostic =
       calculateVehiclesWithExpiredRegistrations(config, entries, vehicleRegistrations)
 
-    val ioDiagnostics = sc.unionInGlobalWindow(
+    val ioDiagnostics = sc.unionInGlobalWindow("Union IO Diagnostic")(
       entriesIoDiagnostic,
       exitsIoDiagnostic,
       vehicleRegistrationsIoDiagnostic,

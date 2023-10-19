@@ -142,6 +142,6 @@ class TollBoothStatsTest extends AnyFlatSpec with Matchers
       .advanceWatermarkToInfinity()
 
     val results = encodeRecord(sc.testBounded(inputs))
-    results should containSingleValue(anyTollBoothStatsRecord.copy(created_at = recordTimestamp))
+    results should containElements(anyTollBoothStatsRecord.copy(created_at = recordTimestamp))
   }
 }

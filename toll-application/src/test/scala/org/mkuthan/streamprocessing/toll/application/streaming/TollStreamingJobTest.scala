@@ -58,7 +58,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           .advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothEntry.Payload]](EntryDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothEntryDecodingError)
+        results should containElements(tollBoothEntryDecodingError)
       }
       .inputStream(
         CustomIO[PubsubResult[TollBoothExit.Payload]](ExitSubscriptionIoId.id),
@@ -71,7 +71,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           ).advanceWatermarkToInfinity().testStream
       )
       .output(CustomIO[DeadLetter[TollBoothExit.Payload]](ExitDlqBucketIoId.id)) { results =>
-        results should containSingleValue(tollBoothExitDecodingError)
+        results should containElements(tollBoothExitDecodingError)
       }
       // receive vehicle registrations
       .inputStream(
@@ -90,17 +90,17 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         Seq(anyVehicleRegistrationRecord)
       )
       .output(CustomIO[DeadLetter[VehicleRegistration.Payload]](VehicleRegistrationDlqBucketIoId.id)) { results =>
-        results should containSingleValue(vehicleRegistrationDecodingError)
+        results should containElements(vehicleRegistrationDecodingError)
       }
       // calculate tool booth stats
       .output(CustomIO[TollBoothStats.Record](EntryStatsTableIoId.id)) { results =>
-        results should containSingleValue(
+        results should containElements(
           anyTollBoothStatsRecord.copy(created_at = Instant.parse("2014-09-10T12:09:59.999Z"))
         )
       }
       // calculate total vehicle times
       .output(CustomIO[TotalVehicleTimes.Record](TotalVehicleTimesTableIoId.id)) { results =>
-        results should containSingleValue(
+        results should containElements(
           anyTotalVehicleTimesRecord.copy(created_at = Instant.parse("2014-09-10T12:12:59.999Z"))
         )
       }
@@ -111,10 +111,10 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
       .output(CustomIO[Message[VehiclesWithExpiredRegistration.Payload]](VehiclesWithExpiredRegistrationTopicIoId.id)) {
         results =>
           val createdAt = Instant.parse("2014-09-10T12:01:00Z") // entry time
-          results should containInAnyOrder(Seq(
+          results should containElements(
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationMessage.payload.id),
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
-          ))
+          )
       }
       .output(CustomIO[TollBoothDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
@@ -123,7 +123,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
           results should beEmpty
       }
       .output(CustomIO[Diagnostic.Record](IoDiagnosticTableIoId.id)) { results =>
-        results should containInAnyOrder(Seq(
+        results should containElements(
           anyIoDiagnosticRecord.copy(
             created_at = Instant.parse("2014-09-10T12:09:59.999Z"),
             id = EntrySubscriptionIoId.id,
@@ -139,7 +139,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
             id = VehicleRegistrationSubscriptionIoId.id,
             reason = vehicleRegistrationPubsubDeadLetter.error
           )
-        ))
+        )
       }
       .run()
   }

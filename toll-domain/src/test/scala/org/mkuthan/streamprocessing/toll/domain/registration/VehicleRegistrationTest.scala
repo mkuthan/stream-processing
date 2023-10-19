@@ -26,9 +26,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
     val (results, dlq) = decodeMessage(sc.testUnbounded(input))
 
-    results should containInAnyOrder(Seq(
-      anyVehicleRegistrationUpdate
-    ))
+    results should containElements(anyVehicleRegistrationUpdate)
     dlq should beEmpty
   }
 
@@ -44,7 +42,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
       val (results, dlq) = decodeMessage(sc.testUnbounded(input))
 
       results should beEmpty
-      dlq should containSingleValue(vehicleRegistrationDecodingError)
+      dlq should containElements(vehicleRegistrationDecodingError)
     }
 
     val result = run.waitUntilDone()
@@ -60,7 +58,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
     val results = decodeRecord(sc.testBounded(history), partitionDate)
 
-    results should containSingleValue(anyVehicleRegistrationHistory)
+    results should containElements(anyVehicleRegistrationHistory)
   }
 
   it should "union history with updates" in runWithScioContext { sc =>
@@ -74,7 +72,7 @@ class VehicleRegistrationTest extends AnyFlatSpec with Matchers
 
     val results = VehicleRegistration.unionHistoryWithUpdates(sc.testBounded(history), sc.testUnbounded(updates))
 
-    results should containInAnyOrder(Seq(anyVehicleRegistrationHistory, anyVehicleRegistrationUpdate))
+    results should containElements(anyVehicleRegistrationHistory, anyVehicleRegistrationUpdate)
   }
 
 }

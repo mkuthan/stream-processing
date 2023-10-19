@@ -40,11 +40,11 @@ class SCollectionSumByKeyOpsTest extends AnyFlatSpec
     val results = sc.testBounded(collection).sumByKeyInFixedWindow(Duration.standardMinutes(10))
 
     results should inOnTimePane("12:00:00", "12:10:00") {
-      containInAnyOrder(Seq(sample1.copy(count = 2), sample2.copy(count = 1)))
+      containElements(sample1.copy(count = 2), sample2.copy(count = 1))
     }
 
     results should inOnTimePane("12:10:00", "12:20:00") {
-      containInAnyOrder(Seq(sample2.copy(count = 1)))
+      containElements(sample2.copy(count = 1))
     }
   }
 }

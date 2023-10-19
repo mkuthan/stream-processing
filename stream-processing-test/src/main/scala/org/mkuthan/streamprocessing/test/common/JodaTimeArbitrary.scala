@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.test.common
 
+import scala.jdk.CollectionConverters._
+
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Instant
@@ -18,10 +20,16 @@ trait JodaTimeArbitrary {
     } yield new Instant(instant)
   }
 
+  implicit val dateTimeZoneArbitrary: Arbitrary[DateTimeZone] = Arbitrary[DateTimeZone] {
+    for {
+      id <- Gen.oneOf(DateTimeZone.getAvailableIDs.asScala)
+    } yield DateTimeZone.forID(id)
+  }
+
   implicit val dateTimeArbitrary: Arbitrary[DateTime] = Arbitrary[DateTime] {
-    // TODO: use more timezones
     for {
       instant <- Arbitrary.arbitrary[Instant]
+      // zone <- Arbitrary.arbitrary[DateTimeZone] TODO: enable
     } yield new DateTime(instant, DateTimeZone.UTC)
   }
 

@@ -20,10 +20,7 @@ import org.mkuthan.streamprocessing.shared.common.Message
 
 private[syntax] trait PubsubScioContextSyntax {
 
-  type PubsubResult[T] = Either[PubsubDeadLetter[T], Message[T]]
-
   implicit class PubsubScioContextOps(private val self: ScioContext) {
-
     def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
         id: IoIdentifier[T],
         subscription: PubsubSubscription[T],
@@ -38,7 +35,7 @@ private[syntax] trait PubsubScioContextSyntax {
 
       self.betterCustomInput(id.id) { in =>
         self.wrap(in.apply("Subscribe", io))
-          .withName("Decode")
+          .withName("Deserialize")
           .map { msg =>
             val payload = msg.getPayload
             val attributes = Utils.readAttributes(msg.getAttributeMap)

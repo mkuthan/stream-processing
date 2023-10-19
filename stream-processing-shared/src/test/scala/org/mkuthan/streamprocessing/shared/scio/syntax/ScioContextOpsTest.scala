@@ -21,11 +21,11 @@ class ScioContextOpsTest extends AnyFlatSpec
     val collection3 = boundedTestCollectionOf[String]
       .advanceWatermarkToInfinity()
 
-    val results = sc.unionInGlobalWindow(
+    val results = sc.unionInGlobalWindow("any name")(
       sc.testBounded(collection1).withGlobalWindow(),
       sc.testBounded(collection2).windowByDays(1),
       sc.testBounded(collection3).windowByMonths(1)
     )
-    results should containInAnyOrder(Seq("one", "two", "three"))
+    results should containElements("one", "two", "three")
   }
 }

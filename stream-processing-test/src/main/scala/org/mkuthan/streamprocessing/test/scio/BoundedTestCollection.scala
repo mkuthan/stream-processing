@@ -9,6 +9,7 @@ import com.spotify.scio.coders.CoderMaterializer
 import org.joda.time.Instant
 
 import org.mkuthan.streamprocessing.test.common.InstantSyntax
+import org.mkuthan.streamprocessing.test.common.RandomString
 
 final case class BoundedTestCollection[T: Coder](name: String, timestampedValues: Create.TimestampedValues[T])
 
@@ -39,8 +40,7 @@ object BoundedTestCollection extends InstantSyntax {
       val coder = CoderMaterializer.beamWithDefault(Coder[T])
       val timestampedValues = Create.timestamped(content.asJava).withCoder(coder)
 
-      // TODO: make transform name unique and avoid warnings from direct runner
-      BoundedTestCollection[T]("foo", timestampedValues)
+      BoundedTestCollection[T](RandomString.randomString(), timestampedValues)
     }
   }
 }

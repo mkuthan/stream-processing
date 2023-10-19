@@ -1,16 +1,18 @@
 package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
 import org.joda.time.Instant
+import org.scalactic.Equality
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.tags.Slow
-import org.scalatest.LoneElement._
+import org.scalatest.EitherValues._
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
 import org.mkuthan.streamprocessing.infrastructure.pubsub.JsonReadConfiguration
 import org.mkuthan.streamprocessing.infrastructure.pubsub.NamedIdAttribute
 import org.mkuthan.streamprocessing.infrastructure.pubsub.NamedTimestampAttribute
+import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubDeadLetter
 import org.mkuthan.streamprocessing.infrastructure.pubsub.PubsubSubscription
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures
 import org.mkuthan.streamprocessing.infrastructure.IntegrationTestFixtures.SampleClass
@@ -29,6 +31,15 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
     with IntegrationTestFixtures
     with PubsubContext {
 
+  implicit def pubsubDeadLetterEquality[T]: Equality[PubsubDeadLetter[T]] = (self: PubsubDeadLetter[T], other: Any) =>
+    other match {
+      case o: PubsubDeadLetter[_] =>
+        self.payload.sameElements(o.payload) &&
+        self.attributes == o.attributes &&
+        self.error.startsWith(o.error)
+      case _ => false
+    }
+
   behavior of "Pubsub ScioContext syntax"
 
   it should "subscribe JSON" in withScioContext { implicit sc =>
@@ -42,18 +53,17 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
           (SampleJson2, SampleMap2)
         )
 
-        val (messages, _) =
-          sc.subscribeJsonFromPubsub(IoIdentifier[SampleClass]("any-id"), PubsubSubscription[SampleClass](subscription))
-            .unzip
-
-        val sink = InMemorySink(messages)
-
+        val results = sc.subscribeJsonFromPubsub(
+          IoIdentifier[SampleClass]("any-id"),
+          PubsubSubscription[SampleClass](subscription)
+        )
+        val sink = InMemorySink(results)
         val run = sc.run()
 
         eventually {
           sink.toSeq should contain.only(
-            Message(SampleObject1, SampleMap1),
-            Message(SampleObject2, SampleMap2)
+            Right(Message(SampleObject1, SampleMap1)),
+            Right(Message(SampleObject2, SampleMap2))
           )
         }
 
@@ -69,19 +79,21 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
       withSubscription(topic) { subscription =>
         publishMessages(topic, (InvalidJson, SampleMap1))
 
-        val (_, dlq) =
-          sc.subscribeJsonFromPubsub(IoIdentifier[SampleClass]("any-id"), PubsubSubscription[SampleClass](subscription))
-            .unzip
-
-        val sink = InMemorySink(dlq)
-
+        val results = sc.subscribeJsonFromPubsub(
+          IoIdentifier[SampleClass]("any-id"),
+          PubsubSubscription[SampleClass](subscription)
+        )
+        val sink = InMemorySink(results)
         val run = sc.run()
 
+        val expectedDeadLetter = PubsubDeadLetter[SampleClass](
+          payload = InvalidJson,
+          attributes = SampleMap1,
+          error = "Unrecognized token 'invalid'"
+        )
+
         eventually {
-          val error = sink.toElement
-          error.payload should be(InvalidJson)
-          error.attributes should be(SampleMap1)
-          error.error should startWith("Unrecognized token 'invalid'")
+          sink.toElement.left.value should equal(expectedDeadLetter)
         }
 
         run.pipelineResult.cancel()
@@ -99,18 +111,16 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
 
         publishMessages(topic, Seq.fill(10)(messagePrototype): _*)
 
-        val (messages, _) = sc.subscribeJsonFromPubsub(
+        val results = sc.subscribeJsonFromPubsub(
           IoIdentifier[SampleClass]("any-id"),
           subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withIdAttribute(NamedIdAttribute.Default)
-        ).unzip
-
-        val messagesSink = InMemorySink(messages)
-
+        )
+        val messagesSink = InMemorySink(results)
         val run = sc.run()
 
         eventually {
-          messagesSink.toSeq.loneElement should be(Message(SampleObject1, attributes))
+          messagesSink.toElement should be(Right(Message(SampleObject1, attributes)))
         }
 
         run.pipelineResult.cancel()
@@ -128,19 +138,19 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
 
         publishMessages(topic, (SampleJson1, attributes))
 
-        val (messages, _) = sc.subscribeJsonFromPubsub(
+        val results = sc.subscribeJsonFromPubsub(
           IoIdentifier[SampleClass]("any-id"),
           subscription = PubsubSubscription[SampleClass](subscription),
           configuration = JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute.Default)
-        ).unzip
+        )
 
-        val messagesSink = InMemorySink(messages.withTimestamp)
+        val messagesSink = InMemorySink(results.withTimestamp)
 
         val run = sc.run()
 
         eventually {
           val (msg, ts) = messagesSink.toElement
-          msg should be(Message(SampleObject1, attributes))
+          msg should be(Right(Message(SampleObject1, attributes)))
           ts should be(timestamp)
         }
 

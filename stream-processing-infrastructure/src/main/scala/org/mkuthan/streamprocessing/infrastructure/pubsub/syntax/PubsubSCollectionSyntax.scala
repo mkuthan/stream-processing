@@ -51,6 +51,8 @@ private[syntax] trait PubsubSCollectionSyntax {
       private val self: SCollection[PubsubDeadLetter[T]]
   ) {
     def toDiagnostic(id: IoIdentifier[T]): SCollection[Diagnostic] =
-      self.map(deadLetter => Diagnostic(id.id, deadLetter.error))
+      self
+        .withName(id.id)
+        .map(deadLetter => Diagnostic(id.id, deadLetter.error))
   }
 }

@@ -21,6 +21,9 @@ import org.mkuthan.streamprocessing.shared.common.Message
 private[syntax] trait PubsubScioContextSyntax {
 
   implicit class PubsubScioContextOps(private val self: ScioContext) {
+
+    import com.spotify.scio.BetterScioContext._
+
     def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
         id: IoIdentifier[T],
         subscription: PubsubSubscription[T],
@@ -30,8 +33,6 @@ private[syntax] trait PubsubScioContextSyntax {
         .readMessagesWithAttributes()
         .pipe(read => configuration.configure(read))
         .fromSubscription(subscription.id)
-
-      import com.spotify.scio.BetterScioContext._
 
       self.betterCustomInput(id.id) { in =>
         self.wrap(in.apply("Subscribe", io))

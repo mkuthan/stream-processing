@@ -42,7 +42,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .to(table.id)
 
       var deadLetters = self.context
-        .withName(s"$id/Empty Dead Letters")
+        .withName(s"$id/Empty dead letters")
         .empty[BigQueryDeadLetter[T]]()
 
       val _ = self.betterSaveAsCustomOutput(id.id) { in =>
@@ -52,7 +52,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
           .internal.apply("Write", io)
 
         val errors = in.context.wrap(writeResult.getFailedStorageApiInserts)
-        deadLetters = errors.applyTransform("Dead Letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
+        deadLetters = errors.applyTransform("Encode dead letters", ParDo.of(new BigQueryDeadLetterEncoderDoFn[T]))
 
         writeResult
       }
@@ -83,7 +83,9 @@ private[syntax] trait BigQuerySCollectionSyntax {
       private val self: SCollection[BigQueryDeadLetter[T]]
   ) {
     def toDiagnostic(id: IoIdentifier[T]): SCollection[Diagnostic] =
-      self.map(deadLetter => Diagnostic(id.id, deadLetter.error))
+      self
+        .withName(id.id)
+        .map(deadLetter => Diagnostic(id.id, deadLetter.error))
   }
 
 }

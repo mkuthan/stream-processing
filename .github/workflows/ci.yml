@@ -23,15 +23,31 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: scapegoat-report
-          path: '**/scapegoat-report/*.html'
-  
+          path: "**/scapegoat-report/*.html"
+
   scalafix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: sbt "scalafixAll --check"   
-          
+      - run: sbt "scalafixAll --check"
+
+  tf-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dflook/terraform-validate@v1
+        with:
+          path: toll-infrastructure
+
+  tf-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dflook/terraform-fmt-check@v1
+        with:
+          path: toll-infrastructure
+
   test:
     runs-on: ubuntu-latest
     needs: [scalafmt, scapegoat, scalafix]

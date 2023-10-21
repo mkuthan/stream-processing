@@ -8,3 +8,11 @@ updates:
       all-dependencies:
         patterns:
           - "*"
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"

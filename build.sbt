@@ -18,6 +18,8 @@ lazy val test = (project in file("stream-processing-test"))
       scio,
       scioGcp,
       scioTest,
+      beamDirectRunner,
+      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
@@ -35,6 +37,8 @@ lazy val shared = (project in file("stream-processing-shared"))
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
+      beamDirectRunner,
+      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
@@ -49,6 +53,8 @@ lazy val infrastructure = (project in file("stream-processing-infrastructure"))
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
+      beamDirectRunner,
+      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
@@ -82,7 +88,11 @@ lazy val tollDomain = (project in file("toll-domain"))
   )
 
 lazy val tollApplication = (project in file("toll-application"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    assemblySettings,
+    assembly / assemblyJarName := "toll-application.jar"
+  )
   .dependsOn(
     shared,
     infrastructure,

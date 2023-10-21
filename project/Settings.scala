@@ -6,6 +6,7 @@ import sbt.Keys._
 import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
+import sbtassembly.AssemblyPlugin.autoImport._
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object Settings {
@@ -46,5 +47,20 @@ object Settings {
     ThisBuild / semanticdbEnabled := true,
     ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
     ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
+  )
+
+  val assemblySettings = Seq(
+    assembly / assemblyMergeStrategy := {
+      case s if s.endsWith(".class")      => MergeStrategy.last
+      case s if s.endsWith(".proto")      => MergeStrategy.last
+      case s if s.endsWith(".properties") => MergeStrategy.filterDistinctLines
+      case PathList("META-INF", "gradle", "incremental.annotation.processors") =>
+        MergeStrategy.discard
+      case PathList("git.properties") =>
+        MergeStrategy.discard
+      case x =>
+        val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+        oldStrategy(x)
+    }
   )
 }

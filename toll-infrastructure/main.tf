@@ -14,10 +14,13 @@ terraform {
 
 provider "google" {
   project = "playground-272019"
-  region  = "eu-west1"
-  zone    = "eu-west1-a"
+  region  = "europe-west1"
 }
 
+resource "google_artifact_registry_repository" "toll-application-registry-repository" {
+  repository_id = "toll-application"
+  format        = "DOCKER"
+}
 resource "google_storage_bucket" "toll-application-bucket" {
   name     = "playground-272019-toll-application"
   location = "EU"
@@ -58,6 +61,7 @@ resource "google_bigquery_table" "vehicle-registration-table" {
   table_id   = "vehicle-registration"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/vehicle-registration.json")
 }
 
@@ -65,6 +69,7 @@ resource "google_bigquery_table" "toll-booth-entry-stats-table" {
   table_id   = "toll-booth-entry-stats"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/toll-booth-entry-stats.json")
 }
 
@@ -72,6 +77,7 @@ resource "google_bigquery_table" "total-vehicle-times-table" {
   table_id   = "total-vehicle-times"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/total-vehicle-times.json")
 }
 
@@ -79,6 +85,7 @@ resource "google_bigquery_table" "total-vehicle-times-diagnostic-table" {
   table_id   = "total-vehicle-times-diagnostic"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -90,6 +97,7 @@ resource "google_bigquery_table" "vehicles-with-expired-registration-diagnostic-
   table_id   = "vehicles-with-expired-registration-diagnostic"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -97,5 +105,6 @@ resource "google_bigquery_table" "io-diagnostic-table" {
   table_id   = "io-diagnostic"
   dataset_id = google_bigquery_dataset.toll-application-dataset.dataset_id
 
+  # TODO: define schema
   schema = file("${path.module}/schemas/io-diagnostic.json")
 }

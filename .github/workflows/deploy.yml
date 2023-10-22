@@ -22,8 +22,8 @@ jobs:
       - uses: dflook/terraform-apply@v1
         with:
           path: toll-infrastructure
-      - uses: "google-github-actions/setup-gcloud@v1"
-      - run: ./deploy-batch.sh
-        working-directory: toll-application
-      - run: ./deploy-streaming.sh
-        working-directory: toll-application
+      # - uses: "google-github-actions/setup-gcloud@v1"
+      # - run: ./deploy-batch.sh
+      #   working-directory: toll-application
+      # - run: ./deploy-streaming.sh
+      #   working-directory: toll-application

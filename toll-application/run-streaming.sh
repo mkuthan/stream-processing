@@ -6,6 +6,7 @@ REGION=europe-west1
 gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --template-file-gcs-location "gs://$PROJECT-toll-application/templates/toll-application-streaming.json" \
     --region "$REGION" \
+    --staging-location="gs://$PROJECT-toll-application/staging/" \
     --enable-streaming-engine \
     --parameters entrySubscription="projects/$PROJECT/subscriptions/toll-booth-entry" \
     --parameters entryDlq="gs://$PROJECT-toll-application/dlq/entry" \
@@ -19,4 +20,4 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --parameters totalVehicleTimesDiagnosticTable="$PROJECT.toll_application.total-vehicle-times-diagnostic" \
     --parameters vehiclesWithExpiredRegistrationTopic="projects/$PROJECT/topics/vehicle-registration" \
     --parameters vehiclesWithExpiredRegistrationDiagnosticTable="$PROJECT.toll_application.vehicles-with-expired-registration-diagnostic" \
-    --parameters ioDiagnosticTable="$PROJECT.toll_application.io-diagnostic"
+    --parameters ioDiagnosticTable="$PROJECT.toll_application.io-diagnostic" \

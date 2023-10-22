@@ -22,8 +22,12 @@ jobs:
       - uses: dflook/terraform-apply@v1
         with:
           path: toll-infrastructure
+      # TODO: fix IAM and deploy flex templates
       # - uses: "google-github-actions/setup-gcloud@v1"
       # - run: ./deploy-batch.sh
       #   working-directory: toll-application
       # - run: ./deploy-streaming.sh
       #   working-directory: toll-application
+
+      # TODO: run streaming job
+      # TODO: deploy DAG for batch job

@@ -8,4 +8,4 @@ gcloud dataflow flex-template build gs://$PROJECT-toll-application/templates/tol
     --sdk-language "JAVA" \
     --flex-template-base-image JAVA17 \
     --jar "target/scala-2.13/toll-application.jar" \
-    --env FLEX_TEMPLATE_JAVA_MAIN_CLASS="org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob"
+    --env FLEX_TEMPLATE_JAVA_MAIN_CLASS="org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob" \

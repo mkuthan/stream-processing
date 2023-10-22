@@ -8,6 +8,8 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --template-file-gcs-location "gs://$PROJECT-toll-application/templates/toll-application-batch.json" \
     --region "$REGION" \
     --staging-location="gs://$PROJECT-toll-application/staging/" \
+    --additional-experiments="use_runner_v2" \
+    --max-workers=1 \
     --parameters effectiveDate="$DATE" \
     --parameters entryTable="$PROJECT.toll_application.toll-booth-entry" \
     --parameters exitTable="$PROJECT.toll_application.toll-booth-exit" \
@@ -18,4 +20,3 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --parameters totalVehicleTimesOneHourGapDiagnosticTable="$PROJECT.toll_application.total-vehicle-times-one-hour-gap-diagnostic" \
     --parameters vehiclesWithExpiredRegistrationDailyTable="$PROJECT.toll_application.vehicles-with-expired-registration-diagnostic-daily" \
     --parameters vehiclesWithExpiredRegistrationDailyDiagnosticTable="$PROJECT.toll_application.vehicles-with-expired-registration-daily-diagnostic" \
-

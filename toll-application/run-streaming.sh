@@ -8,6 +8,8 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --region "$REGION" \
     --staging-location="gs://$PROJECT-toll-application/staging/" \
     --enable-streaming-engine \
+    --additional-experiments="use_runner_v2" \
+    --max-workers=1 \
     --parameters entrySubscription="projects/$PROJECT/subscriptions/toll-booth-entry" \
     --parameters entryDlq="gs://$PROJECT-toll-application/dlq/entry" \
     --parameters exitSubscription="projects/$PROJECT/subscriptions/toll-booth-exit" \

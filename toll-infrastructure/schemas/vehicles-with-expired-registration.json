@@ -1,0 +1,10 @@
+[
+    {
+        "name": "permalink",
+        "type": "STRING"
+    },
+    {
+        "name": "state",
+        "type": "STRING"
+    }
+]

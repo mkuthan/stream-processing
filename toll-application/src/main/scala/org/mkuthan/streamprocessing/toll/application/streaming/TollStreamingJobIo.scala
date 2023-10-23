@@ -14,47 +14,47 @@ trait TollStreamingJobIo extends TollBoothIo with RegistrationIo with VehicleIo 
 
 trait TollBoothIo {
   val EntrySubscriptionIoId: IoIdentifier[TollBoothEntry.Payload] =
-    IoIdentifier("entry-subscription-id")
+    IoIdentifier("entry-subscription")
 
   val EntryDlqBucketIoId: IoIdentifier[TollBoothEntry.DeadLetterPayload] =
-    IoIdentifier("entry-dlq-bucket-id")
+    IoIdentifier("entry-dlq-bucket")
 
   val ExitSubscriptionIoId: IoIdentifier[TollBoothExit.Payload] =
-    IoIdentifier("exit-subscription-id")
+    IoIdentifier("exit-subscription")
 
   val ExitDlqBucketIoId: IoIdentifier[TollBoothExit.DeadLetterPayload] =
-    IoIdentifier("exit-dlq-bucket-id")
+    IoIdentifier("exit-dlq-bucket")
 
   val EntryStatsTableIoId: IoIdentifier[TollBoothStats.Record] =
-    IoIdentifier("entry-stats-table-id")
+    IoIdentifier("entry-stats-table")
 }
 
 trait RegistrationIo {
   val VehicleRegistrationSubscriptionIoId: IoIdentifier[VehicleRegistration.Payload] =
-    IoIdentifier("vehicle-registration-subscription-id")
+    IoIdentifier("vehicle-registration-subscription")
 
   val VehicleRegistrationDlqBucketIoId: IoIdentifier[VehicleRegistration.DeadLetterPayload] =
-    IoIdentifier("vehicle-registration-dlq-bucket-id")
+    IoIdentifier("vehicle-registration-dlq-bucket")
 
   val VehicleRegistrationTableIoId: IoIdentifier[VehicleRegistration.Record] =
-    IoIdentifier("toll.vehicle_registration")
+    IoIdentifier("vehicle-registration-table")
 }
 
 trait VehicleIo {
   val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Payload] =
-    IoIdentifier("vehicles-with-expired-registration-topic-id")
+    IoIdentifier("vehicles-with-expired-registration-topic")
 
   val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[TollBoothDiagnostic.Record] =
-    IoIdentifier("vehicles-with-expired-registration-diagnostic-table-id")
+    IoIdentifier("vehicles-with-expired-registration-diagnostic-table")
 
   val TotalVehicleTimesTableIoId: IoIdentifier[TotalVehicleTimes.Record] =
-    IoIdentifier("total-vehicle-times-table-id")
+    IoIdentifier("total-vehicle-times-table")
 
   val TotalVehicleTimesDiagnosticTableIoId: IoIdentifier[TollBoothDiagnostic.Record] =
-    IoIdentifier("total-vehicle-times-diagnostic-table-id")
+    IoIdentifier("total-vehicle-times-diagnostic-table")
 }
 
 trait DiagnosticIo {
   val IoDiagnosticTableIoId: IoIdentifier[Diagnostic.Record] =
-    IoIdentifier("diagnostic-table-id")
+    IoIdentifier("io-diagnostic-table")
 }

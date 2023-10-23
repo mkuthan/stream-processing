@@ -27,11 +27,13 @@ resource "google_artifact_registry_repository" "toll-application-registry-reposi
 
   repository_id = "toll-application"
   format        = "DOCKER"
+
   cleanup_policies {
-    id     = "keep-minimum-versions"
-    action = "KEEP"
-    most_recent_versions {
-      keep_count = 3
+    id     = "delete-untagged"
+    action = "DELETE"
+    condition {
+      tag_state  = "UNTAGGED"
+      older_than = "604800s" // 7 days
     }
   }
 }

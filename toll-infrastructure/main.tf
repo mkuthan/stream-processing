@@ -58,7 +58,12 @@ resource "google_bigquery_table" "toll-booth-entry-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "entry_time"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-entry.json")
 }
 
@@ -76,7 +81,12 @@ resource "google_bigquery_table" "toll-booth-exit-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "exit_time"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-exit.json")
 }
 
@@ -94,7 +104,11 @@ resource "google_bigquery_table" "vehicle-registration-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/vehicle-registration.json")
 }
 
@@ -103,7 +117,12 @@ resource "google_bigquery_table" "toll-booth-entry-stats-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-entry-stats.json")
 }
 
@@ -112,7 +131,12 @@ resource "google_bigquery_table" "toll-booth-entry-stats-hourly-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-entry-stats.json")
 }
 
@@ -121,7 +145,12 @@ resource "google_bigquery_table" "toll-booth-entry-stats-daily-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-entry-stats.json")
 }
 
@@ -130,7 +159,12 @@ resource "google_bigquery_table" "total-vehicle-times-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/total-vehicle-times.json")
 }
 
@@ -139,7 +173,12 @@ resource "google_bigquery_table" "total-vehicle-times-diagnostic-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -148,7 +187,12 @@ resource "google_bigquery_table" "total-vehicle-times-one-hour-gap-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/total-vehicle-times.json")
 }
 
@@ -157,7 +201,12 @@ resource "google_bigquery_table" "total-vehicle-times-one-hour-gap-diagnostic-ta
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -170,7 +219,12 @@ resource "google_bigquery_table" "vehicles-with-expired-registration-diagnostic-
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -179,16 +233,26 @@ resource "google_bigquery_table" "vehicles-with-expired-registration-daily-table
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/vehicles-with-expired-registration.json")
 }
 
 resource "google_bigquery_table" "vehicles-with-expired-registration-daily-diagnostic-table" {
-  table_id            = "vehicles-with-expired-registration-diagnostic-daily"
+  table_id            = "vehicles-with-expired-registration-daily-diagnostic"
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
   schema = file("${path.module}/schemas/toll-booth-diagnostic.json")
 }
 
@@ -197,6 +261,11 @@ resource "google_bigquery_table" "io-diagnostic-table" {
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
-  # TODO: define schema
-  schema = file("${path.module}/schemas/io-diagnostic.json")
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "created_at"
+    require_partition_filter = true
+  }
+
+  schema = file("${path.module}/schemas/diagnostic.json")
 }

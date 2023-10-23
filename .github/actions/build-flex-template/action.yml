@@ -1,0 +1,35 @@
+name: Build flex template
+description: Build flex template using gcloud
+
+inputs:
+  template_file:
+    description: Google Cloud Storage location of the flex template file
+    required: true
+  image_gcr:
+    description: Google Artifact Registry location to store the flex template image to be built
+    required: true
+  artifact_name:
+    description: Artifact name
+    required: true
+  main_class:
+    description: Main class
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.artifact_name }}
+
+    - uses: "google-github-actions/setup-gcloud@v1"
+
+    - name: Flex template build
+      shell: bash
+      run: |
+        gcloud dataflow flex-template build ${{ inputs.template_file }} \
+            --image-gcr-path "${{ image_gcr }}" \
+            --sdk-language "JAVA" \
+            --flex-template-base-image JAVA17 \
+            --jar "${{ inputs.artifact_name }}" \
+            --env FLEX_TEMPLATE_JAVA_MAIN_CLASS="${{ inputs.main_class }}" \

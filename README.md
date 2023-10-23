@@ -11,9 +11,8 @@ Shared modules:
 
 Use cases:
 
-* `toll-application`, `toll-domain` - sample application for toll data processing,
+* `toll-application`, `toll-domain`, `toll-infrastructure` - sample application for toll data processing,
 see [blog post](https://mkuthan.github.io/blog/2023/09/27/unified-batch-streaming/)
-* `toll-infrastructure` - GCP infrastructure as a code for sample application
 * `word-count` - fixed window example,
 see [blog post](https://mkuthan.github.io/blog/2022/01/28/stream-processing-part1/)
 * `session-window` - session window example,

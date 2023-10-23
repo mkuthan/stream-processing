@@ -1,10 +1,42 @@
 [
     {
-        "name": "permalink",
+        "name": "id",
+        "type": "STRING"
+    },
+    {
+        "name": "entry_time",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "license_plate",
         "type": "STRING"
     },
     {
         "name": "state",
+        "type": "STRING"
+    },
+    {
+        "name": "make",
+        "type": "STRING"
+    },
+    {
+        "name": "model",
+        "type": "STRING"
+    },
+    {
+        "name": "vehicle_type",
+        "type": "STRING"
+    },
+    {
+        "name": "weight_type",
+        "type": "STRING"
+    },
+    {
+        "name": "toll",
+        "type": "NUMERIC"
+    },
+    {
+        "name": "tag",
         "type": "STRING"
     }
 ]

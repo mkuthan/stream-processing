@@ -1,10 +1,26 @@
 [
     {
-        "name": "permalink",
+        "name": "created_at",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "id",
         "type": "STRING"
     },
     {
-        "name": "state",
-        "type": "STRING"
+        "name": "count",
+        "type": "INTEGER"
+    },
+    {
+        "name": "total_toll",
+        "type": "NUMERIC"
+    },
+    {
+        "name": "first_entry_time",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "last_entry_time",
+        "type": "TIMESTAMP"
     }
 ]

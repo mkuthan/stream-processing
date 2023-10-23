@@ -23,7 +23,7 @@ runs:
       shell: bash
       run: |
         gcloud dataflow flex-template build ${{ inputs.template_file }} \
-            --image-gcr-path "${{ image_gcr }}" \
+            --image-gcr-path "${{ inputs.image_gcr }}" \
             --sdk-language "JAVA" \
             --flex-template-base-image JAVA17 \
             --jar "${{ inputs.jar }}" \

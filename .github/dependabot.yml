@@ -9,7 +9,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "terraform"
-    directory: "/"
+    directory: "/toll-infrastructure"
     schedule:
       interval: "weekly"
     groups:

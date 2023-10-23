@@ -12,7 +12,7 @@ inputs:
     description: Local path to your dataflow pipeline jar file
     required: true
   main_class:
-    description: Main class
+    description: Specifies which Java class to run in order to launch the Flex Template
     required: true
 
 runs:

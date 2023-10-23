@@ -1,12 +1,12 @@
 import sbt._
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.13.3"
-  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.13.3"
-  val scioTest = "com.spotify" %% "scio-test" % "0.13.3"
+  val scio = "com.spotify" %% "scio-core" % "0.13.4"
+  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.13.4"
+  val scioTest = "com.spotify" %% "scio-test" % "0.13.4"
 
-  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.50.0"
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.50.0"
+  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.51.0"
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.51.0"
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 

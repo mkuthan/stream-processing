@@ -13,47 +13,38 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: sbt tollApplication/assembly
-      - run: ls -R
       - uses: actions/upload-artifact@v3
         with:
           path: ./toll-application/target/scala-2.13/assembly.jar
 
-  test:
+  build-batch:
     runs-on: ubuntu-latest
     needs: [assembly]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
-      - run: ls -R
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - uses: ./.github/actions/build-flex-template
+        with:
+          template_file: gs://playground-272019-toll-application/templates/toll-application-batch.json
+          image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-batch:latest
+          jar: ./artifact/assembly.jar
+          main_class: org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
 
-  # build-batch:
-  #   runs-on: ubuntu-latest
-  #   needs: [assembly]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/download-artifact@v3
-  #     - uses: google-github-actions/auth@v1
-  #       with:
-  #         credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
-  #     - uses: ./.github/actions/build-flex-template
-  #       with:
-  #         template_file: gs://playground-272019-toll-application/templates/toll-application-batch.json
-  #         image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-batch:latest
-  #         jar: ./app.jar
-  #         main_class: org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
-
-  # build-streaming:
-  #   runs-on: ubuntu-latest
-  #   needs: [assembly]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/download-artifact@v3
-  #     - uses: google-github-actions/auth@v1
-  #       with:
-  #         credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
-  #     - uses: ./.github/actions/build-flex-template
-  #       with:
-  #         template_file: gs://playground-272019-toll-application/templates/toll-application-streaming.json
-  #         image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-streaming:latest
-  #         jar: ./app.jar
-  #         main_class: org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob
+  build-streaming:
+    runs-on: ubuntu-latest
+    needs: [assembly]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - uses: ./.github/actions/build-flex-template
+        with:
+          template_file: gs://playground-272019-toll-application/templates/toll-application-streaming.json
+          image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-streaming:latest
+          jar: ./artifact/assembly.jar
+          main_class: org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob

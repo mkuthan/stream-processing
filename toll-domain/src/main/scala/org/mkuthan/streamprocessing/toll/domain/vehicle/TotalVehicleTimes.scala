@@ -40,22 +40,25 @@ object TotalVehicleTimes {
       gapDuration: Duration,
       windowOptions: WindowOptions
   ): (SCollection[TotalVehicleTimes], SCollection[TollBoothDiagnostic]) = {
-    val boothEntriesById = boothEntries
-      .keyBy(entry => (entry.id, entry.licensePlate))
-      .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
-    val boothExistsById = boothExits
-      .keyBy(exit => (exit.id, exit.licensePlate))
-      .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
+    val results = boothEntries.transform { in =>
+      val boothEntriesById = in
+        .keyBy(entry => (entry.id, entry.licensePlate))
+        .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
 
-    val results = boothEntriesById
-      .leftOuterJoin(boothExistsById)
-      .values
-      .map {
-        case (boothEntry, Some(boothExit)) =>
-          Right(toTotalVehicleTimes(boothEntry, boothExit))
-        case (boothEntry, None) =>
-          Left(TollBoothDiagnostic(boothEntry.id, TollBoothDiagnostic.MissingTollBoothExit))
-      }
+      val boothExistsById = boothExits
+        .keyBy(exit => (exit.id, exit.licensePlate))
+        .withSessionWindows(gapDuration = gapDuration, options = windowOptions)
+
+      boothEntriesById
+        .leftOuterJoin(boothExistsById)
+        .values
+        .map {
+          case (boothEntry, Some(boothExit)) =>
+            Right(toTotalVehicleTimes(boothEntry, boothExit))
+          case (boothEntry, None) =>
+            Left(TollBoothDiagnostic(boothEntry.id, TollBoothDiagnostic.MissingTollBoothExit))
+        }
+    }
 
     results.unzip
   }

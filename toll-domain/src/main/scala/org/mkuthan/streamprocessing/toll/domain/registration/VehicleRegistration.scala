@@ -52,9 +52,11 @@ object VehicleRegistration {
       .unzip
 
   def decodeRecord(input: SCollection[Record], partitionDate: LocalDate): SCollection[VehicleRegistration] =
-    input
-      .map(record => fromRecord(record, partitionDate))
-      .timestampBy(registration => registration.registrationTime)
+    input.transform { in =>
+      in
+        .map(record => fromRecord(record, partitionDate))
+        .timestampBy(registration => registration.registrationTime)
+    }
 
   def unionHistoryWithUpdates(
       history: SCollection[VehicleRegistration],

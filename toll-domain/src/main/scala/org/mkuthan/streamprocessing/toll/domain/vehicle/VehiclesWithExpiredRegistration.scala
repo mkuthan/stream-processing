@@ -51,37 +51,39 @@ object VehiclesWithExpiredRegistration {
       rightWindowDuration: Duration,
       windowOptions: WindowOptions
   ): (SCollection[VehiclesWithExpiredRegistration], SCollection[TollBoothDiagnostic]) = {
-    val boothEntriesByLicensePlate = boothEntries
-      .keyBy(_.licensePlate)
-      .withFixedWindows(
-        duration = leftWindowDuration,
-        options = windowOptions
-      )
+    val results = boothEntries.transform { in =>
+      val boothEntriesByLicensePlate = in
+        .keyBy(_.licensePlate)
+        .withFixedWindows(
+          duration = leftWindowDuration,
+          options = windowOptions
+        )
 
-    val vehicleRegistrationByLicensePlate = vehicleRegistrations
-      .keyBy(_.licensePlate)
-      .withFixedWindows(
-        duration = rightWindowDuration,
-        options = windowOptions
-      )
+      val vehicleRegistrationByLicensePlate = vehicleRegistrations
+        .keyBy(_.licensePlate)
+        .withFixedWindows(
+          duration = rightWindowDuration,
+          options = windowOptions
+        )
 
-    val results = boothEntriesByLicensePlate
-      .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
-      .values
-      .map {
-        case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
-          Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
-        case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
-          Left(TollBoothDiagnostic(
-            boothEntry.id,
-            TollBoothDiagnostic.VehicleRegistrationNotExpired
-          ))
-        case (boothEntry, None) =>
-          Left(TollBoothDiagnostic(
-            boothEntry.id,
-            TollBoothDiagnostic.MissingVehicleRegistration
-          ))
-      }
+      boothEntriesByLicensePlate
+        .hashLeftOuterJoin(vehicleRegistrationByLicensePlate)
+        .values
+        .map {
+          case (boothEntry, Some(vehicleRegistration)) if vehicleRegistration.expired =>
+            Right(toVehiclesWithExpiredRegistration(boothEntry, vehicleRegistration))
+          case (boothEntry, Some(vehicleRegistration)) if !vehicleRegistration.expired =>
+            Left(TollBoothDiagnostic(
+              boothEntry.id,
+              TollBoothDiagnostic.VehicleRegistrationNotExpired
+            ))
+          case (boothEntry, None) =>
+            Left(TollBoothDiagnostic(
+              boothEntry.id,
+              TollBoothDiagnostic.MissingVehicleRegistration
+            ))
+        }
+    }
 
     results.unzip
   }

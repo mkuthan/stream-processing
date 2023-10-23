@@ -47,14 +47,16 @@ object TollBoothDiagnostic {
       windowDuration: Duration,
       windowOptions: WindowOptions
   ): SCollection[Record] =
-    input
-      .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
-      .mapWithTimestamp { case (diagnostic, timestamp) =>
-        Record(
-          created_at = timestamp,
-          toll_booth_id = diagnostic.tollBoothId.id,
-          reason = diagnostic.reason,
-          count = diagnostic.count
-        )
-      }
+    input.transform { in =>
+      in
+        .sumByKeyInFixedWindow(windowDuration = windowDuration, windowOptions = windowOptions)
+        .mapWithTimestamp { case (diagnostic, timestamp) =>
+          Record(
+            created_at = timestamp,
+            toll_booth_id = diagnostic.tollBoothId.id,
+            reason = diagnostic.reason,
+            count = diagnostic.count
+          )
+        }
+    }
 }

@@ -66,9 +66,11 @@ object TollBoothEntry {
       .unzip
 
   def decodeRecord(input: SCollection[Record]): SCollection[TollBoothEntry] =
-    input
-      .map(record => fromRecord(record))
-      .timestampBy(boothExit => boothExit.entryTime)
+    input.transform { in =>
+      in
+        .map(record => fromRecord(record))
+        .timestampBy(boothExit => boothExit.entryTime)
+    }
 
   private def fromMessage(message: Message[Payload]): Either[DeadLetterPayload, TollBoothEntry] = {
     val payload = message.payload

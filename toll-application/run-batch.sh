@@ -3,7 +3,7 @@
 DATE=`date +%Y-%m-%d`
 
 PROJECT=playground-272019
-REGION=europe-west1
+REGION=europe-central2
 
 gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --template-file-gcs-location "gs://$PROJECT-toll-application/templates/toll-application-batch.json" \

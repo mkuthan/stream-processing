@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [assembly]
     steps:
+      - uses: actions/checkout@v4
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
@@ -36,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [assembly]
     steps:
+      - uses: actions/checkout@v4
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"

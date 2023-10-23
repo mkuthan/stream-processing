@@ -52,6 +52,7 @@ object Settings {
   )
 
   val assemblySettings = Seq(
+    assembly / assemblyJarName := "assembly.jar",
     assembly / assemblyMergeStrategy := {
       case s if s.endsWith(".class")      => MergeStrategy.last
       case s if s.endsWith(".proto")      => MergeStrategy.last

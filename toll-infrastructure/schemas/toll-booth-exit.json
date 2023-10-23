@@ -1,10 +1,14 @@
 [
     {
-        "name": "permalink",
+        "name": "id",
         "type": "STRING"
     },
     {
-        "name": "state",
+        "name": "exit_time",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "license_plate",
         "type": "STRING"
     }
 ]

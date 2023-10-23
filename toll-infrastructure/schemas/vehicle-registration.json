@@ -1,10 +1,14 @@
 [
     {
-        "name": "permalink",
+        "name": "id",
         "type": "STRING"
     },
     {
-        "name": "state",
+        "name": "license_plate",
         "type": "STRING"
+    },
+    {
+        "name": "expired",
+        "type": "INTEGER"
     }
 ]

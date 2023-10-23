@@ -1,0 +1,47 @@
+name: Build flex templates
+
+on:
+  workflow_dispatch: ~
+  push:
+    branches:
+      - main
+
+jobs:
+  assembly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: sbt tollApplication/assembly
+      - uses: actions/upload-artifact@v3
+        with:
+          name: toll-application
+          path: toll-application/target/scala-2.13/toll-application.jar"
+
+  build-batch:
+    runs-on: ubuntu-latest
+    needs: [assembly]
+    steps:
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - uses: ./.github/actions/build-flex-template
+        with:
+          template_file: gs://playground-272019-toll-application/templates/toll-application-batch.json
+          image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-batch:latest
+          artifact_name: toll-application
+          main_class: org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
+
+  build-streaming:
+    runs-on: ubuntu-latest
+    needs: [assembly]
+    steps:
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+      - uses: ./.github/actions/build-flex-template
+        with:
+          template_file: gs://playground-272019-toll-application/templates/toll-application-streaming.json
+          image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-streaming:latest
+          artifact_name: toll-application
+          main_class: org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob

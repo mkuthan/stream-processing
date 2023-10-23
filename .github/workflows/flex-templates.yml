@@ -12,17 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: sbt tollApplication/assembly
+      - run: sbt 'set assemblyOutputPath in assembly := new File("./app.jar")' tollApplication/assembly
       - uses: actions/upload-artifact@v3
         with:
-          name: assembly
-          path: stream-processing/toll-application/target/scala-2.13/tollApplication-assembly*.jar"
+          path: ./app.jar
 
   build-batch:
     runs-on: ubuntu-latest
     needs: [assembly]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
@@ -30,7 +30,7 @@ jobs:
         with:
           template_file: gs://playground-272019-toll-application/templates/toll-application-batch.json
           image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-batch:latest
-          artifact_name: assembly
+          jar: ./app.jar
           main_class: org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
 
   build-streaming:
@@ -38,6 +38,7 @@ jobs:
     needs: [assembly]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
       - uses: google-github-actions/auth@v1
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
@@ -45,5 +46,5 @@ jobs:
         with:
           template_file: gs://playground-272019-toll-application/templates/toll-application-streaming.json
           image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-streaming:latest
-          artifact_name: assembly
+          jar: ./app.jar
           main_class: org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob

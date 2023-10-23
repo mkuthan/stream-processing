@@ -15,8 +15,8 @@ jobs:
       - run: sbt tollApplication/assembly
       - uses: actions/upload-artifact@v3
         with:
-          name: toll-application
-          path: toll-application/target/scala-2.13/toll-application.jar"
+          name: assembly
+          path: stream-processing/toll-application/target/scala-2.13/tollApplication-assembly*.jar"
 
   build-batch:
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
         with:
           template_file: gs://playground-272019-toll-application/templates/toll-application-batch.json
           image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-batch:latest
-          artifact_name: toll-application
+          artifact_name: assembly
           main_class: org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
 
   build-streaming:
@@ -45,5 +45,5 @@ jobs:
         with:
           template_file: gs://playground-272019-toll-application/templates/toll-application-streaming.json
           image_gcr: europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-application-streaming:latest
-          artifact_name: toll-application
+          artifact_name: assembly
           main_class: org.mkuthan.streamprocessing.toll.application.streaming.TollStreamingJob

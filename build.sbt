@@ -90,8 +90,7 @@ lazy val tollDomain = (project in file("toll-domain"))
 lazy val tollApplication = (project in file("toll-application"))
   .settings(
     commonSettings,
-    assemblySettings,
-    assembly / assemblyJarName := "toll-application.jar"
+    assemblySettings
   )
   .dependsOn(
     shared,

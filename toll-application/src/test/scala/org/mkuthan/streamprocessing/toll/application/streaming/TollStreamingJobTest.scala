@@ -41,7 +41,7 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         "--entryStatsTable=toll.entry_stats",
         "--totalVehicleTimesTable=toll.total_vehicle_time",
         "--totalVehicleTimesDiagnosticTable=toll.total_vehicle_time_diagnostic",
-        "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
+        "--vehiclesWithExpiredRegistrationTopic=projects/any-id/topics/vehicles-with-expired-registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
         "--ioDiagnosticTable=toll.io_diagnostic"
       )

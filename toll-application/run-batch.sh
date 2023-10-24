@@ -19,6 +19,6 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --parameters entryStatsHourlyTable="$PROJECT.toll_application.toll-booth-entry-stats-hourly" \
     --parameters entryStatsDailyTable="$PROJECT.toll_application.toll-booth-entry-stats-daily" \
     --parameters totalVehicleTimesOneHourGapTable="$PROJECT.toll_application.total-vehicle-times-one-hour-gap" \
-    --parameters totalVehicleTimesOneHourGapDiagnosticTable="$PROJECT.toll_application.total-vehicle-times-one-hour-gap-diagnostic" \
+    --parameters totalVehicleTimesDiagnosticOneHourGapTable="$PROJECT.toll_application.total-vehicle-times-diagnostic-one-hour-gap" \
     --parameters vehiclesWithExpiredRegistrationDailyTable="$PROJECT.toll_application.vehicles-with-expired-registration-daily" \
-    --parameters vehiclesWithExpiredRegistrationDailyDiagnosticTable="$PROJECT.toll_application.vehicles-with-expired-registration-daily-diagnostic" \
+    --parameters vehiclesWithExpiredRegistrationDiagnosticDailyTable="$PROJECT.toll_application.vehicles-with-expired-registration-diagnostic-daily" \

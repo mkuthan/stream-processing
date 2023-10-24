@@ -198,8 +198,8 @@ resource "google_bigquery_table" "total-vehicle-times-one-hour-gap-table" {
   schema = file("${path.module}/schemas/total-vehicle-times.json")
 }
 
-resource "google_bigquery_table" "total-vehicle-times-one-hour-gap-diagnostic-table" {
-  table_id            = "total-vehicle-times-one-hour-gap-diagnostic"
+resource "google_bigquery_table" "total-vehicle-times-diagnostic-one-hour-gap-table" {
+  table_id            = "total-vehicle-times-diagnostic-one-hour-gap"
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 
@@ -244,8 +244,8 @@ resource "google_bigquery_table" "vehicles-with-expired-registration-daily-table
   schema = file("${path.module}/schemas/vehicles-with-expired-registration.json")
 }
 
-resource "google_bigquery_table" "vehicles-with-expired-registration-daily-diagnostic-table" {
-  table_id            = "vehicles-with-expired-registration-daily-diagnostic"
+resource "google_bigquery_table" "vehicles-with-expired-registration-diagnostic-daily-table" {
+  table_id            = "vehicles-with-expired-registration-diagnostic-daily"
   dataset_id          = google_bigquery_dataset.toll-application-dataset.dataset_id
   deletion_protection = false
 

@@ -24,7 +24,7 @@ final case class TollBatchJobConfig(
     vehiclesWithExpiredRegistrationDailyPartition: BigQueryPartition[VehiclesWithExpiredRegistration.Record],
     vehiclesWithExpiredRegistrationDiagnosticDailyPartition: BigQueryPartition[TollBoothDiagnostic.Record],
     totalVehicleTimesOneHourGapPartition: BigQueryPartition[TotalVehicleTimes.Record],
-    totalVehicleTimesOneHourGapDiagnosticTable: BigQueryPartition[TollBoothDiagnostic.Record]
+    totalVehicleTimesDiagnosticOneHourGapTable: BigQueryPartition[TollBoothDiagnostic.Record]
 )
 
 object TollBatchJobConfig {
@@ -40,11 +40,11 @@ object TollBatchJobConfig {
       vehiclesWithExpiredRegistrationDailyPartition =
         BigQueryPartition.daily(args.required("vehiclesWithExpiredRegistrationDailyTable"), effectiveDate),
       vehiclesWithExpiredRegistrationDiagnosticDailyPartition =
-        BigQueryPartition.daily(args.required("vehiclesWithExpiredRegistrationDailyDiagnosticTable"), effectiveDate),
+        BigQueryPartition.daily(args.required("vehiclesWithExpiredRegistrationDiagnosticDailyTable"), effectiveDate),
       totalVehicleTimesOneHourGapPartition =
         BigQueryPartition.daily(args.required("totalVehicleTimesOneHourGapTable"), effectiveDate),
-      totalVehicleTimesOneHourGapDiagnosticTable =
-        BigQueryPartition.daily(args.required("totalVehicleTimesOneHourGapDiagnosticTable"), effectiveDate)
+      totalVehicleTimesDiagnosticOneHourGapTable =
+        BigQueryPartition.daily(args.required("totalVehicleTimesDiagnosticOneHourGapTable"), effectiveDate)
     )
   }
 }

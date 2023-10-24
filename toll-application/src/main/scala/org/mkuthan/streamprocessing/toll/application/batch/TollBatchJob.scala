@@ -124,7 +124,7 @@ object TollBatchJob extends TollBatchJobIo {
       .aggregateAndEncodeRecord(totalVehicleTimesDiagnostic, OneDay, DefaultWindowOptions)
       .writeBoundedToBigQuery(
         TotalVehicleTimesDiagnosticOneHourGapTableIoId,
-        config.totalVehicleTimesOneHourGapDiagnosticTable
+        config.totalVehicleTimesDiagnosticOneHourGapTable
       )
   }
 

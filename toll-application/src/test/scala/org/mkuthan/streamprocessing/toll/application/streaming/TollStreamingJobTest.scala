@@ -41,7 +41,8 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
         "--entryStatsTable=toll.entry_stats",
         "--totalVehicleTimesTable=toll.total_vehicle_time",
         "--totalVehicleTimesDiagnosticTable=toll.total_vehicle_time_diagnostic",
-        "--vehiclesWithExpiredRegistrationTopic=vehicles-with-expired-registration",
+        "--vehiclesWithExpiredRegistrationTopic=projects/any-id/topics/vehicles-with-expired-registration",
+        "--vehiclesWithExpiredRegistrationTable=toll.vehicles_with_expired_registration",
         "--vehiclesWithExpiredRegistrationDiagnosticTable=toll.vehicles_with_expired_registration_diagnostic",
         "--ioDiagnosticTable=toll.io_diagnostic"
       )
@@ -116,12 +117,21 @@ class TollStreamingJobTest extends AnyFlatSpec with Matchers
             anyVehicleWithExpiredRegistrationMessage(createdAt, anyVehicleRegistrationRecord.id)
           )
       }
+      .output(CustomIO[VehiclesWithExpiredRegistration.Record](VehiclesWithExpiredRegistrationTableIoId.id)) {
+        results =>
+          val createdAt = Instant.parse("2014-09-10T12:01:00Z") // entry time
+          results should containElements(
+            anyVehicleWithExpiredRegistrationRecord(createdAt, anyVehicleRegistrationMessage.payload.id),
+            anyVehicleWithExpiredRegistrationRecord(createdAt, anyVehicleRegistrationRecord.id)
+          )
+      }
       .output(CustomIO[TollBoothDiagnostic.Record](
         VehiclesWithExpiredRegistrationDiagnosticTableIoId.id
       )) {
         results =>
           results should beEmpty
       }
+      // I/O diagnostic
       .output(CustomIO[Diagnostic.Record](IoDiagnosticTableIoId.id)) { results =>
         results should containElements(
           anyIoDiagnosticRecord.copy(

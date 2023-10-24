@@ -32,9 +32,9 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
         "--entryStatsHourlyTable=toll.entry_stats_hourly",
         "--entryStatsDailyTable=toll.entry_stats_daily",
         "--totalVehicleTimesOneHourGapTable=toll.total_vehicle_time_one_hour_gap",
-        "--totalVehicleTimesOneHourGapDiagnosticTable=toll.total_vehicle_time_one_hour_gap_diagnostic",
+        "--totalVehicleTimesDiagnosticOneHourGapTable=toll.total_vehicle_time_diagnostic_one_hour_gap",
         "--vehiclesWithExpiredRegistrationDailyTable=toll.vehicles_with_expired_registration_daily",
-        "--vehiclesWithExpiredRegistrationDailyDiagnosticTable=toll.vehicles_with_expired_registration_daily_diagnostic"
+        "--vehiclesWithExpiredRegistrationDiagnosticDailyTable=toll.vehicles_with_expired_registration_diagnostic_daily"
       )
       // read toll booth entries and toll booth exists
       .input(CustomIO[TollBoothEntry.Record](EntryTableIoId.id), Seq(anyTollBoothEntryRecord))

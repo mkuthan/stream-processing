@@ -18,16 +18,13 @@ lazy val test = (project in file("stream-processing-test"))
       scio,
       scioGcp,
       scioTest,
-      beamDirectRunner,
-      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
       logback,
       scalaTest,
       scalaTestPlusScalaCheck,
-      magnolifyScalaCheck,
-      diffx
+      beamDirectRunner % Test
     )
   )
 
@@ -37,12 +34,11 @@ lazy val shared = (project in file("stream-processing-shared"))
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
-      beamDirectRunner,
-      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
-      logback
+      logback,
+      beamDirectRunner % Test
     )
   )
   .dependsOn(test % Test)
@@ -53,12 +49,13 @@ lazy val infrastructure = (project in file("stream-processing-infrastructure"))
     libraryDependencies ++= Seq(
       scio,
       scioGcp,
-      beamDirectRunner,
-      beamDataflowRunner,
       scalaLogging,
       slf4j,
       slf4jJcl,
-      logback
+      logback,
+      beamDirectRunner % Test,
+      magnolifyScalaCheck % Test,
+      diffx % Test
     )
   )
   .dependsOn(
@@ -67,21 +64,36 @@ lazy val infrastructure = (project in file("stream-processing-infrastructure"))
   )
 
 lazy val wordCount = (project in file("word-count"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      beamDirectRunner % Test
+    )
+  )
   .dependsOn(
     shared,
     test % Test
   )
 
 lazy val userSessions = (project in file("user-sessions"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      beamDirectRunner % Test
+    )
+  )
   .dependsOn(
     shared,
     test % Test
   )
 
 lazy val tollDomain = (project in file("toll-domain"))
-  .settings(commonSettings)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      beamDirectRunner % Test
+    )
+  )
   .dependsOn(
     shared,
     test % Test
@@ -90,7 +102,11 @@ lazy val tollDomain = (project in file("toll-domain"))
 lazy val tollApplication = (project in file("toll-application"))
   .settings(
     commonSettings,
-    assemblySettings
+    assemblySettings,
+    libraryDependencies ++= Seq(
+      beamDirectRunner % Test,
+      beamDataflowRunner % Runtime
+    )
   )
   .dependsOn(
     shared,

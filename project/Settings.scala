@@ -38,8 +38,6 @@ object Settings {
     Global / onChangedBuildSource := ReloadOnSourceChanges,
     // experimental feature to speed up the build
     updateOptions := updateOptions.value.withCachedResolution(true),
-    // required by beam-runners-google-cloud-dataflow-java
-    resolvers += "confluent" at "https://packages.confluent.io/maven/",
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
     // enable XML report for codecov

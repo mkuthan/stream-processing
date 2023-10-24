@@ -1,16 +1,14 @@
 #!/bin/bash
 
 PROJECT=playground-272019
-REGION=europe-west1
+REGION=europe-central2
 
 gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --template-file-gcs-location "gs://$PROJECT-toll-application/templates/toll-application-streaming.json" \
     --region "$REGION" \
     --staging-location "gs://$PROJECT-toll-application/staging/" \
     --enable-streaming-engine \
-    --additional-experiments "use_runner_v2" \
-    --max-workers 1 \
-    --worker-machine-type "t2d-standard-1" \
+    --additional-experiments "enable_prime" \
     --parameters entrySubscription="projects/$PROJECT/subscriptions/toll-booth-entry" \
     --parameters entryDlq="gs://$PROJECT-toll-application/dlq/entry" \
     --parameters exitSubscription="projects/$PROJECT/subscriptions/toll-booth-exit" \
@@ -22,5 +20,10 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --parameters totalVehicleTimesTable="$PROJECT.toll_application.total-vehicle-times" \
     --parameters totalVehicleTimesDiagnosticTable="$PROJECT.toll_application.total-vehicle-times-diagnostic" \
     --parameters vehiclesWithExpiredRegistrationTopic="projects/$PROJECT/topics/vehicle-registration" \
+    --parameters vehiclesWithExpiredRegistrationTable="$PROJECT.toll_application.vehicles-with-expired-registration" \
     --parameters vehiclesWithExpiredRegistrationDiagnosticTable="$PROJECT.toll_application.vehicles-with-expired-registration-diagnostic" \
     --parameters ioDiagnosticTable="$PROJECT.toll_application.io-diagnostic" \
+
+    # --additional-experiments "use_runner_v2" \
+    # --max-workers 1 \
+    # --worker-machine-type "t2d-standard-1" \

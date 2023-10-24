@@ -12,10 +12,7 @@ object Dependencies {
   )
 
   val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.51.0"
-
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.51.0" excludeAll (
-    ExclusionRule(organization = "org.apache.beam", name = "beam-sdks-java-io-kafka")
-  )
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.51.0"
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 

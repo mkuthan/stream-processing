@@ -44,6 +44,9 @@ trait VehicleIo {
   val VehiclesWithExpiredRegistrationTopicIoId: IoIdentifier[VehiclesWithExpiredRegistration.Payload] =
     IoIdentifier("vehicles-with-expired-registration-topic")
 
+  val VehiclesWithExpiredRegistrationTableIoId: IoIdentifier[VehiclesWithExpiredRegistration.Record] =
+    IoIdentifier("vehicles-with-expired-registration-table")
+
   val VehiclesWithExpiredRegistrationDiagnosticTableIoId: IoIdentifier[TollBoothDiagnostic.Record] =
     IoIdentifier("vehicles-with-expired-registration-diagnostic-table")
 

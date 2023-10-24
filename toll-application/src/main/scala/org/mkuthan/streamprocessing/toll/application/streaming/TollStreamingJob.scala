@@ -219,6 +219,10 @@ object TollStreamingJob extends TollStreamingJobIo {
       .encodeMessage(vehiclesWithExpiredRegistration)
       .publishJsonToPubsub(VehiclesWithExpiredRegistrationTopicIoId, config.vehiclesWithExpiredRegistrationTopic)
 
+    val vehiclesWithExpiredRegistrationDlq = VehiclesWithExpiredRegistration
+      .encodeRecord(vehiclesWithExpiredRegistration)
+      .writeUnboundedToBigQuery(VehiclesWithExpiredRegistrationTableIoId, config.vehiclesWithExpiredRegistrationTable)
+
     val vehiclesWithExpiredRegistrationsDiagnosticDlq = TollBoothDiagnostic
       .aggregateAndEncodeRecord(vehiclesWithExpiredRegistrationDiagnostic, TenMinutes, DefaultWindowOptions)
       .writeUnboundedToBigQuery(
@@ -226,6 +230,10 @@ object TollStreamingJob extends TollStreamingJobIo {
         config.vehiclesWithExpiredRegistrationDiagnosticTable
       )
 
-    vehiclesWithExpiredRegistrationsDiagnosticDlq.toDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
+    vehiclesWithExpiredRegistrationDlq
+      .toDiagnostic(VehiclesWithExpiredRegistrationTableIoId)
+      .unionInGlobalWindow(
+        vehiclesWithExpiredRegistrationsDiagnosticDlq.toDiagnostic(VehiclesWithExpiredRegistrationDiagnosticTableIoId)
+      )
   }
 }

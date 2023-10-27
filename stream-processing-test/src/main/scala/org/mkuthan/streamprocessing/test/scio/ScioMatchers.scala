@@ -16,82 +16,84 @@ import org.mkuthan.streamprocessing.test.common.InstantSyntax
 
 trait ScioMatchers extends InstantSyntax with EqInstances {
 
-  final val m: SCollectionMatchers = new SCollectionMatchers {}
+  private[scio] object M extends SCollectionMatchers
+
+  import M._
 
   def containElements[T: Coder](
       element: T,
       elements: T*
-  ): m.IterableMatcher[SCollection[T], T] = {
+  ): IterableMatcher[SCollection[T], T] = {
     val all = (element +: elements)
-    m.containInAnyOrder(all)
+    containInAnyOrder(all)
   }
 
   def containElementsAtTime[T: Coder](
       time: String,
       element: T,
       elements: T*
-  ): m.IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
+  ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
     val all = (element +: elements).map(e => (e, time.toInstant))
-    m.containInAnyOrder(all)
+    containInAnyOrder(all)
   }
 
   def containElementsAtTime[T: Coder](
       time: Instant,
       element: T,
       elements: T*
-  ): m.IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
+  ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
     val all = (element +: elements).map(e => (e, time))
-    m.containInAnyOrder(all)
+    containInAnyOrder(all)
   }
 
   def containElementsAtTime[T: Coder](
       element: (String, T),
       elements: (String, T)*
-  ): m.IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
+  ): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
     val all = (element +: elements).map { case (t, e) => (e, t.toInstant) }
-    m.containInAnyOrder(all)
+    containInAnyOrder(all)
   }
 
   def containElementsAtTime[T: Coder](
       element: (Instant, T),
       elements: (Instant, T)*
-  )(implicit d: DummyImplicit): m.IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
+  )(implicit d: DummyImplicit): IterableMatcher[SCollection[(T, Instant)], (T, Instant)] = {
     val all = (element +: elements).map { case (t, e) => (e, t) }
-    m.containInAnyOrder(all)
+    containInAnyOrder(all)
   }
 
-  val beEmpty: m.IterableMatcher[SCollection[_], Any] = m.beEmpty
+  val beEmpty: IterableMatcher[SCollection[_], Any] = M.beEmpty
 
-  def haveSize(size: Int): m.IterableMatcher[SCollection[_], Any] = m.haveSize(size)
+  def haveSize(size: Int): IterableMatcher[SCollection[_], Any] = M.haveSize(size)
 
-  def inWindow[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] = {
+  def inWindow[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] = {
     val window = new IntervalWindow(begin.toInstant, end.toInstant)
     matcher match {
-      case value: m.SingleMatcher[_, _] =>
+      case value: SingleMatcher[_, _] =>
         value.matcher(_.inWindow(window))
-      case value: m.IterableMatcher[_, _] =>
+      case value: IterableMatcher[_, _] =>
         value.matcher(_.inWindow(window))
     }
   }
 
-  def inOnTimePane[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] =
-    m.inOnTimePane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
+  def inOnTimePane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
+    M.inOnTimePane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
 
-  def inLatePane[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] =
-    m.inLatePane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
+  def inLatePane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
+    M.inLatePane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
 
-  def inEarlyPane[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] =
-    m.inEarlyPane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
+  def inEarlyPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
+    M.inEarlyPane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
 
-  def inFinalPane[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] =
-    m.inFinalPane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
+  def inFinalPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] =
+    M.inFinalPane(new IntervalWindow(begin.toInstant, end.toInstant))(matcher)
 
-  def inOnlyPane[T: ClassTag](begin: String, end: String)(matcher: m.MatcherBuilder[T]): Matcher[T] = {
+  def inOnlyPane[T: ClassTag](begin: String, end: String)(matcher: MatcherBuilder[T]): Matcher[T] = {
     val window = new IntervalWindow(begin.toInstant, end.toInstant)
     matcher match {
-      case value: m.SingleMatcher[_, _] =>
+      case value: SingleMatcher[_, _] =>
         value.matcher(_.inOnlyPane(window))
-      case value: m.IterableMatcher[_, _] =>
+      case value: IterableMatcher[_, _] =>
         value.matcher(_.inOnlyPane(window))
     }
   }

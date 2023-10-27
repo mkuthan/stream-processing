@@ -8,7 +8,9 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --region "$REGION" \
     --staging-location "gs://$PROJECT-toll-application/staging/" \
     --enable-streaming-engine \
-    --additional-experiments "enable_prime" \
+    --additional-experiments "use_runner_v2" \
+    --worker-machine-type "t2d-standard-1" \
+    --max-workers 2 \
     --parameters entrySubscription="projects/$PROJECT/subscriptions/toll-booth-entry" \
     --parameters entryDlq="gs://$PROJECT-toll-application/dlq/entry" \
     --parameters exitSubscription="projects/$PROJECT/subscriptions/toll-booth-exit" \
@@ -24,6 +26,4 @@ gcloud dataflow flex-template run "toll-application-`date +%Y%m%d-%H%M%S`" \
     --parameters vehiclesWithExpiredRegistrationDiagnosticTable="$PROJECT.toll_application.vehicles-with-expired-registration-diagnostic" \
     --parameters ioDiagnosticTable="$PROJECT.toll_application.io-diagnostic" \
 
-    # --additional-experiments "use_runner_v2" \
-    # --max-workers 1 \
-    # --worker-machine-type "t2d-standard-1" \
+#    --additional-experiments "enable_prime" \

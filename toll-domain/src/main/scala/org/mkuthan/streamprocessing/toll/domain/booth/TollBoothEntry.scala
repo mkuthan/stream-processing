@@ -69,7 +69,7 @@ object TollBoothEntry {
     input.transform { in =>
       in
         .map(record => fromRecord(record))
-        .timestampBy(boothExit => boothExit.entryTime)
+        .timestampBy(boothEntry => boothEntry.entryTime)
     }
 
   private def fromMessage(message: Message[Payload]): Either[DeadLetterPayload, TollBoothEntry] = {

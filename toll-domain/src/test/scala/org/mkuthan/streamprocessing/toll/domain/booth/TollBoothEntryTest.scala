@@ -61,4 +61,19 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
     results.withTimestamp should containElementsAtTime(anyTollBoothEntry.entryTime, anyTollBoothEntry)
   }
 
+  it should "throw an exception for invalid record" in {
+    val thrown = the[RuntimeException] thrownBy {
+      runWithScioContext { sc =>
+        val invalidRecord = anyTollBoothEntryRecord.copy(id = "")
+
+        val inputs = boundedTestCollectionOf[TollBoothEntry.Record]
+          .addElementsAtMinimumTime(invalidRecord)
+          .advanceWatermarkToInfinity()
+
+        decodeRecord(sc.testBounded(inputs))
+
+      }
+    }
+    thrown.getMessage should include("Toll booth id is empty")
+  }
 }

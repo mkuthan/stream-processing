@@ -19,17 +19,17 @@ object BoundedTestCollection extends InstantSyntax {
     Builder[T](Seq.empty)
 
   final case class Builder[T: Coder](content: Seq[TimestampedValue[T]]) {
-    def addElementsAtMinimumTime(element: T, elements: T*): Builder[T] = {
-      val timestampedElements = (element +: elements)
+    def addElementsAtMinimumTime(elements: T*): Builder[T] = {
+      val timestampedElements = elements
         .foldLeft(content)((acc, e) => acc :+ TimestampedValue.atMinimumTimestamp(e))
       Builder(timestampedElements)
     }
 
-    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] =
-      addElementsAtTime(time.toInstant, element, elements: _*)
+    def addElementsAtTime(time: String, elements: T*): Builder[T] =
+      addElementsAtTime(time.toInstant, elements: _*)
 
-    def addElementsAtTime(instant: Instant, element: T, elements: T*): Builder[T] = {
-      val timestampedElements = (element +: elements)
+    def addElementsAtTime(instant: Instant, elements: T*): Builder[T] = {
+      val timestampedElements = elements
         .foldLeft(content)((acc, e) => acc :+ TimestampedValue.of(e, instant))
       Builder(timestampedElements)
     }

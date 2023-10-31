@@ -8,11 +8,12 @@ import com.softwaremill.diffx.ObjectMatcher
 import com.softwaremill.diffx.SeqMatcher
 import org.joda.time.Instant
 import org.joda.time.LocalDate
+import org.joda.time.LocalDateTime
+import org.joda.time.LocalTime
 
-import org.mkuthan.streamprocessing.infrastructure.bigquery.syntax.BigQueryTypesArbitrary
 import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 
-trait IntegrationTestFixtures extends BigQueryTypesArbitrary {
+trait IntegrationTestFixtures {
   import IntegrationTestFixtures._
 
   implicit val sampleClassMatcher: SeqMatcher[SampleClass] = ObjectMatcher.seq[SampleClass].byValue(_.id)
@@ -25,9 +26,14 @@ trait IntegrationTestFixtures extends BigQueryTypesArbitrary {
     stringField = "complex 1",
     optionalStringField = Some("complex 1"),
     intField = 1,
+    longField = 1L,
+    floatField = 1.0f,
+    doubleField = 1.0,
     bigDecimalField = BigDecimal(1),
     instantField = Instant.parse("2014-09-10T12:03:01Z"),
-    localDateField = LocalDate.parse("2014-09-10")
+    localDateTimeField = LocalDateTime.parse("2014-09-10T12:03:01"),
+    localDateField = LocalDate.parse("2014-09-10"),
+    localTimeField = LocalTime.parse("12:03:01")
   )
 
   val SampleJson1: Array[Byte] = JsonSerde.writeJsonAsBytes(SampleObject1)
@@ -37,9 +43,14 @@ trait IntegrationTestFixtures extends BigQueryTypesArbitrary {
     stringField = "complex 2",
     optionalStringField = None,
     intField = 2,
+    longField = 2L,
+    floatField = 2.0f,
+    doubleField = 2.0,
     bigDecimalField = BigDecimal(2),
     instantField = Instant.parse("2014-09-10T12:03:02Z"),
-    localDateField = LocalDate.parse("2014-09-10")
+    localDateTimeField = LocalDateTime.parse("2014-09-10T12:03:02"),
+    localDateField = LocalDate.parse("2014-09-10"),
+    localTimeField = LocalTime.parse("12:03:02")
   )
 
   val SampleJson2: Array[Byte] = JsonSerde.writeJsonAsBytes(SampleObject2)
@@ -55,8 +66,13 @@ object IntegrationTestFixtures {
       stringField: String,
       optionalStringField: Option[String],
       intField: Int,
+      longField: Long,
+      floatField: Float,
+      doubleField: Double,
       bigDecimalField: BigDecimal,
       instantField: Instant,
-      localDateField: LocalDate
+      localDateTimeField: LocalDateTime,
+      localDateField: LocalDate,
+      localTimeField: LocalTime
   )
 }

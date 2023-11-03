@@ -1,5 +1,7 @@
 package org.mkuthan.streamprocessing.infrastructure.pubsub.syntax
 
+import java.nio.charset.StandardCharsets
+
 import org.joda.time.Instant
 import org.scalactic.Equality
 import org.scalatest.concurrent.Eventually
@@ -77,7 +79,9 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
 
     withTopic { topic =>
       withSubscription(topic) { subscription =>
-        publishMessages(topic, (InvalidJson, SampleMap1))
+        val invalidJson = "invalid json".getBytes(StandardCharsets.UTF_8)
+
+        publishMessages(topic, (invalidJson, SampleMap1))
 
         val results = sc.subscribeJsonFromPubsub(
           IoIdentifier[SampleClass]("any-id"),
@@ -87,7 +91,7 @@ class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
         val run = sc.run()
 
         val expectedDeadLetter = PubsubDeadLetter[SampleClass](
-          payload = InvalidJson,
+          payload = invalidJson,
           attributes = SampleMap1,
           error = "Unrecognized token 'invalid'"
         )

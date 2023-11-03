@@ -13,8 +13,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.TryValues._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import org.mkuthan.streamprocessing.test.common.JodaTimeArbitrary
-
 object JsonSerdeTest extends JodaTimeArbitrary {
 
   final case class SampleClass(
@@ -24,8 +22,8 @@ object JsonSerdeTest extends JodaTimeArbitrary {
       double: Double,
       bigInt: BigInt,
       bigDecimal: BigDecimal,
-      dateTime: DateTime,
       instant: Instant,
+      dateTime: DateTime,
       localDateTime: LocalDateTime,
       localDate: LocalDate,
       localTime: LocalTime

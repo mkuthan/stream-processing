@@ -13,7 +13,7 @@ import com.fasterxml.jackson.module.scala.JavaTypeable
 object JsonSerde {
 
   private lazy val ObjectMapper = new ObjectMapper()
-    .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .enable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
     .registerModule(new JodaModule())

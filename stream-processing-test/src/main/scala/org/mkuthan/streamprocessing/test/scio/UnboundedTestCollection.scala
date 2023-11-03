@@ -22,17 +22,21 @@ object UnboundedTestCollection {
   }
 
   final case class Builder[T: Coder](builder: TestStream.Builder[T]) extends InstantSyntax {
-    def addElementsAtWatermarkTime(element: T, elements: T*): Builder[T] =
-      Builder(builder.addElements(element, elements: _*))
+    def addElementsAtWatermarkTime(elements: T*): Builder[T] =
+      elements match {
+        case Seq(x, xs @ _*) => Builder(builder.addElements(x, xs: _*))
+        case Seq()           => this
+      }
 
-    def addElementsAtTime(time: String, element: T, elements: T*): Builder[T] =
-      addElementsAtTime(time.toInstant, element, elements: _*)
+    def addElementsAtTime(time: String, elements: T*): Builder[T] =
+      addElementsAtTime(time.toInstant, elements: _*)
 
-    def addElementsAtTime(instant: Instant, element: T, elements: T*): Builder[T] = {
-      val timestampedElement = TimestampedValue.of(element, instant)
+    def addElementsAtTime(instant: Instant, elements: T*): Builder[T] = {
       val timestampedElements = elements.map(e => TimestampedValue.of(e, instant))
-
-      Builder(builder.addElements(timestampedElement, timestampedElements: _*))
+      timestampedElements match {
+        case Seq(x, xs @ _*) => Builder(builder.addElements(x, xs: _*))
+        case Seq()           => this
+      }
     }
 
     def advanceProcessingTime(duration: Duration): Builder[T] =

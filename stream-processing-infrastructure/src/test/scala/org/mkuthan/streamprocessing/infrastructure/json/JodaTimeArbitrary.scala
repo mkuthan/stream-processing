@@ -1,4 +1,4 @@
-package org.mkuthan.streamprocessing.test.common
+package org.mkuthan.streamprocessing.infrastructure.json
 
 import scala.jdk.CollectionConverters._
 

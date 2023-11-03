@@ -4,8 +4,6 @@ import java.util.UUID
 
 import com.spotify.scio.bigquery.types.BigQueryType
 
-import com.softwaremill.diffx.ObjectMatcher
-import com.softwaremill.diffx.SeqMatcher
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
@@ -15,8 +13,6 @@ import org.mkuthan.streamprocessing.infrastructure.json.JsonSerde
 
 trait IntegrationTestFixtures {
   import IntegrationTestFixtures._
-
-  implicit val sampleClassMatcher: SeqMatcher[SampleClass] = ObjectMatcher.seq[SampleClass].byValue(_.id)
 
   val SampleClassBigQueryType: BigQueryType[SampleClass] = BigQueryType[SampleClass]
   val SampleClassBigQuerySchema = SampleClassBigQueryType.schema

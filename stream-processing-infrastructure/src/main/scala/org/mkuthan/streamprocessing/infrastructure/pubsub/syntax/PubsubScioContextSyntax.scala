@@ -22,7 +22,7 @@ private[syntax] trait PubsubScioContextSyntax {
 
   implicit class PubsubScioContextOps(private val self: ScioContext) {
 
-    import com.spotify.scio.BetterScioContext._
+    import com.spotify.scio.TestableScioContext._
 
     def subscribeJsonFromPubsub[T <: AnyRef: Coder: ClassTag](
         id: IoIdentifier[T],
@@ -34,7 +34,7 @@ private[syntax] trait PubsubScioContextSyntax {
         .pipe(read => configuration.configure(read))
         .fromSubscription(subscription.id)
 
-      self.betterCustomInput(id.id) { in =>
+      self.testableCustomInput(id.id) { in =>
         self.wrap(in.apply("Subscribe", io))
           .withName("Deserialize")
           .map { msg =>

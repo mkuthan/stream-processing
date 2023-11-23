@@ -94,7 +94,7 @@ object TollStreamingJob extends TollStreamingJobIo {
         EntrySubscriptionIoId,
         config.entrySubscription,
         JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute(TollBoothEntry.TimestampAttribute))
-      ).unzip
+      ).partition()
 
     val (entries, entriesDlq) = TollBoothEntry.decodeMessage(entryMessages)
     entriesDlq
@@ -115,7 +115,7 @@ object TollStreamingJob extends TollStreamingJobIo {
         ExitSubscriptionIoId,
         config.exitSubscription,
         JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute(TollBoothExit.TimestampAttribute))
-      ).unzip
+      ).partition()
 
     val (exits, existsDlq) = TollBoothExit.decodeMessage(exitMessages)
     existsDlq
@@ -136,7 +136,7 @@ object TollStreamingJob extends TollStreamingJobIo {
         VehicleRegistrationSubscriptionIoId,
         config.vehicleRegistrationSubscription,
         JsonReadConfiguration().withTimestampAttribute(NamedTimestampAttribute(VehicleRegistration.TimestampAttribute))
-      ).unzip
+      ).partition()
 
     val (vehicleRegistrationUpdates, vehicleRegistrationUpdatesDlq) =
       VehicleRegistration.decodeMessage(vehicleRegistrationMessages)

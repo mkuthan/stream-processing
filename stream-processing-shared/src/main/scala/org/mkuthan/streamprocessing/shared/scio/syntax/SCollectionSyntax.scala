@@ -38,7 +38,7 @@ private[syntax] trait SCollectionSyntax {
   }
 
   implicit class SCollectionEitherOps[L: Coder, R: Coder](private val self: SCollection[Either[L, R]]) {
-    def unzip: (SCollection[R], SCollection[L]) = {
+    def partition(): (SCollection[R], SCollection[L]) = {
       val leftOutput = SideOutput[L]()
 
       val (rightOutput, sideOutputs) = self

@@ -20,7 +20,7 @@ class SCollectionEitherOpsTest extends AnyFlatSpec
 
     val (right, left) = sc
       .testBounded(collection)
-      .unzip
+      .partition()
 
     right should containElements("r1", "r2", "r3")
     left should containElements("l1", "l2")

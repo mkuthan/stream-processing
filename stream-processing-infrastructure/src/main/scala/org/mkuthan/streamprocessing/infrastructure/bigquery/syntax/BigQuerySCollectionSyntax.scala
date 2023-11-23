@@ -27,7 +27,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
       private val self: SCollection[T]
   ) {
 
-    import com.spotify.scio.values.BetterSCollection._
+    import com.spotify.scio.values.TestableSCollection._
 
     private val bigQueryType = BigQueryType[T]
 
@@ -45,7 +45,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .withName(s"$id/Empty dead letters")
         .empty[BigQueryDeadLetter[T]]()
 
-      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+      val _ = self.testableSaveAsCustomOutput(id.id) { in =>
         val writeResult = in
           .withName("Serialize")
           .map(bigQueryType.toTableRow)
@@ -70,7 +70,7 @@ private[syntax] trait BigQuerySCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(partition.id)
 
-      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+      val _ = self.testableSaveAsCustomOutput(id.id) { in =>
         in
           .withName("Serialize")
           .map(bigQueryType.toTableRow)

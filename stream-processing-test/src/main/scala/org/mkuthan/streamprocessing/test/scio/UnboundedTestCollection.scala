@@ -25,7 +25,7 @@ object UnboundedTestCollection {
     def addElementsAtWatermarkTime(elements: T*): Builder[T] =
       elements match {
         case Seq(x, xs @ _*) => Builder(builder.addElements(x, xs: _*))
-        case Seq()           => this
+        case _               => this
       }
 
     def addElementsAtTime(time: String, elements: T*): Builder[T] =
@@ -35,7 +35,7 @@ object UnboundedTestCollection {
       val timestampedElements = elements.map(e => TimestampedValue.of(e, instant))
       timestampedElements match {
         case Seq(x, xs @ _*) => Builder(builder.addElements(x, xs: _*))
-        case Seq()           => this
+        case _               => this
       }
     }
 

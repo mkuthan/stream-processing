@@ -10,10 +10,10 @@ import com.spotify.scio.testing.TestDataManager
 import com.spotify.scio.values.SCollection
 
 // https://github.com/spotify/scio/issues/4995
-object BetterScioContext {
+object TestableScioContext {
 
   implicit class BetterScioContextOps(val self: ScioContext) {
-    def betterCustomInput[T, I >: PBegin <: PInput](name: String)(transformFn: I => SCollection[T]): SCollection[T] =
+    def testableCustomInput[T, I >: PBegin <: PInput](name: String)(transformFn: I => SCollection[T]): SCollection[T] =
       self.requireNotClosed {
         if (self.isTest) {
           TestDataManager.getInput(self.testId.getOrElse(""))(CustomIO[T](name)).toSCollection(self)

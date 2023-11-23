@@ -48,7 +48,7 @@ object TollBoothExit {
   ): (SCollection[TollBoothExit], SCollection[DeadLetterPayload]) =
     input
       .map(message => fromMessage(message))
-      .unzip
+      .partition()
 
   def decodeRecord(input: SCollection[Record]): SCollection[TollBoothExit] =
     input.transform { in =>

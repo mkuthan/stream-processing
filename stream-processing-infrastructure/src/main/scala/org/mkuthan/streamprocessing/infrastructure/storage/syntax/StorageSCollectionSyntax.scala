@@ -16,7 +16,7 @@ import org.mkuthan.streamprocessing.infrastructure.storage.StorageConfiguration
 private[syntax] trait StorageSCollectionSyntax {
   implicit class StorageSCollectionOps[T <: AnyRef: Coder](private val self: SCollection[T]) {
 
-    import com.spotify.scio.values.BetterSCollection._
+    import com.spotify.scio.values.TestableSCollection._
 
     def writeToStorageAsJson(
         id: IoIdentifier[T],
@@ -28,7 +28,7 @@ private[syntax] trait StorageSCollectionSyntax {
         .pipe(write => storageConfiguration.configure(write))
         .to(bucket.url)
 
-      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+      val _ = self.testableSaveAsCustomOutput(id.id) { in =>
         in.withName("Serialize")
           .map(JsonSerde.writeJsonAsString)
           .internal.apply("Write", io)

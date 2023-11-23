@@ -60,7 +60,7 @@ object TotalVehicleTimes {
         }
     }
 
-    results.unzip
+    results.partition()
   }
 
   def encodeRecord(input: SCollection[TotalVehicleTimes]): SCollection[Record] =

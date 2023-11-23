@@ -108,7 +108,7 @@ object BigQueryPropertyTest {
         .chooseNum(MinTimestamp.getMillis, MaxTimestamp.getMillis)
         .map(new LocalDate(_, DateTimeZone.UTC))
       localTime <- Gen
-        .chooseNum(0, 24 * 3600 * 1000)
+        .chooseNum(0L, 24L * 3600 * 1000)
         .map(LocalTime.fromMillisOfDay(_))
     } yield SampleClass(
       id = UUID.randomUUID().toString,

@@ -22,7 +22,7 @@ private[syntax] trait PubsubSCollectionSyntax {
       private val self: SCollection[Message[T]]
   ) {
 
-    import com.spotify.scio.values.BetterSCollection._
+    import com.spotify.scio.values.TestableSCollection._
 
     def publishJsonToPubsub(
         id: IoIdentifier[T],
@@ -34,7 +34,7 @@ private[syntax] trait PubsubSCollectionSyntax {
         .pipe(write => configuration.configure(write))
         .to(topic.id)
 
-      val _ = self.betterSaveAsCustomOutput(id.id) { in =>
+      val _ = self.testableSaveAsCustomOutput(id.id) { in =>
         in
           .withName("Serialize")
           .map { msg =>

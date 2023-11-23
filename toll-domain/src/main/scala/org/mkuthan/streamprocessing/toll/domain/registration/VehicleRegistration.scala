@@ -49,7 +49,7 @@ object VehicleRegistration {
       : (SCollection[VehicleRegistration], SCollection[DeadLetter[Payload]]) =
     input
       .map(message => fromMessage(message))
-      .unzip
+      .partition()
 
   def decodeRecord(input: SCollection[Record], partitionDate: LocalDate): SCollection[VehicleRegistration] =
     input.transform { in =>

@@ -85,7 +85,7 @@ object VehiclesWithExpiredRegistration {
         }
     }
 
-    results.unzip
+    results.partition()
   }
 
   def encodeMessage(input: SCollection[VehiclesWithExpiredRegistration]): SCollection[Message[Payload]] =

@@ -10,10 +10,10 @@ import com.spotify.scio.io.EmptyTap
 import com.spotify.scio.testing.TestDataManager
 
 // https://github.com/spotify/scio/issues/4995
-object BetterSCollection {
+object TestableSCollection {
 
-  implicit class BetterSCollectionOps[T](val self: SCollection[T]) {
-    def betterSaveAsCustomOutput[O <: POutput](name: String)(transformFn: SCollection[T] => O): ClosedTap[Nothing] = {
+  implicit class TestableSCollectionOps[T](val self: SCollection[T]) {
+    def testableSaveAsCustomOutput[O <: POutput](name: String)(transformFn: SCollection[T] => O): ClosedTap[Nothing] = {
       if (self.context.isTest) {
         TestDataManager.getOutput(self.context.testId.getOrElse(""))(CustomIO[T](name))(self)
       } else {

@@ -24,7 +24,7 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.17"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0"
 
-  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.6.4"
+  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.7.0"
 
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0"
 }

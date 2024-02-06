@@ -12,4 +12,7 @@ object BigQueryServicesFactory extends BigQueryServices {
 
   override def getStorageClient(options: BigQueryOptions): BigQueryServices.StorageClient =
     new BigQueryServicesImpl().getStorageClient(options)
+
+  override def getWriteStreamService(options: BigQueryOptions): BigQueryServices.WriteStreamService =
+    new BigQueryServicesImpl().getWriteStreamService(options)
 }

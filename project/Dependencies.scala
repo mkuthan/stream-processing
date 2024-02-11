@@ -22,7 +22,7 @@ object Dependencies {
   val logback = "ch.qos.logback" % "logback-classic" % "1.4.14"
 
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.18"
-  val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0"
+  val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0"
 
   val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.7.0"
 

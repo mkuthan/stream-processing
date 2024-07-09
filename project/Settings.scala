@@ -42,13 +42,14 @@ object Settings {
     resolvers += "confluent" at "https://packages.confluent.io/maven/",
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
+    // pin jackson
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.1",
     // enable XML report for codecov
     jacocoReportSettings := JacocoReportSettings()
       .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML),
     // scalafix
     ThisBuild / semanticdbEnabled := true,
-    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
-    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
+    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
   )
 
   val assemblySettings = Seq(

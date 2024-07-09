@@ -1,4 +1,4 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
   val scio = "com.spotify" %% "scio-core" % "0.14.5"

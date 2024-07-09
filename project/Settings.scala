@@ -1,13 +1,12 @@
-import sbt._
-import sbt.nio.Keys.onChangedBuildSource
-import sbt.nio.Keys.ReloadOnSourceChanges
-import sbt.Keys._
-
-import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
+import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
-import sbtassembly.AssemblyPlugin.autoImport._
-import scalafix.sbt.ScalafixPlugin.autoImport._
+import sbt.*
+import sbt.Keys.*
+import sbt.nio.Keys.ReloadOnSourceChanges
+import sbt.nio.Keys.onChangedBuildSource
+import sbtassembly.AssemblyPlugin.autoImport.*
+import scalafix.sbt.ScalafixPlugin.autoImport.*
 
 object Settings {
   val commonSettings = Seq(
@@ -55,12 +54,18 @@ object Settings {
   val assemblySettings = Seq(
     assembly / assemblyJarName := "assembly.jar",
     assembly / assemblyMergeStrategy := {
-      case s if s.endsWith(".class")      => MergeStrategy.last
-      case s if s.endsWith(".proto")      => MergeStrategy.last
-      case s if s.endsWith(".properties") => MergeStrategy.filterDistinctLines
+      case s if s.endsWith(".class")         => MergeStrategy.last
+      case s if s.endsWith(".proto")         => MergeStrategy.last
+      case s if s.endsWith(".kotlin_module") => MergeStrategy.last
+      case s if s.endsWith(".properties")    => MergeStrategy.filterDistinctLines
+      case s if s.endsWith(".txt")           => MergeStrategy.discard
       case PathList("META-INF", "gradle", "incremental.annotation.processors") =>
         MergeStrategy.discard
+      case PathList("META-INF", "kotlin-project-structure-metadata.json") =>
+        MergeStrategy.discard
       case PathList("git.properties") =>
+        MergeStrategy.discard
+      case PathList("commonMain", _*) =>
         MergeStrategy.discard
       case x =>
         val oldStrategy = (ThisBuild / assemblyMergeStrategy).value

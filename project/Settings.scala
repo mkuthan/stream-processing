@@ -11,7 +11,7 @@ import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object Settings {
   val commonSettings = Seq(
-    scalaVersion := "2.13.12",
+    scalaVersion := "2.13.14",
     scalacOptions := Seq(
       "-deprecation", // Emit warning and location for usages of deprecated APIs
       "-feature", // Emit warning and location for usages of features that should be imported explicitly
@@ -42,13 +42,14 @@ object Settings {
     resolvers += "confluent" at "https://packages.confluent.io/maven/",
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
+    // pin jackson
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.14.1",
     // enable XML report for codecov
     jacocoReportSettings := JacocoReportSettings()
       .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML),
     // scalafix
     ThisBuild / semanticdbEnabled := true,
-    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
-    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
+    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
   )
 
   val assemblySettings = Seq(

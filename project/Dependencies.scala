@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.14.0"
+  val scio = "com.spotify" %% "scio-core" % "0.14.5"
 
   val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.0" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")

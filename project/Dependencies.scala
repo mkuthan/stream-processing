@@ -16,7 +16,7 @@ object Dependencies {
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
-  val slf4j = "org.slf4j" % "slf4j-api" % "2.0.12"
+  val slf4j = "org.slf4j" % "slf4j-api" % "2.0.13"
   val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % "2.0.13"
 
   val logback = "ch.qos.logback" % "logback-classic" % "1.5.6"

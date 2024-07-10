@@ -3,7 +3,7 @@ name: Scala Steward
 on:
   workflow_dispatch: ~
   schedule:
-    - cron: "0 0 * * 0" # 00:00 every Sunday
+    - cron: "0 0 1 * *" # at 00:00 on day-of-month 1
 
 jobs:
   scala-steward:

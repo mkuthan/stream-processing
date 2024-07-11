@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "stream-processing",
     commonSettings
-  ).aggregate(test, shared, infrastructure, wordCount, userSessions, tollDomain, tollApplication)
+  ).aggregate(test, shared, infrastructure, wordCount, userSessions, lookupJoin, tollDomain, tollApplication)
 
 lazy val test = (project in file("stream-processing-test"))
   .settings(
@@ -76,6 +76,18 @@ lazy val wordCount = (project in file("word-count"))
   )
 
 lazy val userSessions = (project in file("user-sessions"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      beamDirectRunner % Test
+    )
+  )
+  .dependsOn(
+    shared,
+    test % Test
+  )
+
+lazy val lookupJoin = (project in file("lookup-join"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(

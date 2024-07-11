@@ -17,3 +17,4 @@ see [blog post](https://mkuthan.github.io/blog/2023/09/27/unified-batch-streamin
 see [blog post](https://mkuthan.github.io/blog/2022/01/28/stream-processing-part1/)
 * `session-window` - session window example,
 see [blog post](https://mkuthan.github.io/blog/2022/03/08/stream-processing-part2/)
+* `lookup-join` - lookup join example

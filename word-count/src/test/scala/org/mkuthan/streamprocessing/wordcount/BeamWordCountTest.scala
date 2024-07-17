@@ -40,10 +40,10 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
     )
   }
 
-  "Words" should "be aggregated into single fixed window with latest timestamp" in runWithScioContext { sc =>
+  "Words" should "be aggregated into single fixed window with the latest timestamp" in runWithScioContext { sc =>
     val words = unboundedTestCollectionOf[String]
       .addElementsAtTime("00:00:00", "foo bar")
-      .addElementsAtTime("00:00:30", "baz baz")
+      .addElementsAtTime("00:00:30", "bar")
       .advanceWatermarkToInfinity()
 
     val results = wordCountInFixedWindow(
@@ -54,8 +54,25 @@ final class BeamWordCountTest extends AnyFlatSpec with Matchers with TestScioCon
 
     results.withTimestamp should containElementsAtTime(
       ("00:00:00", ("foo", 1L)),
-      ("00:00:00", ("bar", 1L)),
-      ("00:00:30", ("baz", 2L))
+      ("00:00:30", ("bar", 2L))
+    )
+  }
+
+  "Words" should "be aggregated into single fixed window with the earliest timestamp" in runWithScioContext { sc =>
+    val words = unboundedTestCollectionOf[String]
+      .addElementsAtTime("00:00:00", "foo bar")
+      .addElementsAtTime("00:00:30", "bar")
+      .advanceWatermarkToInfinity()
+
+    val results = wordCountInFixedWindow(
+      sc.testUnbounded(words),
+      OneMinute,
+      timestampCombiner = TimestampCombiner.EARLIEST
+    )
+
+    results.withTimestamp should containElementsAtTime(
+      ("00:00:00", ("foo", 1L)),
+      ("00:00:00", ("bar", 2L))
     )
   }
 

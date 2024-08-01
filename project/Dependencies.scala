@@ -7,7 +7,7 @@ object Dependencies {
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val scioTest = "com.spotify" %% "scio-test" % "0.14.5" excludeAll (
+  val scioTest = "com.spotify" %% "scio-test" % "0.14.6" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 

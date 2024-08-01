@@ -1,13 +1,13 @@
 import sbt.*
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.14.5"
+  val scio = "com.spotify" %% "scio-core" % "0.14.6"
 
-  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.5" excludeAll (
+  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.6" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val scioTest = "com.spotify" %% "scio-test" % "0.14.5" excludeAll (
+  val scioTest = "com.spotify" %% "scio-test" % "0.14.6" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
@@ -24,7 +24,7 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0"
 
-  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.7.3"
+  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.7.4"
 
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0"
 }

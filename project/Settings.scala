@@ -1,10 +1,11 @@
-import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
-import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
-import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 import sbt.*
-import sbt.Keys.*
-import sbt.nio.Keys.ReloadOnSourceChanges
 import sbt.nio.Keys.onChangedBuildSource
+import sbt.nio.Keys.ReloadOnSourceChanges
+import sbt.Keys.*
+
+import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
+import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
+import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings
 import sbtassembly.AssemblyPlugin.autoImport.*
 import scalafix.sbt.ScalafixPlugin.autoImport.*
 

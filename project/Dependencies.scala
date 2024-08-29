@@ -1,18 +1,18 @@
 import sbt.*
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.14.5"
+  val scio = "com.spotify" %% "scio-core" % "0.14.7"
 
-  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.5" excludeAll (
+  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.7" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val scioTest = "com.spotify" %% "scio-test" % "0.14.5" excludeAll (
+  val scioTest = "com.spotify" %% "scio-test" % "0.14.7" excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.57.0"
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.57.0"
+  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.58.0"
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.58.0"
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 

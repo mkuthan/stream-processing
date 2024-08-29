@@ -43,8 +43,8 @@ object Settings {
     excludeDependencies += "commons-logging" % "commons-logging",
     // pin jackson
     dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.15.4",
-    // pin zstd-jni
-    dependencyOverrides += "com.github.luben" % "zstd-jni" % "1.5.6-3",
+    // don't check the version compatibility of this library
+    libraryDependencySchemes += "com.github.luben" % "zstd-jni" % VersionScheme.Always,
     // enable XML report for codecov
     jacocoReportSettings := JacocoReportSettings()
       .withFormats(JacocoReportFormats.XML, JacocoReportFormats.HTML),

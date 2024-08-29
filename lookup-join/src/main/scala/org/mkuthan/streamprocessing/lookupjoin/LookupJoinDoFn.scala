@@ -3,10 +3,6 @@ package org.mkuthan.streamprocessing.lookupjoin
 import scala.annotation.unused
 import scala.jdk.CollectionConverters._
 
-import com.spotify.scio.ScioMetrics
-import com.spotify.scio.coders.Coder
-import com.spotify.scio.coders.CoderMaterializer
-import com.typesafe.scalalogging.LazyLogging
 import org.apache.beam.sdk.metrics.Metrics
 import org.apache.beam.sdk.state.BagState
 import org.apache.beam.sdk.state.CombiningState
@@ -15,6 +11,7 @@ import org.apache.beam.sdk.state.TimeDomain
 import org.apache.beam.sdk.state.Timer
 import org.apache.beam.sdk.state.TimerSpecs
 import org.apache.beam.sdk.state.ValueState
+import org.apache.beam.sdk.transforms.windowing.GlobalWindow
 import org.apache.beam.sdk.transforms.DoFn
 import org.apache.beam.sdk.transforms.DoFn.AlwaysFetched
 import org.apache.beam.sdk.transforms.DoFn.Element
@@ -24,8 +21,14 @@ import org.apache.beam.sdk.transforms.DoFn.ProcessElement
 import org.apache.beam.sdk.transforms.DoFn.StateId
 import org.apache.beam.sdk.transforms.DoFn.TimerId
 import org.apache.beam.sdk.transforms.DoFn.Timestamp
-import org.apache.beam.sdk.transforms.windowing.GlobalWindow
 import org.apache.beam.sdk.values.KV
+import com.spotify.scio.coders.Coder
+import com.spotify.scio.coders.CoderMaterializer
+import com.spotify.scio.ScioMetrics
+import com.typesafe.scalalogging.LazyLogging
+import org.apache.beam.sdk.state.TimerMap
+import org.apache.beam.sdk.transforms.DoFn.OnTimerFamily
+import org.apache.beam.sdk.transforms.DoFn.TimerFamily
 import org.joda.time.Duration
 import org.joda.time.Instant
 
@@ -148,6 +151,8 @@ class LookupJoinDoFn[K, V, Lookup](valuesTimeToLive: Duration, lookupTimeToLive:
   @unused
   @TimerId(ClearLookupTimerKey) private val clearLookupTimerSpec = TimerSpecs.timer(TimeDomain.EVENT_TIME)
 
+  @TimerFamily("release1") private val releaseValues1TimerSpec =  TimerSpecs.timerMap(TimeDomain.EVENT_TIME)
+
   @unused
   @ProcessElement
   def processElement(
@@ -161,6 +166,7 @@ class LookupJoinDoFn[K, V, Lookup](valuesTimeToLive: Duration, lookupTimeToLive:
       @AlwaysFetched @StateId(ValuesReleaseTimestampKey) valuesReleaseTimestampState: ValueState[Instant],
       @TimerId(ReleaseValuesTimerKey) releaseValuesTimer: Timer,
       @TimerId(ClearLookupTimerKey) clearLookupTimer: Timer,
+      @TimerFamily("release1") releaseValues1Timer: TimerMap,
       output: OutputReceiver[OutputType[K, V, Lookup]]
   ): Unit = {
     val key = element.getKey
@@ -187,6 +193,11 @@ class LookupJoinDoFn[K, V, Lookup](valuesTimeToLive: Duration, lookupTimeToLive:
 
       updateClearLookupTimer(maxTimestampSeen, clearLookupTimer, lookupTimeToLive)
     }
+  }
+
+  @OnTimerFamily("release1")
+  def foo(@TimerId timerId: String, @Timestamp ts: Instant): Unit = {
+
   }
 
   @unused

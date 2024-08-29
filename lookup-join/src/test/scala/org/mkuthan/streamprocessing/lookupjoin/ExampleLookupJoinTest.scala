@@ -1,11 +1,12 @@
 package org.mkuthan.streamprocessing.lookupjoin
 
 import org.joda.time.Duration
-import org.mkuthan.streamprocessing.test.scio.TestScioContext
-import org.mkuthan.streamprocessing.test.scio.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
+
+import org.mkuthan.streamprocessing.test.scio.syntax._
+import org.mkuthan.streamprocessing.test.scio.TestScioContext
 
 class ExampleLookupJoinTest extends AnyFlatSpec with Matchers with TestScioContext with TableDrivenPropertyChecks {
 
@@ -93,13 +94,13 @@ class ExampleLookupJoinTest extends AnyFlatSpec with Matchers with TestScioConte
   }
 
   it should "not join too early Value with Lookup" in runWithScioContext { sc =>
-    val values = unboundedTestCollectionOf[Value]
-      .addElementsAtTime("11:49:59", anyValue)
-      .advanceWatermarkToInfinity()
-
     val lookups = unboundedTestCollectionOf[Lookup]
       .advanceWatermarkTo("12:00:00")
       .addElementsAtTime("12:00:00", anyLookup)
+      .advanceWatermarkToInfinity()
+
+    val values = unboundedTestCollectionOf[Value]
+      .addElementsAtTime("11:49:59", anyValue)
       .advanceWatermarkToInfinity()
 
     val results = lookupJoin(
@@ -116,13 +117,13 @@ class ExampleLookupJoinTest extends AnyFlatSpec with Matchers with TestScioConte
   }
 
   it should "join early Value with Lookup" in runWithScioContext { sc =>
-    val values = unboundedTestCollectionOf[Value]
-      .addElementsAtTime("11:59:59", anyValue)
-      .advanceWatermarkToInfinity()
-
     val lookups = unboundedTestCollectionOf[Lookup]
       .advanceWatermarkTo("12:00:00")
       .addElementsAtTime("12:00:00", anyLookup)
+      .advanceWatermarkToInfinity()
+
+    val values = unboundedTestCollectionOf[Value]
+      .addElementsAtTime("11:59:59", anyValue)
       .advanceWatermarkToInfinity()
 
     val results = lookupJoin(
@@ -164,16 +165,16 @@ class ExampleLookupJoinTest extends AnyFlatSpec with Matchers with TestScioConte
   }
 
   it should "emit frequent Values after their time to live expires" in runWithScioContext { sc =>
+    val lookups = unboundedTestCollectionOf[Lookup]
+      .advanceWatermarkTo("12:00:00")
+      .advanceWatermarkToInfinity()
+
     val values = unboundedTestCollectionOf[Value]
       .advanceWatermarkTo("12:00:00")
       .addElementsAtTime("12:00:00", anyValue.copy(name = "first value"))
       .addElementsAtTime("12:00:40", anyValue.copy(name = "second value"))
       .advanceWatermarkTo("12:01:01") // ensure that the first values release timer should fire
       .addElementsAtTime("12:01:20", anyValue.copy(name = "third value"))
-      .advanceWatermarkToInfinity()
-
-    val lookups = unboundedTestCollectionOf[Lookup]
-      .advanceWatermarkTo("12:00:00")
       .advanceWatermarkToInfinity()
 
     val results = lookupJoin(

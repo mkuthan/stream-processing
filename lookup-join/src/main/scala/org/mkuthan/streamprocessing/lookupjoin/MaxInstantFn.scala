@@ -3,6 +3,7 @@ package org.mkuthan.streamprocessing.lookupjoin
 import scala.jdk.CollectionConverters._
 
 import org.apache.beam.sdk.transforms.Combine.CombineFn
+
 import org.joda.time.Instant
 
 class MaxInstantFn extends CombineFn[Instant, Instant, Instant] {

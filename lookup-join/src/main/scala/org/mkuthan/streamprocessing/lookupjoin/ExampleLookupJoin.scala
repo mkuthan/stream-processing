@@ -1,12 +1,14 @@
 package org.mkuthan.streamprocessing.lookupjoin
 
-import com.spotify.scio.values.SCollection
-import com.spotify.scio.values.WindowOptions
 import org.apache.beam.sdk.transforms.windowing.AfterPane
 import org.apache.beam.sdk.transforms.windowing.Repeatedly
 import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.transforms.windowing.Window.ClosingBehavior
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+
+import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.WindowOptions
+
 import org.joda.time.Duration
 
 object ExampleLookupJoin {
@@ -19,13 +21,16 @@ object ExampleLookupJoin {
       values: SCollection[Value],
       lookups: SCollection[Lookup],
       valuesTimeToLive: Duration,
-      lookupTimeToLive: Duration
+      lookupTimeToLive: Duration,
+      accumulationMode: AccumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
+      closingBehavior: ClosingBehavior = ClosingBehavior.FIRE_IF_NON_EMPTY,
+      timestampCombiner: TimestampCombiner = TimestampCombiner.LATEST
   ): SCollection[(Value, Option[Lookup])] = {
     val globalWindowOptions = WindowOptions(
       trigger = Repeatedly.forever(AfterPane.elementCountAtLeast(1)),
-      accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES,
-      closingBehavior = ClosingBehavior.FIRE_IF_NON_EMPTY,
-      timestampCombiner = TimestampCombiner.LATEST
+      accumulationMode = accumulationMode,
+      closingBehavior = closingBehavior,
+      timestampCombiner = timestampCombiner
     )
 
     val valuesById = values

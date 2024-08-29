@@ -21,3 +21,5 @@ trait TollBoothStatsFixture {
     last_entry_time = anyTollBoothStats.lastEntryTime
   )
 }
+
+object TollBoothStatsFixture extends TollBoothEntryFixture

@@ -40,3 +40,5 @@ trait TollBoothExitFixture {
     licensePlate = LicensePlate(anyTollBoothExitPayload.license_plate)
   )
 }
+
+object TollBoothExitFixture extends TollBoothExitFixture

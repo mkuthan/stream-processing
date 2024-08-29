@@ -48,3 +48,5 @@ trait VehiclesWithExpiredRegistrationFixture {
       Map(VehiclesWithExpiredRegistration.TimestampAttribute -> createdAt.toString)
     )
 }
+
+object VehiclesWithExpiredRegistrationFixture extends VehiclesWithExpiredRegistrationFixture

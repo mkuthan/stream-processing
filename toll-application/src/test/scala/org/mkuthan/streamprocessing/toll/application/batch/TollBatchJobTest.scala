@@ -8,19 +8,29 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import org.mkuthan.streamprocessing.test.scio.JobTestScioContext
-import org.mkuthan.streamprocessing.toll.application.TollJobFixtures
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothDiagnostic
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntry
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothEntryFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExit
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothExitFixture
 import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStats
+import org.mkuthan.streamprocessing.toll.domain.booth.TollBoothStatsFixture
 import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistration
+import org.mkuthan.streamprocessing.toll.domain.registration.VehicleRegistrationFixture
 import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimes
+import org.mkuthan.streamprocessing.toll.domain.vehicle.TotalVehicleTimesFixture
 import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistration
+import org.mkuthan.streamprocessing.toll.domain.vehicle.VehiclesWithExpiredRegistrationFixture
 
 class TollBatchJobTest extends AnyFlatSpec with Matchers
     with JobTestScioContext
-    with TollJobFixtures
-    with TollBatchJobIo {
+    with TollBatchJobIo
+    with TollBoothEntryFixture
+    with TollBoothExitFixture
+    with TollBoothStatsFixture
+    with TotalVehicleTimesFixture
+    with VehicleRegistrationFixture
+    with VehiclesWithExpiredRegistrationFixture {
 
   "Toll job" should "run in the batch mode" in {
     JobTest[TollBatchJob.type]

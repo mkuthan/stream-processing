@@ -25,3 +25,5 @@ trait TotalVehicleTimesFixture {
     duration_seconds = anyTotalVehicleTimes.duration.getStandardSeconds
   )
 }
+
+object TotalVehicleTimesFixture extends TotalVehicleTimesFixture

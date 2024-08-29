@@ -55,3 +55,5 @@ trait TollBoothEntryFixture {
     licensePlate = LicensePlate(anyTollBoothEntryPayload.license_plate)
   )
 }
+
+object TollBoothEntryFixture extends TollBoothEntryFixture

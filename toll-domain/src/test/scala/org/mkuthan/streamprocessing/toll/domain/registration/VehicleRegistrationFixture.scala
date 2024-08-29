@@ -54,3 +54,5 @@ trait VehicleRegistrationFixture {
     expired = defaultExpired == "1"
   )
 }
+
+object VehicleRegistrationFixture extends VehicleRegistrationFixture

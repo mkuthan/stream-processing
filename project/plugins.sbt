@@ -7,4 +7,4 @@ addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.2.4")
 // automated code changes
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.13.0")
 // fat-jar for flex templates
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.2.0")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.0")

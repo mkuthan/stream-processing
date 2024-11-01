@@ -11,7 +11,7 @@ import scalafix.sbt.ScalafixPlugin.autoImport.*
 
 object Settings {
   val commonSettings = Seq(
-    scalaVersion := "2.13.14",
+    scalaVersion := "2.13.15",
     scalacOptions := Seq(
       "-deprecation", // Emit warning and location for usages of deprecated APIs
       "-feature", // Emit warning and location for usages of features that should be imported explicitly

@@ -1,6 +1,5 @@
 package org.mkuthan.streamprocessing.infrastructure.bigquery
 
-import scala.annotation.unused
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
@@ -28,7 +27,6 @@ private[bigquery] class BigQueryDeadLetterEncoderDoFn[T <: HasAnnotation: Coder:
   private lazy val bigQueryType = BigQueryType[T]
 
   @ProcessElement
-  @unused
   def processElement(
       @Element element: In,
       output: OutputReceiver[Out[T]]

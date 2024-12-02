@@ -44,4 +44,4 @@ jobs:
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
       - run: sbt jacoco
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5

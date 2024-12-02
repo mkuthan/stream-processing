@@ -43,7 +43,7 @@ object Settings {
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
     // pin jackson
-    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.15.4",
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.18.2",
     // don't check the version compatibility of this library
     libraryDependencySchemes += "com.github.luben" % "zstd-jni" % VersionScheme.Always,
     // enable XML report for codecov

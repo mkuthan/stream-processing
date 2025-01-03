@@ -3,7 +3,7 @@ addSbtPlugin("com.github.sbt" % "sbt-jacoco" % "3.5.0")
 // code formatting
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 // code analysis
-addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.2.7")
+addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.2.8")
 // automated code changes
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.13.0")
 // fat-jar for flex templates

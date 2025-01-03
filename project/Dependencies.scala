@@ -11,15 +11,15 @@ object Dependencies {
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.60.0"
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.60.0"
+  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.61.0"
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.61.0"
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
   val slf4j = "org.slf4j" % "slf4j-api" % "2.0.16"
   val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % "2.0.16"
 
-  val logback = "ch.qos.logback" % "logback-classic" % "1.5.7"
+  val logback = "ch.qos.logback" % "logback-classic" % "1.5.15"
 
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0"

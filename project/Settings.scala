@@ -40,6 +40,8 @@ object Settings {
     updateOptions := updateOptions.value.withCachedResolution(true),
     // required by beam-runners-google-cloud-dataflow-java
     resolvers += "confluent" at "https://packages.confluent.io/maven/",
+    // disable integration tests by default
+    Test / testOptions += Tests.Argument("-l", "org.scalatest.tags.Slow"),
     // use jcl-over-slf4j bridge instead of common-logging
     excludeDependencies += "commons-logging" % "commons-logging",
     // pin jackson

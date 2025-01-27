@@ -3,7 +3,7 @@ import sbt._
 import Dependencies._
 import Settings._
 
-addCommandAlias("check", "clean; scalafixAll; scalafmtAll; scapegoat; testOnly -- -l org.scalatest.tags.Slow")
+addCommandAlias("check", "clean; scalafixAll; scalafmtAll; scapegoat; test")
 
 lazy val root = (project in file("."))
   .settings(

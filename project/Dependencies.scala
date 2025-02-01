@@ -12,7 +12,7 @@ object Dependencies {
   )
 
   val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.62.0"
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.61.0"
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.62.0"
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 

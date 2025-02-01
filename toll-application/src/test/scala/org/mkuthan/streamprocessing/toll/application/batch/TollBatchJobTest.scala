@@ -32,7 +32,7 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
     with VehicleRegistrationFixture
     with VehiclesWithExpiredRegistrationFixture {
 
-  "Toll job" should "run in the batch mode" in {
+  "Toll job" should "run in the batch mode" in
     JobTest[TollBatchJob.type]
       .args(
         "--effectiveDate=2014-09-10",
@@ -87,5 +87,4 @@ class TollBatchJobTest extends AnyFlatSpec with Matchers
           results should beEmpty
       }
       .run()
-  }
 }

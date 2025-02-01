@@ -62,7 +62,7 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
   }
 
   it should "throw an exception for invalid record" in {
-    val thrown = the[RuntimeException] thrownBy {
+    val thrown = the[RuntimeException] thrownBy
       runWithScioContext { sc =>
         val invalidRecord = anyTollBoothEntryRecord.copy(id = "")
 
@@ -73,7 +73,6 @@ class TollBoothEntryTest extends AnyFlatSpec with Matchers
         decodeRecord(sc.testBounded(inputs))
 
       }
-    }
     thrown.getMessage should include("Toll booth id is empty")
   }
 }

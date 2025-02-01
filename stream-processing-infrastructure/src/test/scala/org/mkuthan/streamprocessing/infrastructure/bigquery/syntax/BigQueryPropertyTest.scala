@@ -36,7 +36,7 @@ class BigQueryPropertyTest extends AnyFlatSpec with Matchers
 
   behavior of "BigQuery syntax"
 
-  it should "write and read" in {
+  it should "write and read" in
     withDataset { datasetName =>
       withTable(datasetName, SampleClassBigQuerySchema) { tableName =>
         val samples = sampleObjects()
@@ -74,7 +74,6 @@ class BigQueryPropertyTest extends AnyFlatSpec with Matchers
         }
       }
     }
-  }
 }
 
 object BigQueryPropertyTest {

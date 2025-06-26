@@ -2,9 +2,6 @@ name: Build flex templates
 
 on:
   workflow_dispatch: ~
-#  push:
-#    branches:
-#      - main
 
 jobs:
   assembly:

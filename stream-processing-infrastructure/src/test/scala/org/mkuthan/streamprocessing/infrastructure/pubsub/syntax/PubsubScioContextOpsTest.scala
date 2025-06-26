@@ -7,7 +7,6 @@ import org.scalactic.Equality
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.tags.Slow
 import org.scalatest.EitherValues._
 
 import org.mkuthan.streamprocessing.infrastructure.common.IoIdentifier
@@ -26,7 +25,6 @@ import org.mkuthan.streamprocessing.test.gcp.PubsubContext
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
-@Slow
 class PubsubScioContextOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext

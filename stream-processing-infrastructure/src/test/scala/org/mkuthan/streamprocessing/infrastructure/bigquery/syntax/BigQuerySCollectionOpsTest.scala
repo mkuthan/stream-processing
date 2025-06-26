@@ -8,7 +8,6 @@ import org.joda.time.LocalDateTime
 import org.scalatest.concurrent.Eventually
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.tags.Slow
 
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryPartition
 import org.mkuthan.streamprocessing.infrastructure.bigquery.BigQueryTable
@@ -22,7 +21,6 @@ import org.mkuthan.streamprocessing.test.scio.syntax._
 import org.mkuthan.streamprocessing.test.scio.InMemorySink
 import org.mkuthan.streamprocessing.test.scio.IntegrationTestScioContext
 
-@Slow
 class BigQuerySCollectionOpsTest extends AnyFlatSpec with Matchers
     with Eventually with GcpTestPatience
     with IntegrationTestScioContext

@@ -3,6 +3,7 @@ import sbt.nio.Keys.onChangedBuildSource
 import sbt.nio.Keys.ReloadOnSourceChanges
 import sbt.Keys.*
 
+import com.github.sbt.jacoco.JacocoKeys.jacocoExcludes
 import com.github.sbt.jacoco.JacocoKeys.jacocoReportSettings
 import com.github.sbt.jacoco.JacocoKeys.JacocoReportFormats
 import com.github.sbt.jacoco.JacocoPlugin.autoImport.JacocoReportSettings

@@ -4,6 +4,7 @@ import Dependencies._
 import Settings._
 
 addCommandAlias("check", "clean; scalafixAll; scalafmtAll; scapegoat; test")
+addCommandAlias("updates", "dependencyUpdates; reload plugins; dependencyUpdates")
 
 lazy val root = (project in file("."))
   .settings(

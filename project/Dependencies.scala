@@ -1,18 +1,21 @@
 import sbt.*
 
 object Dependencies {
-  val scio = "com.spotify" %% "scio-core" % "0.14.17"
+  val scioVersion = "0.14.18"
+  val beamVersion = "2.66.0"
 
-  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % "0.14.17" excludeAll (
+  val scio = "com.spotify" %% "scio-core" % scioVersion
+
+  val scioGcp = "com.spotify" %% "scio-google-cloud-platform" % scioVersion excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val scioTest = "com.spotify" %% "scio-test" % "0.14.17" excludeAll (
+  val scioTest = "com.spotify" %% "scio-test" % scioVersion excludeAll (
     ExclusionRule(organization = "org.apache.beam", name = "beam-runners-direct-java")
   )
 
-  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % "2.64.0"
-  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.64.0"
+  val beamDirectRunner = "org.apache.beam" % "beam-runners-direct-java" % beamVersion
+  val beamDataflowRunner = "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % beamVersion
 
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
@@ -24,7 +27,7 @@ object Dependencies {
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
   val scalaTestPlusScalaCheck = "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0"
 
-  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.7.4"
+  val magnolifyScalaCheck = "com.spotify" %% "magnolify-scalacheck" % "0.8.0"
 
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0"
 }

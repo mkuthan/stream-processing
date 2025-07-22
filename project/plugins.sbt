@@ -1,7 +1,7 @@
 // test coverage
 addSbtPlugin("com.github.sbt" % "sbt-jacoco" % "3.5.0")
 // code formatting
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.5")
 // code analysis
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.2.13")
 // automated code changes

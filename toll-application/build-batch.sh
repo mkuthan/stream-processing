@@ -5,7 +5,7 @@ IMAGE_GCR=europe-west1-docker.pkg.dev/playground-272019/toll-application/toll-ap
 JAR=./target/scala-2.13/assembly.jar
 MAIN_CLASS=org.mkuthan.streamprocessing.toll.application.batch.TollBatchJob
 
-(cd .. && sbt tollApplication/assembly)
+(cd .. && sbt assembly)
 
 gcloud dataflow flex-template build $TEMPLATE_FILE \
             --image-gcr-path $IMAGE_GCR \

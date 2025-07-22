@@ -3,8 +3,9 @@ import sbt._
 import Dependencies._
 import Settings._
 
+addCommandAlias("assembly", "tollApplication/assembly")
 addCommandAlias("check", "clean; scalafixAll; scalafmtAll; scapegoat; test")
-addCommandAlias("updates", "dependencyUpdates; reload plugins; dependencyUpdates")
+addCommandAlias("updates", "dependencyUpdates")
 
 lazy val root = (project in file("."))
   .settings(
